@@ -17,14 +17,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          submodules: true
+          submodules: false
           lfs: false
-      - name: Cleanup Backend Artifacts
+          fetch-depth: 1
+      - name: Cleanup
         run: |
-          # Remove backend code and compiled artifacts to speed up upload
-          rm -rf AquentaLibrary
-          find . -type d -name "bin" -exec rm -rf {} +
-          find . -type d -name "obj" -exec rm -rf {} +
+          # Only keep what is needed for the website
+          rm -rf AquentaLibrary .git .github
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
