@@ -2,16 +2,25 @@
   const DEFAULT_API_BASE_URL = 'http://localhost:5024/api';
 
   function getApiBaseUrl() {
+    let url = DEFAULT_API_BASE_URL;
+
     if (window.AQUENTA_API_BASE_URL && typeof window.AQUENTA_API_BASE_URL === 'string') {
-      return window.AQUENTA_API_BASE_URL.replace(/\/$/, '');
+      url = window.AQUENTA_API_BASE_URL;
+    } else {
+      const stored = localStorage.getItem('AQUENTA_API_BASE_URL');
+      if (stored && typeof stored === 'string') {
+        url = stored;
+      }
     }
 
-    const stored = localStorage.getItem('AQUENTA_API_BASE_URL');
-    if (stored && typeof stored === 'string') {
-      return stored.replace(/\/$/, '');
+    url = url.replace(/\/$/, '');
+
+    // Auto-fix: Ensure /api is appended if missing (except for localhost where it might be explicit)
+    if (!url.toLowerCase().endsWith('/api')) {
+      url += '/api';
     }
 
-    return DEFAULT_API_BASE_URL;
+    return url;
   }
 
   async function request(path, options) {

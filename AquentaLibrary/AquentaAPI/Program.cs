@@ -7,13 +7,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend", policy =>
-    {
-        policy
-            .AllowAnyOrigin()
-            .AllowAnyHeader()
-            .AllowAnyMethod();
-    });
+        options.AddPolicy("AllowFrontend", policy =>
+        {
+            policy.SetIsOriginAllowed(origin => true)
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        });
 });
 
 builder.Services.AddControllers();
@@ -23,7 +23,10 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// SECURITY: Add cache control headers to prevent browser caching of protected content
+// Enable CORS as the very first step in the pipeline
+app.UseCors("AllowFrontend");
+
+// SECURITY: Add cache control headers
 app.Use(async (context, next) =>
 {
     // Apply no-cache headers to all responses
@@ -54,8 +57,6 @@ else
 }
 
 app.UseHttpsRedirection();
-
-app.UseCors("AllowFrontend");
 
 app.UseAuthorization();
 
