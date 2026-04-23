@@ -35,10 +35,22 @@ app.Use(async (context, next) =>
 });
 
 // Configure the HTTP request pipeline.
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Aquenta API v1");
+    c.RoutePrefix = string.Empty; // Set Swagger at the root (optional, but helpful for discovery)
+});
+
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    // Enable developer exception page in production temporarily for debugging if needed, 
+    // but better to use a diagnostic endpoint.
+    app.UseExceptionHandler("/error");
 }
 
 app.UseHttpsRedirection();
@@ -48,6 +60,21 @@ app.UseCors("AllowFrontend");
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapGet("/health", () => 
+{
+    try 
+    {
+        var connectionString = AquentaLibrary.Repositories.SqlConnectionResolver.GetWorkingConnectionString();
+        // Hide sensitive parts of connection string for safety, but show the server
+        var displayString = connectionString.Split(';')[0]; 
+        return Results.Ok(new { Status = "Healthy", Database = "Connected", Info = displayString });
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem(detail: ex.Message, title: "Database Connection Failed");
+    }
+});
 
 SeedMissingMonthlyPeriods();
 

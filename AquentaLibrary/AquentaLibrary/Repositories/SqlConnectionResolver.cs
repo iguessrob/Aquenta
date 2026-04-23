@@ -4,7 +4,7 @@ using Microsoft.Data.SqlClient;
 
 namespace AquentaLibrary.Repositories
 {
-    internal static class SqlConnectionResolver
+    public static class SqlConnectionResolver
     {
         private static readonly Lazy<string> CachedConnectionString = new Lazy<string>(ResolveConnectionString);
 
