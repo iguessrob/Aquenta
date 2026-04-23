@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AQUENTA - Water Billing & Consumption Management</title>
+    <link rel="stylesheet" href="styles/index.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <svg class="logo-svg" fill="none" preserveAspectRatio="none" viewBox="0 0 33.5152 44.2492">
+                    <g>
+                        <path d="M21.8031 21.6042C20.1338 22.8794 20.5533 24.4235 21.2756 25.1458C21.998 25.8681 23.6329 26.5811 25.0478 24.9547C26.2562 23.5656 29.8617 17.0467 29.8617 17.0467C29.8617 17.0467 23.0354 20.663 21.8031 21.6042Z" fill="white" stroke="#152E74" stroke-width="0.2" />
+                        <path d="M28.4369 38.9178C28.4369 38.9178 25.026 40.6909 20.7011 39.6732C18.4746 39.1492 15.7263 37.3987 12.4235 33.217C12.0764 32.7775 11.5687 32.0668 10.8614 31.3078C10.1168 30.5087 8.70154 29.2567 8.70154 29.2567C8.70154 29.2567 7.68002 33.842 9.19649 36.9886C11.1934 41.1322 14.3147 43.1388 17.6928 43.622C22.4952 44.3088 28.4369 38.9178 28.4369 38.9178Z" fill="white" stroke="#152E74" stroke-width="0.2" />
+                        <path d="M5.55911 40.072C8.85696 43.1095 14.3244 44.151 14.3244 44.151C14.3244 44.151 9.72481 42.2416 7.81553 37.7288C5.90625 33.2159 7.12125 28.9634 7.12125 28.9634C7.12125 28.9634 4.95162 28.7732 3.30269 29.7445C1.65377 30.7158 0.785919 32.6952 0.785919 32.6952C0.785919 32.6952 2.26127 37.0345 5.55911 40.072Z" fill="white" stroke="#152E74" stroke-width="0.2" />
+                        <path d="M18.8372 12.7346L16.3204 9.87069C16.3204 9.87069 13.6301 12.9082 11.8944 15.425C9.56016 18.8096 8.68333 20.8925 8.68333 20.8925C8.68333 20.8925 5.81941 20.8491 3.99692 21.7604C2.17443 22.6716 0.438722 24.7111 0.438722 24.7111C0.438722 24.7111 1.7405 19.3304 7.12119 11.78C12.5019 4.22961 16.4072 0.150674 16.4072 0.150674L21.5276 6.39926L25.8668 12.3875C25.8668 12.3875 24.2179 11.78 22.0483 12.0403C19.8786 12.3007 18.8372 12.7346 18.8372 12.7346Z" fill="white" stroke="#152E74" stroke-width="0.2" />
+                        <path d="M6.16647 27.402C1.8272 27.5534 0.178293 30.9602 0.178293 30.9602C0.178293 30.9602 -0.429247 28.5302 1.74045 25.5795C3.91016 22.6288 6.94272 22.3117 8.68324 22.3684C16.6674 22.6288 18.7668 33.041 25.4328 33.5638C29.8588 33.911 32.5492 29.4849 32.5492 29.4849C32.5492 29.4849 31.9417 37.7295 24.9989 38.337C15.0643 39.2063 13.8904 27.1326 6.16647 27.402Z" fill="white" stroke="#152E74" stroke-width="0.2" />
+                        <path d="M18.3165 18.4622C16.6411 19.8201 15.5394 23.409 15.5394 23.409C15.5394 23.409 14.7122 22.7424 14.2376 22.4543C13.763 22.1662 13.0221 21.76 13.0221 21.76C13.0221 21.76 13.0216 19.764 15.0182 17.2471C17.0147 14.7302 19.3574 13.689 22.5685 13.4286C26.3871 13.119 28.9043 15.3379 28.9043 15.3379L25.5202 17.0112C25.5202 17.0112 24.3145 16.6456 23.0897 16.6397C21.145 16.6302 19.8574 17.2133 18.3165 18.4622Z" fill="white" stroke="#152E74" stroke-width="0.2" />
+                        <path d="M22.7426 30.7001C22.7426 30.7001 23.8931 31.7005 24.9122 31.9151C26.0293 32.1503 27.8164 31.8183 28.8939 31.1828C31.4011 29.704 32.4852 27.9135 32.8911 24.8833C33.4806 20.4829 31.3343 17.9426 31.3343 17.9426L29.6113 21.5876C29.6113 21.5876 29.684 22.2794 29.6114 23.9033C29.5623 25.0005 28.8814 26.9931 27.5526 28.3347C26.0468 29.8549 22.7426 30.7001 22.7426 30.7001Z" fill="white" stroke="#152E74" stroke-width="0.2" />
+                    </g>
+                </svg>
+                <span class="logo-text">AQUENTA</span>
+            </div>
+
+            <nav>
+                <a href="#features">Features</a>
+                <a href="#faqs">FAQs</a>
+                <a href="#contact">Contact Us</a>
+                <a href="auth.html" class="login-btn">Login</a>
+            </nav>
+
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <svg id="menuIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+                <svg id="closeIcon" style="display: none;" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>          
+
+        <div class="mobile-nav" id="mobileNav">
+            <a href="#features" onclick="closeMobileMenu()">Features</a>
+            <a href="#faqs" onclick="closeMobileMenu()">FAQs</a>
+            <a href="#contact" onclick="closeMobileMenu()">Contact Us</a>
+            <a href="auth.html" class="login-btn" onclick="closeMobileMenu()">Login</a>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-background">
+            <div class="hero-bg-gradient"></div>
+            <img src="/assets/images/hero-bg.png" alt="Water droplet ripples" class="hero-bg-image">
+        </div>
+
+        <div class="hero-wave">
+            <svg viewBox="0 0 1440 320" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+                <path fill="white" opacity="0.85" d="M0,175L48,190C96,205,192,238,288,242C384,246,480,220,576,206C672,192,768,190,864,202C960,214,1056,236,1152,240C1248,244,1344,230,1392,222L1440,214L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z">
+                    <animate attributeName="d" dur="5s" repeatCount="indefinite"
+                        values="M0,175L48,190C96,205,192,238,288,242C384,246,480,220,576,206C672,192,768,190,864,202C960,214,1056,236,1152,240C1248,244,1344,230,1392,222L1440,214L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z;
+                                M0,150L48,168C96,186,192,228,288,236C384,244,480,232,576,214C672,196,768,184,864,188C960,192,1056,210,1152,228C1248,246,1344,254,1392,252L1440,250L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z;
+                                M0,175L48,190C96,205,192,238,288,242C384,246,480,220,576,206C672,192,768,190,864,202C960,214,1056,236,1152,240C1248,244,1344,230,1392,222L1440,214L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z" />
+                </path>
+                <path fill="white" opacity="1" d="M0,150L48,168C96,186,192,228,288,236C384,244,480,232,576,214C672,196,768,184,864,188C960,192,1056,210,1152,228C1248,246,1344,254,1392,252L1440,250L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z">
+                    <animate attributeName="d" dur="3.5s" repeatCount="indefinite"
+                        values="M0,150L48,168C96,186,192,228,288,236C384,244,480,232,576,214C672,196,768,184,864,188C960,192,1056,210,1152,228C1248,246,1344,254,1392,252L1440,250L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z;
+                                M0,118L48,138C96,158,192,210,288,228C384,246,480,244,576,224C672,204,768,182,864,182C960,182,1056,202,1152,224C1248,246,1344,258,1392,260L1440,262L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z;
+                                M0,150L48,168C96,186,192,228,288,236C384,244,480,232,576,214C672,196,768,184,864,188C960,192,1056,210,1152,228C1248,246,1344,254,1392,252L1440,250L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z" />
+                </path>
+            </svg>
+        </div>
+
+        <div class="hero-content">
+            <div class="hero-grid">
+                <div class="hero-text">
+                    <h1 class="hero-title">Water Billing &<br>Consumption<br>Management</h1>
+                    <p class="hero-description">Empowering utilities with accurate, transparent, and efficient billing and monitoring solutions.</p>
+                    <button class="hero-btn">Get Started</button>
+                </div>
+
+                <div class="hero-dashboard">
+                    <div class="dashboard-card">
+                        <svg class="dashboard-graph" fill="none" preserveAspectRatio="xMidYMid meet" viewBox="0 0 520 264.5">
+                            <g clip-path="url(#clip0_9_576)">
+                                <path d="M9.53674e-06 132.25C86.6667 97.5833 173.333 88.9167 260 106.25C346.667 123.583 433.333 132.25 520 132.25V262.25H9.53674e-06V132.25Z" fill="#0E58AD" opacity="0.1" />
+                                <g opacity="0.5" />
+                                <path d="M9.53674e-06 132.25C86.6667 97.5833 173.333 88.9167 260 106.25C346.667 123.583 433.333 132.25 520 132.25" opacity="0.6" stroke="#0E58AD" stroke-width="2.6" />
+                                <path d="M9.53674e-06 158.25C86.6667 175.583 173.333 175.583 260 158.25C346.667 140.917 433.333 149.583 520 184.25" opacity="0.4" stroke="#0E58AD" stroke-width="2.6" />
+                                <path d="M130 98.45C132.872 98.45 135.2 96.1219 135.2 93.25C135.2 90.3781 132.872 88.05 130 88.05C127.128 88.05 124.8 90.3781 124.8 93.25C124.8 96.1219 127.128 98.45 130 98.45Z" fill="#0E58AD" />
+                                <path d="M260 111.45C262.872 111.45 265.2 109.122 265.2 106.25C265.2 103.378 262.872 101.05 260 101.05C257.128 101.05 254.8 103.378 254.8 106.25C254.8 109.122 257.128 111.45 260 111.45Z" fill="#0E58AD" />
+                                <path d="M390 124.45C392.872 124.45 395.2 122.122 395.2 119.25C395.2 116.378 392.872 114.05 390 114.05C387.128 114.05 384.8 116.378 384.8 119.25C384.8 122.122 387.128 124.45 390 124.45Z" fill="#0E58AD" />
+                                <path d="M455 91.95C457.872 91.95 460.2 89.6219 460.2 86.75C460.2 83.8781 457.872 81.55 455 81.55C452.128 81.55 449.8 83.8781 449.8 86.75C449.8 89.6219 452.128 91.95 455 91.95Z" fill="#0E58AD" />
+                                <g>
+                                    <path d="M460.2 130H371.8C367.492 130 364 133.492 364 137.8V187.2C364 191.508 367.492 195 371.8 195H460.2C464.508 195 468 191.508 468 187.2V137.8C468 133.492 464.508 130 460.2 130Z" fill="white" opacity="0.95" />
+                                    <path d="M383.5 149.75H448.5" stroke="#D1D5DB" stroke-width="2.6" />
+                                    <path d="M383.5 162.5H429" stroke="#D1D5DB" stroke-width="2.6" />
+                                    <path d="M383.5 175.5H435.5" stroke="#D1D5DB" stroke-width="2.6" />
+                                </g>
+                            </g>
+                            <defs>
+                                <clipPath id="clip0_9_576">
+                                    <rect fill="white" height="264.5" width="520" />
+                                </clipPath>
+                            </defs>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="features-container">
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h3 class="feature-title">Meter Reading
+& Tracking</h3>
+                    <div class="feature-icon-wrapper">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="feature-description">Records water usage and keeps consumption data organized for reference and review.</p>
+                </div>
+
+                <div class="feature-card">
+                    <h3 class="feature-title">Automated
+Billing</h3>
+                    <div class="feature-icon-wrapper">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <polyline points="10 9 9 9 8 9"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="feature-description">Creates water bills automatically based on recorded usage.</p>
+                </div>
+
+                <div class="feature-card">
+                    <h3 class="feature-title">Admin-Dashboard
+Reporting</h3>
+                    <div class="feature-icon-wrapper">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24">
+                                <line x1="12" y1="20" x2="12" y2="10"></line>
+                                <line x1="18" y1="20" x2="18" y2="4"></line>
+                                <line x1="6" y1="20" x2="6" y2="16"></line>
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="feature-description">Provides basic operational and financial reports for monitoring usage and billing activity.</p>
+                </div>
+
+                <div class="feature-card">
+                    <h3 class="feature-title">Customer
+Transparency</h3>
+                    <div class="feature-icon-wrapper">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="feature-description">Give customers clear visibility into their water usage and billing history.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faqs" class="faq">
+        <div class="faq-container">
+            <div class="faq-header">
+                <p class="faq-subtitle">Don't be afraid to ask</p>
+                <h2 class="faq-title">Frequently Asked Questions</h2>
+            </div>
+
+            <div class="faq-list">
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFAQ(0)">
+                        <span class="faq-question-text">Can I update my personal information online?</span>
+                        <div class="faq-toggle" id="toggle-0">
+                            <svg viewBox="0 0 24 24">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                        </div>
+                    </button>
+                    <div class="faq-answer" id="answer-0">
+                        <p class="faq-answer-text">Basic account details may be viewable online, but major changes (like name or address) must be requested at the cooperative office for verification.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFAQ(1)">
+                        <span class="faq-question-text">What happens if I miss a payment?</span>
+                        <div class="faq-toggle" id="toggle-1">
+                            <svg viewBox="0 0 24 24">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                        </div>
+                    </button>
+                    <div class="faq-answer" id="answer-1">
+                        <p class="faq-answer-text">Late payments may incur additional charges. Please contact our office immediately if you anticipate difficulty meeting a payment deadline to discuss possible arrangements.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFAQ(2)">
+                        <span class="faq-question-text">I forgot my password. What should I do?</span>
+                        <div class="faq-toggle" id="toggle-2">
+                            <svg viewBox="0 0 24 24">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                        </div>
+                    </button>
+                    <div class="faq-answer" id="answer-2">
+                        <p class="faq-answer-text">Click on the "Forgot Password" link on the login page. You'll receive instructions via email to reset your password securely.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFAQ(3)">
+                        <span class="faq-question-text">Why was a penalty added to my bill?</span>
+                        <div class="faq-toggle" id="toggle-3">
+                            <svg viewBox="0 0 24 24">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                        </div>
+                    </button>
+                    <div class="faq-answer" id="answer-3">
+                        <p class="faq-answer-text">Penalties are typically added for late payments or missed payment deadlines. Check your billing statement for specific details or contact our office for clarification.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFAQ(4)">
+                        <span class="faq-question-text">Is my personal and billing information secure?</span>
+                        <div class="faq-toggle" id="toggle-4">
+                            <svg viewBox="0 0 24 24">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                        </div>
+                    </button>
+                    <div class="faq-answer" id="answer-4">
+                        <p class="faq-answer-text">Yes, we use industry-standard encryption and security measures to protect all customer data. Your information is stored securely and is only accessible to authorized personnel.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFAQ(5)">
+                        <span class="faq-question-text">What if I cannot log in to my account?</span>
+                        <div class="faq-toggle" id="toggle-5">
+                            <svg viewBox="0 0 24 24">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                        </div>
+                    </button>
+                    <div class="faq-answer" id="answer-5">
+                        <p class="faq-answer-text">First, try resetting your password. If issues persist, contact our support team with your account number and we'll help you regain access to your account.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="contact-background">
+            <img src="/assets/images/contact-bg.png" alt="Water background" class="contact-bg-image">
+            <div class="contact-bg-overlay"></div>
+        </div>
+
+        <div class="contact-container">
+            <div class="contact-header">
+                <h2 class="contact-title">Contact Us</h2>
+                <p class="contact-description">Need help with something? If you have any questions about your water bill, payments, or account details, feel free to reach us using the information below.</p>
+            </div>
+
+            <div class="contact-grid">
+                <!-- Contact Form -->
+                <div class="contact-form-card">
+                    <h3 class="contact-form-title">In what way can we help?</h3>
+                    <form id="contactForm" onsubmit="handleSubmit(event)" autocomplete="off">
+                        <div class="form-grid form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" name="fullName" class="form-input" required>
+                                <div class="form-error" id="error-fullName"></div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Account Number (optional)</label>
+                                <input type="text" name="accountNumber" class="form-input">
+                                <div class="form-error" id="error-accountNumber"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-grid form-grid-2">
+                            <div class="form-group">
+                                <label class="form-label">Contact Number</label>
+                                <input type="tel" name="contactNumber" class="form-input" required>
+                                <div class="form-error" id="error-contactNumber"></div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Email Address</label>
+                                <input type="email" name="email" class="form-input" required>
+                                <div class="form-error" id="error-email"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Subject</label>
+                            <div class="select-wrapper">
+                                <select name="subject" class="form-select">
+                                    <option value="Billing">Billing</option>
+                                    <option value="Technical Support">Technical Support</option>
+                                    <option value="Account">Account</option>
+                                    <option value="Others">Others</option>
+                                </select>
+                                <svg class="select-arrow" fill="#E6E6E6" viewBox="0 0 16.0258 9.03188">
+                                    <path d="M8.0094 9.03188C7.82865 9.03188 7.6604 9.003 7.50465 8.94525C7.3489 8.8875 7.20078 8.7885 7.06028 8.64825L0.318902 1.90688C0.111402 1.69913 0.00515245 1.438 0.000152449 1.1235C-0.00459755 0.809251 0.101652 0.543375 0.318902 0.325875C0.536402 0.108625 0.799902 0 1.1094 0C1.4189 0 1.6824 0.108625 1.8999 0.325875L8.0094 6.43575L14.1189 0.325875C14.3267 0.118375 14.5878 0.0121251 14.9023 0.00712509C15.2165 0.00237509 15.4824 0.108625 15.6999 0.325875C15.9172 0.543375 16.0258 0.806876 16.0258 1.11638C16.0258 1.42588 15.9172 1.68938 15.6999 1.90688L8.95853 8.64825C8.81803 8.7885 8.6699 8.8875 8.51415 8.94525C8.3584 9.003 8.19015 9.03188 8.0094 9.03188Z" />
+                                </svg>
+                            </div>
+                            <div class="form-error" id="error-subject"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Write Your Question</label>
+                            <textarea name="message" class="form-textarea" rows="4" maxlength="300" required id="messageField" oninput="updateCharCount()"></textarea>
+                            <div class="form-error" id="error-message"></div>
+                            <div class="char-count"><span id="charCount">0</span> / 300</div>
+                        </div>
+
+                        <button type="submit" class="submit-btn">Submit Now</button>
+                    </form>
+                </div>
+
+                <!-- Office Information -->
+                <div class="contact-info">
+                    <h3 class="contact-info-title">Office Information</h3>
+                    
+                    <div class="contact-info-list">
+                        <div class="contact-info-item">
+                            <div class="contact-info-icon">
+                                <svg width="40" height="40" viewBox="0 0 24 24">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                    <circle cx="12" cy="10" r="3"></circle>
+                                </svg>
+                            </div>
+                            <div class="contact-info-content">
+                                <h4>Address</h4>
+                                <p>St. Joseph Water Billing Cooperative<br>San Jose Sto. Tomas City Batangas</p>
+                            </div>
+                        </div>
+
+                        <div class="contact-info-item">
+                            <div class="contact-info-icon">
+                                <svg width="36" height="36" viewBox="0 0 24 24">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                            </div>
+                            <div class="contact-info-content">
+                                <h4>Office Hours</h4>
+                                <p>Monday - Saturday: 8:00AM - 5:00PM<br>Sunday & Holidays: Closed</p>
+                            </div>
+                        </div>
+
+                        <div class="contact-info-item">
+                            <div class="contact-info-icon">
+                                <svg width="32" height="32" viewBox="0 0 24 24">
+                                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                                </svg>
+                            </div>
+                            <div class="contact-info-content">
+                                <h4>Mobile Number</h4>
+                                <p>0900-000-0000</p>
+                            </div>
+                        </div>
+
+                        <div class="contact-info-item">
+                            <div class="contact-info-icon">
+                                <svg width="32" height="32" viewBox="0 0 24 24">
+                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                    <polyline points="22,6 12,13 2,6"></polyline>
+                                </svg>
+                            </div>
+                            <div class="contact-info-content">
+                                <h4>Email Address</h4>
+                                <p>support@stjosephcoop.com</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="assistance-card">
+                        <h4>Need Immediate Assistance?</h4>
+                        <p>For urgent water-related emergencies or billing concerns, please contact our office directly during business hours. Our team is ready to assist you.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Map Section -->
+            <div class="map-section">
+                <div class="map-wrapper">
+                    <iframe
+                        src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d266.94339329535796!2d121.19827834920255!3d14.073350479111523!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33bd6897606f6737%3A0xa29996840e78ee8!2sSt.%20Joseph%20Multipurpose%20Cooperative!5e0!3m2!1sen!2sph!4v1770888268426!5m2!1sen!2sph"
+                        allowfullscreen
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"
+                        title="St. Joseph Multipurpose Cooperative Location"
+                    ></iframe>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-grid">
+                <!-- Logo and Description -->
+                <div class="footer-logo-section">
+                    <div class="footer-logo">
+                        <svg class="footer-logo-svg" fill="none" preserveAspectRatio="none" viewBox="0 0 33.5152 44.2492">
+                            <g>
+                                <path d="M21.8031 21.6042C20.1338 22.8794 20.5533 24.4235 21.2756 25.1458C21.998 25.8681 23.6329 26.5811 25.0478 24.9547C26.2562 23.5656 29.8617 17.0467 29.8617 17.0467C29.8617 17.0467 23.0354 20.663 21.8031 21.6042Z" fill="#0e58ad" stroke="#152E74" stroke-width="0.2" />
+                                <path d="M28.4369 38.9178C28.4369 38.9178 25.026 40.6909 20.7011 39.6732C18.4746 39.1492 15.7263 37.3987 12.4235 33.217C12.0764 32.7775 11.5687 32.0668 10.8614 31.3078C10.1168 30.5087 8.70154 29.2567 8.70154 29.2567C8.70154 29.2567 7.68002 33.842 9.19649 36.9886C11.1934 41.1322 14.3147 43.1388 17.6928 43.622C22.4952 44.3088 28.4369 38.9178 28.4369 38.9178Z" fill="#0e58ad" stroke="#152E74" stroke-width="0.2" />
+                                <path d="M5.55911 40.072C8.85696 43.1095 14.3244 44.151 14.3244 44.151C14.3244 44.151 9.72481 42.2416 7.81553 37.7288C5.90625 33.2159 7.12125 28.9634 7.12125 28.9634C7.12125 28.9634 4.95162 28.7732 3.30269 29.7445C1.65377 30.7158 0.785919 32.6952 0.785919 32.6952C0.785919 32.6952 2.26127 37.0345 5.55911 40.072Z" fill="#0e58ad" stroke="#152E74" stroke-width="0.2" />
+                                <path d="M18.8372 12.7346L16.3204 9.87069C16.3204 9.87069 13.6301 12.9082 11.8944 15.425C9.56016 18.8096 8.68333 20.8925 8.68333 20.8925C8.68333 20.8925 5.81941 20.8491 3.99692 21.7604C2.17443 22.6716 0.438722 24.7111 0.438722 24.7111C0.438722 24.7111 1.7405 19.3304 7.12119 11.78C12.5019 4.22961 16.4072 0.150674 16.4072 0.150674L21.5276 6.39926L25.8668 12.3875C25.8668 12.3875 24.2179 11.78 22.0483 12.0403C19.8786 12.3007 18.8372 12.7346 18.8372 12.7346Z" fill="#0e58ad" stroke="#152E74" stroke-width="0.2" />
+                                <path d="M6.16647 27.402C1.8272 27.5534 0.178293 30.9602 0.178293 30.9602C0.178293 30.9602 -0.429247 28.5302 1.74045 25.5795C3.91016 22.6288 6.94272 22.3117 8.68324 22.3684C16.6674 22.6288 18.7668 33.041 25.4328 33.5638C29.8588 33.911 32.5492 29.4849 32.5492 29.4849C32.5492 29.4849 31.9417 37.7295 24.9989 38.337C15.0643 39.2063 13.8904 27.1326 6.16647 27.402Z" fill="#0e58ad" stroke="#152E74" stroke-width="0.2" />
+                                <path d="M18.3165 18.4622C16.6411 19.8201 15.5394 23.409 15.5394 23.409C15.5394 23.409 14.7122 22.7424 14.2376 22.4543C13.763 22.1662 13.0221 21.76 13.0221 21.76C13.0221 21.76 13.0216 19.764 15.0182 17.2471C17.0147 14.7302 19.3574 13.689 22.5685 13.4286C26.3871 13.119 28.9043 15.3379 28.9043 15.3379L25.5202 17.0112C25.5202 17.0112 24.3145 16.6456 23.0897 16.6397C21.145 16.6302 19.8574 17.2133 18.3165 18.4622Z" fill="#0e58ad" stroke="#152E74" stroke-width="0.2" />
+                                <path d="M22.7426 30.7001C22.7426 30.7001 23.8931 31.7005 24.9122 31.9151C26.0293 32.1503 27.8164 31.8183 28.8939 31.1828C31.4011 29.704 32.4852 27.9135 32.8911 24.8833C33.4806 20.4829 31.3343 17.9426 31.3343 17.9426L29.6113 21.5876C29.6113 21.5876 29.684 22.2794 29.6114 23.9033C29.5623 25.0005 28.8814 26.9931 27.5526 28.3347C26.0468 29.8549 22.7426 30.7001 22.7426 30.7001Z" fill="#0e58ad" stroke="#152E74" stroke-width="0.2" />
+                            </g>
+                        </svg>
+                        <span class="footer-logo-text">AQUENTA</span>
+                    </div>
+                    <p class="footer-description">AQUENTA is a water billing and utility management system that gives seamless resources-based material to improve your billing and utility customers.</p>
+                </div>
+
+                <!-- Navigation Links -->
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#faqs">FAQs</a></li>
+                        <li><a href="#contact">Contact Us</a></li>
+                    </ul>
+                </div>
+
+                <!-- Additional Info -->
+                <div class="footer-support">
+                    <h4>Support</h4>
+                    <ul>
+                        <li>Email: support@stjosephcoop.com</li>
+                        <li>Phone: 0900-000-0000</li>
+                        <li>Hours: Mon-Sat, 8AM-5PM</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Copyright -->
+            <div class="footer-bottom">
+                <p class="footer-copyright">© 2026 AQUENTA. All rights reserved.</p>
+                <p class="footer-privacy"><a href="#">Privacy Notice</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script/index.js"></script>
+</body>
+</html>

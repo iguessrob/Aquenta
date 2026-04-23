@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- SECURITY: Prevent browser caching of auth page -->
+    <meta name="pragma" content="no-cache">
+    <meta name="cache-control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta name="expires" content="0">
+    <title>AQUENTA - Login</title>
+    <link rel="stylesheet" href="styles/auth.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Left Panel - Hero Section -->
+        <div class="hero-panel">
+            <!-- Background Image -->
+            <div class="hero-background">
+                <img 
+                    src="/assets/images/auth-water-bg.png" 
+                    alt="" 
+                    class="hero-image"
+                />
+            </div>
+
+            <!-- Content -->
+            <div class="hero-content">
+                <!-- Logo -->
+                <div class="logo-container">
+                    <div class="logo-wrapper">
+                        <!-- White Circle Background -->
+                        <svg class="logo-circle" fill="none" viewBox="0 0 124 124">
+                            <circle cx="62" cy="62" fill="white" r="62" />
+                        </svg>
+                        
+                        <!-- Logo Icon -->
+                        <div class="logo-icon">
+                            <svg class="logo-svg" fill="none" viewBox="0 0 63.5656 83.8188">
+                                <path d="M41.321 40.8976C38.1503 43.3195 38.9472 46.2522 40.3191 47.6241C41.691 48.996 44.7963 50.3501 47.4836 47.2611C49.7787 44.6228 56.6266 32.2415 56.6266 32.2415C56.6266 32.2415 43.6613 39.11 41.321 40.8976Z" fill="url(#paint0_linear_1_72)" stroke="#136A4D" stroke-width="0.2" />
+                                <path d="M10.4685 75.9733C16.7321 81.7425 27.1165 83.7205 27.1165 83.7205C27.1165 83.7205 18.3804 80.0942 14.7541 71.5229C11.1278 62.9516 13.4355 54.8748 13.4355 54.8748C13.4355 54.8748 9.3147 54.5135 6.18289 56.3583C3.05108 58.203 1.40277 61.9626 1.40277 61.9626C1.40277 61.9626 4.20491 70.2042 10.4685 75.9733Z" fill="url(#paint2_linear_1_72)" stroke="#136A4D" stroke-width="0.2" />
+                                <path d="M53.9205 73.7814C53.9205 73.7814 47.4422 77.1489 39.2279 75.216C34.9991 74.2209 29.7792 70.896 23.5063 62.9539C22.8469 62.1191 21.8826 60.7691 20.5393 59.3276C19.125 57.8098 16.437 55.4319 16.437 55.4319C16.437 55.4319 14.4969 64.1408 17.3771 70.1173C21.1698 77.9871 27.0981 81.7983 33.5142 82.7159C42.6354 84.0205 53.9205 73.7814 53.9205 73.7814Z" fill="url(#paint1_linear_1_72)" stroke="#136A4D" stroke-width="0.2" />
+                                <path d="M35.6877 24.0514L30.9076 18.6119C30.9076 18.6119 25.7978 24.3811 22.5012 29.1612C18.0678 35.5897 16.4024 39.5457 16.4024 39.5457C16.4024 39.5457 10.963 39.4633 7.50149 41.194C4.04002 42.9248 0.743379 46.7983 0.743379 46.7983C0.743379 46.7983 3.21586 36.5787 13.4354 22.2383C23.655 7.89781 31.0724 0.150674 31.0724 0.150674L40.7975 12.0186L49.0391 23.3921C49.0391 23.3921 45.9073 22.2383 41.7865 22.7328C37.6657 23.2273 35.6877 24.0514 35.6877 24.0514Z" fill="url(#paint3_linear_1_72)" stroke="#136A4D" stroke-width="0.2" />
+                                <path d="M11.6221 51.9092C3.38048 52.1967 0.248702 58.6674 0.248702 58.6674C0.248702 58.6674 -0.905201 54.0521 3.21572 48.4478C7.33665 42.8435 13.0964 42.2411 16.4022 42.349C31.5666 42.8435 35.5539 62.6194 48.2147 63.6124C56.6211 64.2717 61.731 55.8652 61.731 55.8652C61.731 55.8652 60.5771 71.5243 47.3906 72.6782C28.5219 74.3292 26.2921 51.3975 11.6221 51.9092Z" fill="url(#paint4_linear_1_72)" stroke="#136A4D" stroke-width="0.2" />
+                                <path d="M34.6988 34.9299C31.5166 37.5091 29.4242 44.3254 29.4242 44.3254C29.4242 44.3254 27.8531 43.0594 26.9517 42.5122C26.0503 41.965 24.6431 41.1935 24.6431 41.1935C24.6431 41.1935 24.6421 37.4024 28.4342 32.622C32.2263 27.8417 36.6758 25.8641 42.7746 25.3695C50.0272 24.7815 54.8083 28.9959 54.8083 28.9959L48.3808 32.174C48.3808 32.174 46.0908 31.4797 43.7645 31.4684C40.071 31.4504 37.6254 32.5578 34.6988 34.9299Z" fill="url(#paint5_linear_1_72)" stroke="#136A4D" stroke-width="0.2" />
+                                <path d="M43.1052 58.1733C43.1052 58.1733 45.2904 60.0734 47.226 60.4809C49.3477 60.9277 52.7419 60.2971 54.7884 59.0901C59.5503 56.2815 61.6094 52.8807 62.3804 47.1254C63.5 38.7677 59.4235 33.9429 59.4235 33.9429L56.151 40.8659C56.151 40.8659 56.2891 42.1798 56.1512 45.2641C56.0579 47.348 54.7646 51.1326 52.2409 53.6806C49.3809 56.5681 43.1052 58.1733 43.1052 58.1733Z" fill="url(#paint6_linear_1_72)" stroke="#136A4D" stroke-width="0.2" />
+                                <defs>
+                                    <linearGradient gradientUnits="userSpaceOnUse" id="paint0_linear_1_72" x1="47.9736" x2="47.6988" y1="32.1024" y2="49.1983">
+                                        <stop stop-color="#152E74" />
+                                        <stop offset="1" stop-color="#0E58AD" />
+                                    </linearGradient>
+                                    <linearGradient gradientUnits="userSpaceOnUse" id="paint1_linear_1_72" x1="35.0341" x2="34.6393" y1="55.7026" y2="82.8244">
+                                        <stop stop-color="#152E74" />
+                                        <stop offset="1" stop-color="#0E58AD" />
+                                    </linearGradient>
+                                    <linearGradient gradientUnits="userSpaceOnUse" id="paint2_linear_1_72" x1="14.2597" x2="14.2597" y1="54.8462" y2="83.7205">
+                                        <stop stop-color="#152E74" />
+                                        <stop offset="1" stop-color="#0E58AD" />
+                                    </linearGradient>
+                                    <linearGradient gradientUnits="userSpaceOnUse" id="paint3_linear_1_72" x1="24.8913" x2="24.8913" y1="0.150674" y2="46.7983">
+                                        <stop stop-color="#152E74" />
+                                        <stop offset="1" stop-color="#0E58AD" />
+                                    </linearGradient>
+                                    <linearGradient gradientUnits="userSpaceOnUse" id="paint4_linear_1_72" x1="30.9155" x2="30.9155" y1="42.3381" y2="72.7632">
+                                        <stop stop-color="#152E74" />
+                                        <stop offset="1" stop-color="#0E58AD" />
+                                    </linearGradient>
+                                    <linearGradient gradientUnits="userSpaceOnUse" id="paint5_linear_1_72" x1="39.7257" x2="39.7257" y1="25.3133" y2="44.3254">
+                                        <stop stop-color="#152E74" />
+                                        <stop offset="1" stop-color="#0E58AD" />
+                                    </linearGradient>
+                                    <linearGradient gradientUnits="userSpaceOnUse" id="paint6_linear_1_72" x1="62.3166" x2="44.176" y1="48.0505" y2="46.4004">
+                                        <stop stop-color="#152E74" />
+                                        <stop offset="1" stop-color="#0E58AD" />
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Brand Name -->
+                <h1 class="brand-name">AQUENTA</h1>
+
+                <!-- Tagline -->
+                <p class="tagline">
+                    Better Water Services for Better Communities
+                </p>
+            </div>
+
+            <!-- Footer - Left Side -->
+            <div class="hero-footer">
+                <p class="copyright">© 2026</p>
+                <p class="privacy">Privacy Notice</p>
+            </div>
+        </div>
+
+        <!-- Right Panel - Login Form -->
+        <div class="login-panel">
+            <!-- Home Icon -->
+            <button class="home-button" aria-label="Home">
+                <svg class="home-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+            </button>
+
+            <div class="login-content">
+                <!-- Header -->
+                <div class="login-header">
+                    <h2 class="welcome-title">Welcome Back,</h2>
+                    <p class="welcome-subtitle">Please enter your details to sign in.</p>
+                </div>
+
+                <!-- Login Form -->
+                <form id="loginForm" class="login-form" autocomplete="off">
+                    <!-- Credential Error Message -->
+                    <div class="credential-error" id="credentialError">
+                        <svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        <span id="credentialErrorText">The login information you entered is incorrect.</span>
+                    </div>
+
+                    <!-- Account Number Field -->
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect width="20" height="16" x="2" y="4" rx="2"></rect>
+                                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+                            </svg>
+                            <input
+                                type="text"
+                                id="accountNumber"
+                                name="accountNumber"
+                                placeholder="Account Number"
+                                class="form-input"
+                                autocomplete="off"
+                            />
+                        </div>
+                    </div>
+
+                    <!-- Password Field -->
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                placeholder="Password"
+                                class="form-input"
+                                autocomplete="new-password"
+                            />
+                            <button type="button" id="togglePassword" class="toggle-password">
+                                <!-- Eye Icon (hidden) -->
+                                <svg id="eyeIcon" class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                                <!-- Eye Off Icon (visible) -->
+                                <svg id="eyeOffIcon" class="eye-icon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
+                                    <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"></path>
+                                    <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"></path>
+                                    <line x1="2" x2="22" y1="2" y2="22"></line>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Forget Password Link -->
+                    <div class="forgot-password-wrapper">
+                        <a href="#" class="forgot-password">
+                            Forget Password?
+                        </a>
+                    </div>
+
+                    <!-- Login Button -->
+                    <button type="submit" class="login-button">
+                        Login
+                    </button>
+                </form>
+
+                <!-- Support Text -->
+                <p class="support-text">
+                    Don't have an account? Contact your cooperative for support.
+                </p>
+            </div>
+
+            <!-- Footer - Mobile Only -->
+            <div class="mobile-footer">
+                <p class="mobile-copyright">© 2026</p>
+                <p class="mobile-privacy">Privacy Notice</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="loginLoadingOverlay" class="login-loading-overlay
+    " aria-hidden="true">
+        <div class="login-loading-content" role="status" aria-live="polite" aria-label="Loading">
+            <div class="login-loading-logo" aria-hidden="true">
+                <div class="logo-wrapper">
+                    <svg class="logo-circle" fill="none" viewBox="0 0 124 124">
+                        <circle cx="62" cy="62" fill="white" r="62" />
+                    </svg>
+
+                    <div class="logo-icon">
+                        <svg class="logo-svg" fill="none" viewBox="0 0 63.5656 83.8188">
+                            <path d="M41.321 40.8976C38.1503 43.3195 38.9472 46.2522 40.3191 47.6241C41.691 48.996 44.7963 50.3501 47.4836 47.2611C49.7787 44.6228 56.6266 32.2415 56.6266 32.2415C56.6266 32.2415 43.6613 39.11 41.321 40.8976Z" fill="url(#paint0_linear_loader)" stroke="#136A4D" stroke-width="0.2" />
+                            <path d="M10.4685 75.9733C16.7321 81.7425 27.1165 83.7205 27.1165 83.7205C27.1165 83.7205 18.3804 80.0942 14.7541 71.5229C11.1278 62.9516 13.4355 54.8748 13.4355 54.8748C13.4355 54.8748 9.3147 54.5135 6.18289 56.3583C3.05108 58.203 1.40277 61.9626 1.40277 61.9626C1.40277 61.9626 4.20491 70.2042 10.4685 75.9733Z" fill="url(#paint2_linear_loader)" stroke="#136A4D" stroke-width="0.2" />
+                            <path d="M53.9205 73.7814C53.9205 73.7814 47.4422 77.1489 39.2279 75.216C34.9991 74.2209 29.7792 70.896 23.5063 62.9539C22.8469 62.1191 21.8826 60.7691 20.5393 59.3276C19.125 57.8098 16.437 55.4319 16.437 55.4319C16.437 55.4319 14.4969 64.1408 17.3771 70.1173C21.1698 77.9871 27.0981 81.7983 33.5142 82.7159C42.6354 84.0205 53.9205 73.7814 53.9205 73.7814Z" fill="url(#paint1_linear_loader)" stroke="#136A4D" stroke-width="0.2" />
+                            <path d="M35.6877 24.0514L30.9076 18.6119C30.9076 18.6119 25.7978 24.3811 22.5012 29.1612C18.0678 35.5897 16.4024 39.5457 16.4024 39.5457C16.4024 39.5457 10.963 39.4633 7.50149 41.194C4.04002 42.9248 0.743379 46.7983 0.743379 46.7983C0.743379 46.7983 3.21586 36.5787 13.4354 22.2383C23.655 7.89781 31.0724 0.150674 31.0724 0.150674L40.7975 12.0186L49.0391 23.3921C49.0391 23.3921 45.9073 22.2383 41.7865 22.7328C37.6657 23.2273 35.6877 24.0514 35.6877 24.0514Z" fill="url(#paint3_linear_loader)" stroke="#136A4D" stroke-width="0.2" />
+                            <path d="M11.6221 51.9092C3.38048 52.1967 0.248702 58.6674 0.248702 58.6674C0.248702 58.6674 -0.905201 54.0521 3.21572 48.4478C7.33665 42.8435 13.0964 42.2411 16.4022 42.349C31.5666 42.8435 35.5539 62.6194 48.2147 63.6124C56.6211 64.2717 61.731 55.8652 61.731 55.8652C61.731 55.8652 60.5771 71.5243 47.3906 72.6782C28.5219 74.3292 26.2921 51.3975 11.6221 51.9092Z" fill="url(#paint4_linear_loader)" stroke="#136A4D" stroke-width="0.2" />
+                            <path d="M34.6988 34.9299C31.5166 37.5091 29.4242 44.3254 29.4242 44.3254C29.4242 44.3254 27.8531 43.0594 26.9517 42.5122C26.0503 41.965 24.6431 41.1935 24.6431 41.1935C24.6431 41.1935 24.6421 37.4024 28.4342 32.622C32.2263 27.8417 36.6758 25.8641 42.7746 25.3695C50.0272 24.7815 54.8083 28.9959 54.8083 28.9959L48.3808 32.174C48.3808 32.174 46.0908 31.4797 43.7645 31.4684C40.071 31.4504 37.6254 32.5578 34.6988 34.9299Z" fill="url(#paint5_linear_loader)" stroke="#136A4D" stroke-width="0.2" />
+                            <path d="M43.1052 58.1733C43.1052 58.1733 45.2904 60.0734 47.226 60.4809C49.3477 60.9277 52.7419 60.2971 54.7884 59.0901C59.5503 56.2815 61.6094 52.8807 62.3804 47.1254C63.5 38.7677 59.4235 33.9429 59.4235 33.9429L56.151 40.8659C56.151 40.8659 56.2891 42.1798 56.1512 45.2641C56.0579 47.348 54.7646 51.1326 52.2409 53.6806C49.3809 56.5681 43.1052 58.1733 43.1052 58.1733Z" fill="url(#paint6_linear_loader)" stroke="#136A4D" stroke-width="0.2" />
+                            <defs>
+                                <linearGradient gradientUnits="userSpaceOnUse" id="paint0_linear_loader" x1="47.9736" x2="47.6988" y1="32.1024" y2="49.1983">
+                                    <stop stop-color="#152E74" />
+                                    <stop offset="1" stop-color="#0E58AD" />
+                                </linearGradient>
+                                <linearGradient gradientUnits="userSpaceOnUse" id="paint1_linear_loader" x1="35.0341" x2="34.6393" y1="55.7026" y2="82.8244">
+                                    <stop stop-color="#152E74" />
+                                    <stop offset="1" stop-color="#0E58AD" />
+                                </linearGradient>
+                                <linearGradient gradientUnits="userSpaceOnUse" id="paint2_linear_loader" x1="14.2597" x2="14.2597" y1="54.8462" y2="83.7205">
+                                    <stop stop-color="#152E74" />
+                                    <stop offset="1" stop-color="#0E58AD" />
+                                </linearGradient>
+                                <linearGradient gradientUnits="userSpaceOnUse" id="paint3_linear_loader" x1="24.8913" x2="24.8913" y1="0.150674" y2="46.7983">
+                                    <stop stop-color="#152E74" />
+                                    <stop offset="1" stop-color="#0E58AD" />
+                                </linearGradient>
+                                <linearGradient gradientUnits="userSpaceOnUse" id="paint4_linear_loader" x1="30.9155" x2="30.9155" y1="42.3381" y2="72.7632">
+                                    <stop stop-color="#152E74" />
+                                    <stop offset="1" stop-color="#0E58AD" />
+                                </linearGradient>
+                                <linearGradient gradientUnits="userSpaceOnUse" id="paint5_linear_loader" x1="39.7257" x2="39.7257" y1="25.3133" y2="44.3254">
+                                    <stop stop-color="#152E74" />
+                                    <stop offset="1" stop-color="#0E58AD" />
+                                </linearGradient>
+                                <linearGradient gradientUnits="userSpaceOnUse" id="paint6_linear_loader" x1="62.3166" x2="44.176" y1="48.0505" y2="46.4004">
+                                    <stop stop-color="#152E74" />
+                                    <stop offset="1" stop-color="#0E58AD" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            <div class="loader" aria-hidden="true">
+                <div class="circle">
+                    <div class="dot"></div>
+                    <div class="outline"></div>
+                </div>
+                <div class="circle">
+                    <div class="dot"></div>
+                    <div class="outline"></div>
+                </div>
+                <div class="circle">
+                    <div class="dot"></div>
+                    <div class="outline"></div>
+                </div>
+                <div class="circle">
+                    <div class="dot"></div>
+                    <div class="outline"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECURITY: Clear history and prevent cached pages on login page load -->
+    <script>
+        (function() {
+            // Immediately clear forward history on auth page
+            window.history.pushState(null, '', window.location.href);
+            
+            // Prevent back-button navigation on auth page
+            window.addEventListener('popstate', function() {
+                window.history.pushState(null, '', window.location.href);
+            });
+        })();
+    </script>
+    <script src="script/api-client.js"></script>
+    <script src="script/auth.js"></script>
+</body>
+</html>

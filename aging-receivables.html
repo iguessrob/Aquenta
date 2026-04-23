@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AQUENTA - Aging Receivables</title>
+  <link rel="stylesheet" href="styles/global.css">
+  <link rel="stylesheet" href="styles/aging-receivables.css">
+  <link rel="stylesheet" href="styles/topbar-global.css">
+</head>
+<body>
+  <div class="app-container">
+    <div id="mobileOverlay" class="mobile-overlay"></div>
+
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-container">
+          <div class="logo-circle">
+            <img src="/assets/images/Aquenta_logo.png" alt="Aquenta Logo" class="logo-img">
+          </div>
+          <span class="logo-text">AQUENTA</span>
+        </div>
+        <button id="closeSidebar" class="close-btn" type="button" aria-label="Close sidebar">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <nav class="nav">
+        <a href="admin-dashboard.html" class="nav-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+          <span>Dashboard</span>
+        </a>
+        <a href="billing.html" class="nav-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+            <line x1="1" y1="10" x2="23" y2="10"></line>
+          </svg>
+          <span>Billing</span>
+        </a>
+        <a href="invoices.html" class="nav-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+          </svg>
+          <span>Invoices</span>
+        </a>
+        <a href="customer-record.html" class="nav-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span>Customer Records</span>
+        </a>
+        <a href="payment.html" class="nav-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+            <line x1="1" y1="10" x2="23" y2="10"></line>
+          </svg>
+          <span>Payments</span>
+        </a>
+        <a href="tariffs.html" class="nav-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 4v16"></path>
+            <path d="M9 5h5a3.5 3.5 0 0 1 0 7H9"></path>
+            <line x1="5" y1="8" x2="20" y2="8"></line>
+            <line x1="5" y1="11" x2="20" y2="11"></line>
+          </svg>
+          <span>Tariffs</span>
+        </a>
+        <a href="reports.html" class="nav-item active" aria-current="page">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+          <span>Reports</span>
+        </a>
+      </nav>
+    </aside>
+
+    <div class="main-container">
+      <header class="topbar">
+        <div>
+          <div class="topbar-left">
+            <button id="menuBtn" class="menu-btn" type="button" aria-label="Open sidebar">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+              </svg>
+            </button>
+            <div class="breadcrumb" aria-label="Breadcrumb">
+              <a href="reports.html">Reports</a>
+              <span class="breadcrumb-separator">&gt;</span>
+              <span class="breadcrumb-current">Aging Receivables</span>
+            </div>
+          </div>
+          <div class="topbar-right">
+            <div class="admin-info-wrapper">
+              <div class="admin-info" id="adminInfoBtn">
+                <div class="admin-details">
+                  <span class="admin-label">Admin Staff</span>
+                  <span class="admin-role">Admin Account</span>
+                </div>
+                <div class="admin-profile">
+                  <div class="avatar" id="adminAvatar">AS</div>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="chevron-down">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </div>
+              </div>
+
+              <!-- Profile Dropdown -->
+              <div class="profile-dropdown" id="adminDropdown">
+                <button class="profile-dropdown-item logout" id="adminLogoutBtn">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                  </svg>
+                  <span>Logout</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="content">
+        <div class="report-header">
+          <div class="report-header-left">
+            <h1 class="report-title">Aging Receivables</h1>
+          </div>
+          <button class="print-btn" type="button" onclick="window.print()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 6 2 18 2 18 9"></polyline>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+              <rect x="6" y="14" width="12" height="8"></rect>
+            </svg>
+            Print
+          </button>
+        </div>
+
+        <section class="summary-banner">
+          <div>Total Outstanding Balance: ₱7,670.00</div>
+        </section>
+
+        <section class="report-card">
+          <h2 class="section-title">Aging of Accounts Summary</h2>
+          <div class="table-shell">
+            <table class="summary-table">
+              <thead>
+                <tr>
+                  <th class="label-col"> </th>
+                  <th>Account Balance</th>
+                  <th>Current</th>
+                  <th>1-30 Days</th>
+                  <th>31-60 Days</th>
+                  <th>61-90 Days</th>
+                  <th>Over 90 Days</th>
+                </tr>
+              </thead>
+              <tbody id="agingSummaryBody">
+                <!-- Data will be injected here -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="report-card">
+          <h2 class="section-title">Detailed Customer List</h2>
+          <div class="filters-row">
+            <div class="search-box">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" placeholder="Search by Name or Account #" aria-label="Search by name or account number">
+            </div>
+            <select id="districtFilter" aria-label="Filter by district">
+              <option value="all">District: All</option>
+            </select>
+            <select id="membershipFilter" aria-label="Filter by membership">
+              <option value="all">Membership: All</option>
+              <option value="member">Member</option>
+              <option value="non-member">Non-Member</option>
+            </select>
+          </div>
+
+          <div class="table-shell">
+            <table class="details-table">
+              <thead>
+                <tr>
+                  <th>Account #</th>
+                  <th>Concessioner</th>
+                  <th>M/NM</th>
+                  <th>Account Balance</th>
+                  <th>Current</th>
+                  <th>1-30 Days</th>
+                  <th>31-60 Days</th>
+                  <th>61-90 Days</th>
+                  <th>Over 90 Days</th>
+                </tr>
+              </thead>
+              <tbody id="agingDetailsBody">
+                <!-- Data will be injected here -->
+              </tbody>
+            </table>
+          </div>
+
+          <div class="table-footer">
+            <p>Showing 1 to 20 of 20 records</p>
+            <div class="pagination">
+              <button type="button" aria-label="Previous page">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+              </button>
+              <button type="button" class="active" aria-current="page">1</button>
+              <button type="button" aria-label="Next page">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- SECURITY GUARD: Validate session before rendering page content -->
+  <script src="script/admin-security-guard.js"></script>
+  <script src="script/api-client.js"></script>
+  <script src="script/admin-topbar.js"></script>
+  <script src="script/aging-receivables.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
