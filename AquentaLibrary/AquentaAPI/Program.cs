@@ -7,13 +7,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options =>
 {
-        options.AddPolicy("AllowFrontend", policy =>
-        {
-            policy.SetIsOriginAllowed(origin => true)
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials();
-        });
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("https://delightful-glacier-0c6df2900.7.azurestaticapps.net")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
 });
 
 builder.Services.AddControllers();
@@ -22,9 +21,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
-
-// Enable CORS as the very first step in the pipeline
-app.UseCors("AllowFrontend");
 
 // SECURITY: Add cache control headers
 app.Use(async (context, next) =>
@@ -56,7 +52,9 @@ else
     app.UseExceptionHandler("/error");
 }
 
-app.UseHttpsRedirection();
+app.UseRouting();
+
+app.UseCors("AllowFrontend");
 
 app.UseAuthorization();
 
