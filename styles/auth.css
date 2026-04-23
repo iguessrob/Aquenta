@@ -1,0 +1,553 @@
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body.loading-active {
+    overflow: hidden;
+}
+
+.login-loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: #ffffff;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.login-loading-overlay.active {
+    display: flex;
+}
+
+.login-loading-content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.login-loading-logo {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 150px;
+    height: 150px;
+}
+
+.login-loading-logo .logo-wrapper {
+    width: 100%;
+    height: 100%;
+}
+
+.loader {
+    position: absolute;
+    left: 50%;
+    bottom: 15vh;
+    transform: translateX(-50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    --color: #0E58AD;
+    --animation: 2s ease-in-out infinite;
+}
+
+.loader .circle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 20px;
+    height: 20px;
+    border: solid 2px var(--color);
+    border-radius: 50%;
+    margin: 0 10px;
+    background-color: transparent;
+    animation: circle-keys var(--animation);
+}
+
+.loader .circle .dot {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--color);
+    animation: dot-keys var(--animation);
+}
+
+.loader .circle .outline {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    animation: outline-keys var(--animation);
+}
+
+.loader .circle:nth-child(2) {
+    animation-delay: 0.3s;
+}
+
+.loader .circle:nth-child(3) {
+    animation-delay: 0.6s;
+}
+
+.loader .circle:nth-child(4) {
+    animation-delay: 0.9s;
+}
+
+.loader .circle:nth-child(2) .dot {
+    animation-delay: 0.3s;
+}
+
+.loader .circle:nth-child(3) .dot {
+    animation-delay: 0.6s;
+}
+
+.loader .circle:nth-child(4) .dot {
+    animation-delay: 0.9s;
+}
+
+.loader .circle:nth-child(1) .outline {
+    animation-delay: 0.9s;
+}
+
+.loader .circle:nth-child(2) .outline {
+    animation-delay: 1.2s;
+}
+
+.loader .circle:nth-child(3) .outline {
+    animation-delay: 1.5s;
+}
+
+.loader .circle:nth-child(4) .outline {
+    animation-delay: 1.8s;
+}
+
+@keyframes circle-keys {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.5);
+        opacity: 0.5;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes dot-keys {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(0);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes outline-keys {
+    0% {
+        transform: scale(0);
+        outline: solid 20px var(--color);
+        outline-offset: 0;
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1);
+        outline: solid 0 transparent;
+        outline-offset: 20px;
+        opacity: 0;
+    }
+}
+
+/* Container */
+.container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    background-color: white;
+}
+
+/* Hero Panel - Left Side */
+.hero-panel {
+    display: none;
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    z-index: 20;
+}
+
+.hero-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 0;
+}
+
+.hero-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    color: white;
+    text-align: center;
+}
+
+.logo-container {
+    margin-bottom: 1.5rem;
+}
+
+.logo-wrapper {
+    position: relative;
+    width: 124px;
+    height: 124px;
+}
+
+.logo-circle {
+    position: absolute;
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.logo-icon {
+    position: absolute;
+    top: 19.73px;
+    left: 30px;
+    width: 63.466px;
+    height: 83.57px;
+}
+
+.logo-svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.brand-name {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 5rem;
+}
+
+.tagline {
+    font-size: 20px;
+    font-weight: 400;
+    max-width: 435px;
+    line-height: normal;
+}
+
+.hero-footer {
+    position: absolute;
+    bottom: 2rem;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 5rem;
+    color: white;
+    z-index: 10;
+}
+
+.copyright {
+    font-size: 14px;
+    font-weight: 700;
+    color: #bbb;
+}
+
+.privacy {
+    font-size: 14px;
+    font-weight: 500;
+    text-align: right;
+    margin-right: 2rem;
+}
+
+/* Login Panel - Right Side */
+.login-panel {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+    z-index: 10;
+}
+
+.home-button {
+    position: absolute;
+    top: 2.5rem;
+    right: 2.5rem;
+    padding: 0.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+
+.home-button:hover {
+    background-color: #f3f4f6;
+}
+
+.home-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    color: #000;
+}
+
+.login-content {
+    width: 100%;
+    max-width: 420px;
+}
+
+.login-header {
+    margin-bottom: 2.5rem;
+}
+
+.welcome-title {
+    font-size: 26px;
+    font-weight: 600;
+    color: black;
+    margin-bottom: 0.75rem;
+}
+
+.welcome-subtitle {
+    font-size: 16px;
+    font-weight: 400;
+    color: black;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-group {
+    position: relative;
+}
+
+.input-wrapper {
+    position: relative;
+    border: 2px solid #ccc;
+    border-radius: 0.5rem;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+    gap: 0.75rem;
+    transition: border-color 0.2s;
+}
+
+.input-wrapper:focus-within {
+    border-color: #0E58AD;
+}
+
+.credential-error {
+    display: flex;
+    padding: 0.75rem 1rem;
+    margin-top: 0;
+    margin-bottom: 0.2rem;
+    border: 1px solid #fecaca;
+    background-color: #fef2f2;
+    border-radius: 0.75rem;
+    color: #dc2626;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    align-items: center;
+    gap: 0.75rem;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: opacity 0.3s, max-height 0.3s;
+    pointer-events: none;
+}
+
+.credential-error.show {
+    opacity: 1;
+    max-height: 200px;
+    pointer-events: auto;
+}
+
+.error-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    color: #dc2626;
+    flex-shrink: 0;
+}
+
+#credentialErrorText {
+    flex: 1;
+}
+
+.input-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: #898989;
+    flex-shrink: 0;
+}
+
+.form-input {
+    flex: 1;
+    font-size: 16px;
+    color: #636363;
+    border: none;
+    outline: none;
+    background: transparent;
+}
+
+.form-input::placeholder {
+    color: #636363;
+}
+
+.toggle-password {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    color: #898989;
+    transition: color 0.2s;
+}
+
+.toggle-password:hover {
+    color: #636363;
+}
+
+.eye-icon {
+    width: 1rem;
+    height: 1rem;
+}
+
+.eye-icon.hidden {
+    display: none;
+}
+
+.forgot-password-wrapper {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.forgot-password {
+    font-size: 16px;
+    font-weight: 500;
+    color: #141414;
+    text-decoration: underline;
+    transition: color 0.2s;
+}
+
+.forgot-password:hover {
+    color: #0E58AD;
+}
+
+.login-button {
+    width: 100%;
+    height: 56px;
+    border-radius: 0.5rem;
+    font-size: 15px;
+    font-weight: 700;
+    color: white;
+    border: none;
+    cursor: pointer;
+    background: linear-gradient(180deg, #0E58AD 0%, #152E74 100%);
+    transition: opacity 0.2s;
+}
+
+.login-button:hover {
+    opacity: 0.9;
+}
+
+.support-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: #141414;
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.mobile-footer {
+    position: absolute;
+    bottom: 2rem;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 2rem;
+    color: black;
+}
+
+.mobile-copyright {
+    font-size: 14px;
+    font-weight: 700;
+    color: #999;
+}
+
+.mobile-privacy {
+    font-size: 14px;
+    font-weight: 500;
+    text-align: right;
+}
+
+/* Desktop Styles - 1024px and above */
+@media (min-width: 1024px) {
+    .container {
+        flex-direction: row;
+    }
+
+    .hero-panel {
+        display: flex;
+        width: 60%;
+    }
+
+    .hero-footer {
+        padding: 0 5rem;
+    }
+
+    .login-panel {
+        width: 40%;
+        margin-left: -2rem;
+        padding: 3rem 4rem;
+    }
+
+    .mobile-footer {
+        display: none;
+    }
+}

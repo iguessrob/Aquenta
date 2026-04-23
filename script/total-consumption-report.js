@@ -1,0 +1,171 @@
+(function () {
+  const sidebar = document.getElementById('sidebar');
+  const mobileOverlay = document.getElementById('mobileOverlay');
+  const menuBtn = document.getElementById('menuBtn');
+  const closeSidebarBtn = document.getElementById('closeSidebar');
+  const tableBody = document.getElementById('consumptionTableBody');
+
+  const MONTH_NAMES = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  const MOTHER_ACCOUNT_NUMBER = 'ACC-MOTHER-0001';
+  const MOTHER_METER_NUMBER = 'MTR-MOTHER-0001';
+
+  function getApi() {
+    if (!window.AquentaApiClient) {
+      throw new Error('API client is not loaded. Please include script/api-client.js');
+    }
+    return window.AquentaApiClient;
+  }
+
+  function openSidebar() {
+    if (!sidebar || !mobileOverlay) return;
+    sidebar.classList.add('open');
+    mobileOverlay.classList.add('active');
+  }
+
+  function closeSidebar() {
+    if (!sidebar || !mobileOverlay) return;
+    sidebar.classList.remove('open');
+    mobileOverlay.classList.remove('active');
+  }
+
+  function bindSidebar() {
+    if (menuBtn) menuBtn.addEventListener('click', openSidebar);
+    if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', closeSidebar);
+    if (mobileOverlay) mobileOverlay.addEventListener('click', closeSidebar);
+  }
+
+  function createEmptyMonthlyReport() {
+    return new Array(12).fill(null).map(() => ({
+      motherMeterConsumption: 0,
+      concessionerConsumption: 0,
+      waterLoss: 0,
+    }));
+  }
+
+  function normalizeReportRows(data) {
+    const monthlyReport = createEmptyMonthlyReport();
+
+    (data || []).forEach(item => {
+      const idx = (item.monthIndex ?? item.MonthIndex) - 1;
+      if (idx >= 0 && idx < 12) {
+        const motherMeterConsumption = Number(item.motherMeterConsumption ?? item.MotherMeterConsumption ?? 0);
+        const concessionerConsumption = Number(item.concessionerConsumption ?? item.ConcessionerConsumption ?? 0);
+        const waterLoss = Number(item.waterLoss ?? item.WaterLoss ?? (motherMeterConsumption - concessionerConsumption));
+
+        monthlyReport[idx] = {
+          motherMeterConsumption,
+          concessionerConsumption,
+          waterLoss,
+        };
+      }
+    });
+
+    return monthlyReport;
+  }
+
+  function isMotherMeterRecord(item) {
+    const accountNumber = String(item.accountNumber ?? item.AccountNumber ?? '').trim().toUpperCase();
+    const meterNumber = String(item.meterNumber ?? item.MeterNumber ?? '').trim().toUpperCase();
+
+    return accountNumber === MOTHER_ACCOUNT_NUMBER || meterNumber === MOTHER_METER_NUMBER;
+  }
+
+  function aggregateFromBillingSummary(rows, targetYear) {
+    const monthlyReport = createEmptyMonthlyReport();
+
+    (rows || []).forEach(item => {
+      const createdAtRaw = item.createdAt ?? item.CreatedAt;
+      const createdAt = createdAtRaw ? new Date(createdAtRaw) : null;
+      if (!createdAt || Number.isNaN(createdAt.getTime())) return;
+      if (createdAt.getFullYear() !== targetYear) return;
+
+      const monthIndex = createdAt.getMonth();
+      if (monthIndex < 0 || monthIndex > 11) return;
+
+      const consumption = Number(item.consumption ?? item.Consumption ?? 0);
+      if (!Number.isFinite(consumption)) return;
+
+      if (isMotherMeterRecord(item)) {
+        monthlyReport[monthIndex].motherMeterConsumption += consumption;
+      } else {
+        monthlyReport[monthIndex].concessionerConsumption += consumption;
+      }
+    });
+
+    monthlyReport.forEach(m => {
+      m.waterLoss = m.motherMeterConsumption - m.concessionerConsumption;
+    });
+
+    return monthlyReport;
+  }
+
+  async function getMonthlyWaterLossData(api, year) {
+    try {
+      const endpointRows = await api.get(`/report/consumption-water-loss/${year}`);
+      return normalizeReportRows(endpointRows);
+    } catch (endpointError) {
+      // Fallback path if the running API build does not yet include the new endpoint.
+      console.warn('Primary endpoint unavailable; falling back to billing-summary aggregation.', endpointError);
+      const billingRows = await api.get('/report/billing-summary');
+      return aggregateFromBillingSummary(billingRows, year);
+    }
+  }
+
+  async function loadConsumptionReport() {
+    try {
+      const api = getApi();
+      const currentYear = new Date().getFullYear();
+      const monthlyReport = await getMonthlyWaterLossData(api, currentYear);
+
+      if (!tableBody) return;
+      tableBody.innerHTML = '';
+
+      let annualMotherMeter = 0;
+      let annualConcessioners = 0;
+      let annualWaterLoss = 0;
+
+      MONTH_NAMES.forEach((name, i) => {
+        const monthData = monthlyReport[i];
+        annualMotherMeter += monthData.motherMeterConsumption;
+        annualConcessioners += monthData.concessionerConsumption;
+        annualWaterLoss += monthData.waterLoss;
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${name}</td>
+          <td class="text-right">${monthData.motherMeterConsumption.toLocaleString()}</td>
+          <td class="text-right">${monthData.concessionerConsumption.toLocaleString()}</td>
+          <td class="text-right">${monthData.waterLoss.toLocaleString()}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+
+      // Total Row
+      const totalRow = document.createElement('tr');
+      totalRow.className = 'total-row';
+      totalRow.innerHTML = `
+        <td>TOTAL ANNUAL</td>
+        <td class="text-right">${annualMotherMeter.toLocaleString()}</td>
+        <td class="text-right">${annualConcessioners.toLocaleString()}</td>
+        <td class="text-right">${annualWaterLoss.toLocaleString()}</td>
+      `;
+      tableBody.appendChild(totalRow);
+
+    } catch (error) {
+      console.error('Failed to load consumption report:', error);
+      if (tableBody) {
+        tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:red;">Error loading data.</td></tr>';
+      }
+    }
+  }
+
+  async function init() {
+    bindSidebar();
+    await loadConsumptionReport();
+  }
+
+  init();
+})();
