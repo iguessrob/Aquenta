@@ -138,7 +138,18 @@ function updateDashboardStats(billings, concessioner) {
     return s === 'unpaid' || s === 'overdue';
   });
 
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+
   const totalUnpaid = unpaidBills.reduce((sum, b) => {
+    return sum + parseFloat(b.billAmount || b.BillAmount || 0) + parseFloat(b.penalty || b.Penalty || 0);
+  }, 0);
+
+  const totalBalance = unpaidBills.filter(b => {
+    const billDate = new Date(b.periodEnd || b.PeriodEnd || b.createdAt || b.CreatedAt || 0);
+    return !(billDate.getMonth() === currentMonth && billDate.getFullYear() === currentYear);
+  }).reduce((sum, b) => {
     return sum + parseFloat(b.billAmount || b.BillAmount || 0) + parseFloat(b.penalty || b.Penalty || 0);
   }, 0);
 
@@ -148,7 +159,7 @@ function updateDashboardStats(billings, concessioner) {
     unpaidEl.textContent = '₱' + totalUnpaid.toLocaleString('en-PH', { minimumFractionDigits: 2 });
   }
   if (balanceEl) {
-    balanceEl.textContent = '₱' + totalUnpaid.toLocaleString('en-PH', { minimumFractionDigits: 2 });
+    balanceEl.textContent = '₱' + totalBalance.toLocaleString('en-PH', { minimumFractionDigits: 2 });
   }
 
   const unpaidCountEl = document.getElementById('statUnpaidCount');

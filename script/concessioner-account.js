@@ -64,11 +64,11 @@ function renderAccountForm(editing) {
   html += '<div class="form-group"><label class="form-label">Category</label><input class="form-input" value="' + escHtml(c._categoryName) + '" disabled style="background:#f8fafc; color:#64748b;"></div>';
   html += '<div class="form-group"><label class="form-label">Membership</label><input class="form-input" value="' + escHtml(c._membershipName) + '" disabled style="background:#f8fafc; color:#64748b;"></div>';
   html += '<div class="form-group"><label class="form-label">District</label><input class="form-input" value="' + escHtml(c._districtName) + '" disabled style="background:#f8fafc; color:#64748b;"></div>';
+  html += '<div class="form-group full"><label class="form-label">Address</label><input class="form-input" value="' + escHtml(address) + '" disabled style="background:#f8fafc; color:#64748b;"></div>';
   html += '<div class="form-group"><label class="form-label">Status</label><div style="padding-top:4px;"><span class="badge badge-' + status.toLowerCase() + '">' + escHtml(status) + '</span></div></div>';
 
   // Editable fields
   html += '<div class="form-group full" style="margin-top:12px; padding-top:16px; border-top:1px solid #e2e8f0; grid-column:1/-1;"><label class="form-label" style="font-size:14px; font-weight:600; color:#0f172a;">Contact Information</label></div>';
-  html += '<div class="form-group full"><label class="form-label">Address</label><input class="form-input" id="inputAddress" value="' + escHtml(address) + '" ' + disabledAttr + ' ' + (editing ? '' : inputBg) + '></div>';
   html += '<div class="form-group"><label class="form-label">Contact Number</label><input class="form-input" id="inputContact" value="' + escHtml(contact) + '" ' + disabledAttr + ' ' + (editing ? '' : inputBg) + '></div>';
   html += '<div class="form-group"><label class="form-label">Email Address</label><input class="form-input" id="inputEmail" type="email" value="' + escHtml(email) + '" ' + disabledAttr + ' ' + (editing ? '' : inputBg) + '></div>';
 
@@ -106,9 +106,9 @@ async function saveAccount(e) {
   var saveBtn = document.getElementById('saveBtn');
   if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Saving...'; }
 
-  var address = document.getElementById('inputAddress').value.trim();
   var contact = document.getElementById('inputContact').value.trim();
   var email = document.getElementById('inputEmail').value.trim();
+  var address = currentConcessioner.address || currentConcessioner.Address || '';
 
   var updated = {
     concessionerId: currentConcessioner.concessionerId || currentConcessioner.ConcessionerId,

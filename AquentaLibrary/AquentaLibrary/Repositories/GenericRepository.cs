@@ -12,11 +12,21 @@ namespace AquentaLibrary.Repositories
 {       
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
-        protected readonly IDbConnection dbConnection;
+        protected string ConnectionString => SqlConnectionResolver.GetWorkingConnectionString();
+
+        protected IDbConnection CreateConnection()
+        {
+            return new SqlConnection(ConnectionString);
+        }
+
+        /// <summary>
+        /// Gets a fresh connection. Note: For complex operations, use CreateConnection() with a 'using' block.
+        /// For simple Dapper calls, Dapper will automatically open and close this connection.
+        /// </summary>
+        protected IDbConnection dbConnection => CreateConnection();
 
         public GenericRepository()
         {
-            dbConnection = new SqlConnection(SqlConnectionResolver.GetWorkingConnectionString());
         }
 
         // READ
@@ -24,9 +34,9 @@ namespace AquentaLibrary.Repositories
         public IEnumerable<T> GetAll()
         {
             string tableName = GetTableName();
-
             string query = $"SELECT * FROM {tableName}";
 
+            using var dbConnection = CreateConnection();
             return dbConnection.Query<T>(query);
         }
 
@@ -42,6 +52,7 @@ namespace AquentaLibrary.Repositories
             var parameters = new DynamicParameters();
             parameters.Add(paramName, id);
 
+            using var dbConnection = CreateConnection();
             return dbConnection.QueryFirstOrDefault<T>(query, parameters);
         }
 
@@ -55,8 +66,8 @@ namespace AquentaLibrary.Repositories
 
             string query = $"INSERT INTO {tableName} ({columns}) VALUES ({values})";
 
-            int affectedRow = 0;
-            affectedRow = dbConnection.Execute(query, Entity);
+            using var dbConnection = CreateConnection();
+            int affectedRow = dbConnection.Execute(query, Entity);
             return affectedRow == 1;
         }
 
@@ -72,8 +83,8 @@ namespace AquentaLibrary.Repositories
 
             string query = $"UPDATE {tableName} SET {setClause} WHERE {keyColumn} = @{paramName}";
 
-            int affectedRow = 0;
-            affectedRow = dbConnection.Execute(query, Entity);
+            using var dbConnection = CreateConnection();
+            int affectedRow = dbConnection.Execute(query, Entity);
             return affectedRow == 1;
         }
 
@@ -103,8 +114,8 @@ namespace AquentaLibrary.Repositories
             var parameters = new DynamicParameters();
             parameters.Add(paramName, id);
 
-            int affectedRow = 0;
-            affectedRow = dbConnection.Execute(query, parameters);
+            using var dbConnection = CreateConnection();
+            int affectedRow = dbConnection.Execute(query, parameters);
             return affectedRow == 1;
         }
 
@@ -177,6 +188,7 @@ namespace AquentaLibrary.Repositories
 
             // The stored procedure returns a single row with one column (TotalActiveConcessioners).
             // QuerySingle<int> will map the first column of the single row to int.
+            using var dbConnection = CreateConnection();
             return dbConnection.QuerySingle<int>(
                 "dbo.SP_ShowTotalActiveConcessioners",
                 parameters,

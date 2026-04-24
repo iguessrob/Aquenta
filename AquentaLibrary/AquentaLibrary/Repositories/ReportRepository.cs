@@ -15,16 +15,15 @@ namespace AquentaLibrary.Repositories
     /// </summary>
     public class ReportRepository
     {
-        private readonly IDbConnection _dbConnection;
+        private string ConnectionString => SqlConnectionResolver.GetWorkingConnectionString();
+
+        private IDbConnection CreateConnection()
+        {
+            return new SqlConnection(ConnectionString);
+        }
 
         public ReportRepository()
         {
-            _dbConnection = new SqlConnection(SqlConnectionResolver.GetWorkingConnectionString());
-        }
-
-        public ReportRepository(IDbConnection connection)
-        {
-            _dbConnection = connection;
         }
 
         // ==================== AGGREGATE FUNCTIONS (DASHBOARD) ====================
@@ -34,10 +33,11 @@ namespace AquentaLibrary.Repositories
         /// </summary>
         public int GetTotalActiveConcessioners(string status = "Active")
         {
+            using var dbConnection = CreateConnection();
             var parameters = new DynamicParameters();
             parameters.Add("@Status", status, DbType.String);
 
-            return _dbConnection.QuerySingle<int>(
+            return dbConnection.QuerySingle<int>(
                 "SP_ShowTotalActiveConcessioners",
                 parameters,
                 commandType: CommandType.StoredProcedure);
@@ -48,11 +48,12 @@ namespace AquentaLibrary.Repositories
         /// </summary>
         public int GetMonthlyWaterConsumption(DateTime startDate, DateTime endDate)
         {
+            using var dbConnection = CreateConnection();
             var parameters = new DynamicParameters();
             parameters.Add("@StartDate", startDate, DbType.DateTime);
             parameters.Add("@EndDate", endDate, DbType.DateTime);
 
-            return _dbConnection.QuerySingle<int>(
+            return dbConnection.QuerySingle<int>(
                 "SP_GetMonthlyWaterConsumption",
                 parameters,
                 commandType: CommandType.StoredProcedure);
@@ -63,10 +64,11 @@ namespace AquentaLibrary.Repositories
         /// </summary>
         public decimal GetPendingCollections()
         {
+            using var dbConnection = CreateConnection();
             var parameters = new DynamicParameters();
             parameters.Add("@BillStatus", "Unpaid", DbType.String);
 
-            var result = _dbConnection.QuerySingleOrDefault<decimal?>(
+            var result = dbConnection.QuerySingleOrDefault<decimal?>(
                 "SP_ShowSumAmountofPendingConcessioner",
                 parameters,
                 commandType: CommandType.StoredProcedure);
@@ -79,7 +81,8 @@ namespace AquentaLibrary.Repositories
         /// </summary>
         public decimal GetLatestMonthPendingCollections()
         {
-            var result = _dbConnection.QuerySingleOrDefault<decimal?>(
+            using var dbConnection = CreateConnection();
+            var result = dbConnection.QuerySingleOrDefault<decimal?>(
                 "SP_GetLatestMonthPendingCollections",
                 commandType: CommandType.StoredProcedure);
 
@@ -91,7 +94,8 @@ namespace AquentaLibrary.Repositories
         /// </summary>
         public decimal GetTotalMonthlyAccountReceivable()
         {
-            var result = _dbConnection.QuerySingleOrDefault<decimal?>(
+            using var dbConnection = CreateConnection();
+            var result = dbConnection.QuerySingleOrDefault<decimal?>(
                 "SP_GetTotalMonthlyAccountReceivable",
                 commandType: CommandType.StoredProcedure);
 
@@ -103,7 +107,8 @@ namespace AquentaLibrary.Repositories
         /// </summary>
         public decimal GetTotalMonthlyCollection()
         {
-            var result = _dbConnection.QuerySingleOrDefault<decimal?>(
+            using var dbConnection = CreateConnection();
+            var result = dbConnection.QuerySingleOrDefault<decimal?>(
                 "SP_GetTotalMonthlyCollection",
                 commandType: CommandType.StoredProcedure);
 
@@ -115,7 +120,8 @@ namespace AquentaLibrary.Repositories
         /// </summary>
         public decimal GetTotalAnnualAccountReceivable()
         {
-            var result = _dbConnection.QuerySingleOrDefault<decimal?>(
+            using var dbConnection = CreateConnection();
+            var result = dbConnection.QuerySingleOrDefault<decimal?>(
                 "SP_GetTotalAnnualAccountReceivable",
                 commandType: CommandType.StoredProcedure);
 
@@ -127,7 +133,8 @@ namespace AquentaLibrary.Repositories
         /// </summary>
         public int GetTotalConcessioners()
         {
-            return _dbConnection.QuerySingle<int>(
+            using var dbConnection = CreateConnection();
+            return dbConnection.QuerySingle<int>(
                 "SP_GetTotalConcessioners",
                 commandType: CommandType.StoredProcedure);
         }
@@ -137,10 +144,11 @@ namespace AquentaLibrary.Repositories
         /// </summary>
         public dynamic GetTotalBillingByPeriod(int periodId)
         {
+            using var dbConnection = CreateConnection();
             var parameters = new DynamicParameters();
             parameters.Add("@PeriodID", periodId, DbType.Int32);
 
-            return _dbConnection.QuerySingleOrDefault<dynamic>(
+            return dbConnection.QuerySingleOrDefault<dynamic>(
                 "SP_GetTotalBillingByPeriod",
                 parameters,
                 commandType: CommandType.StoredProcedure);
@@ -151,11 +159,12 @@ namespace AquentaLibrary.Repositories
         /// </summary>
         public dynamic GetTotalPaymentCollections(DateTime startDate, DateTime endDate)
         {
+            using var dbConnection = CreateConnection();
             var parameters = new DynamicParameters();
             parameters.Add("@StartDate", startDate, DbType.DateTime);
             parameters.Add("@EndDate", endDate, DbType.DateTime);
 
-            return _dbConnection.QuerySingleOrDefault<dynamic>(
+            return dbConnection.QuerySingleOrDefault<dynamic>(
                 "SP_GetTotalPaymentCollections",
                 parameters,
                 commandType: CommandType.StoredProcedure);
@@ -166,7 +175,8 @@ namespace AquentaLibrary.Repositories
         /// </summary>
         public dynamic GetUnpaidBillsSummary()
         {
-            return _dbConnection.QuerySingleOrDefault<dynamic>(
+            using var dbConnection = CreateConnection();
+            return dbConnection.QuerySingleOrDefault<dynamic>(
                 "SP_GetUnpaidBillsSummary",
                 commandType: CommandType.StoredProcedure);
         }
@@ -176,7 +186,8 @@ namespace AquentaLibrary.Repositories
         /// </summary>
         public dynamic GetOverdueBillsSummary()
         {
-            return _dbConnection.QuerySingleOrDefault<dynamic>(
+            using var dbConnection = CreateConnection();
+            return dbConnection.QuerySingleOrDefault<dynamic>(
                 "SP_GetOverdueBillsSummary",
                 commandType: CommandType.StoredProcedure);
         }
@@ -188,6 +199,7 @@ namespace AquentaLibrary.Repositories
         /// </summary>
         public IEnumerable<dynamic> GetBillingProgressByZone(int periodId)
         {
+            using var dbConnection = CreateConnection();
             const string sql = @"
                 SELECT
                     d.DistrictID AS DistrictId,
@@ -206,7 +218,7 @@ namespace AquentaLibrary.Repositories
             var parameters = new DynamicParameters();
             parameters.Add("@PeriodID", periodId, DbType.Int32);
 
-            return _dbConnection.Query<dynamic>(sql, parameters);
+            return dbConnection.Query<dynamic>(sql, parameters);
         }
 
         /// <summary>
@@ -215,7 +227,8 @@ namespace AquentaLibrary.Repositories
         /// </summary>
         public IEnumerable<dynamic> GetArrearSummaryReport()
         {
-            return _dbConnection.Query<dynamic>(
+            using var dbConnection = CreateConnection();
+            return dbConnection.Query<dynamic>(
                 "SP_GetArrearSummaryReport",
                 commandType: CommandType.StoredProcedure);
         }
@@ -228,7 +241,8 @@ namespace AquentaLibrary.Repositories
         /// </summary>
         public IEnumerable<dynamic> GetDistrictConsumptionSummary()
         {
-            return _dbConnection.Query<dynamic>(
+            using var dbConnection = CreateConnection();
+            return dbConnection.Query<dynamic>(
                 "SP_GetDistrictConsumptionSummary",
                 commandType: CommandType.StoredProcedure);
         }
@@ -239,7 +253,8 @@ namespace AquentaLibrary.Repositories
         /// </summary>
         public IEnumerable<dynamic> GetBillingWithPaymentSummary()
         {
-            return _dbConnection.Query<dynamic>(
+            using var dbConnection = CreateConnection();
+            return dbConnection.Query<dynamic>(
                 "SP_GetBillingWithPaymentSummary",
                 commandType: CommandType.StoredProcedure);
         }
@@ -250,7 +265,8 @@ namespace AquentaLibrary.Repositories
         /// </summary>
         public IEnumerable<dynamic> GetActiveCustomerDebtAndUsageSummary()
         {
-            return _dbConnection.Query<dynamic>(
+            using var dbConnection = CreateConnection();
+            return dbConnection.Query<dynamic>(
                 "SP_GetActiveCustomerDebtAndUsageSummary",
                 commandType: CommandType.StoredProcedure);
         }
@@ -261,7 +277,8 @@ namespace AquentaLibrary.Repositories
         /// </summary>
         public IEnumerable<dynamic> GetDelinquentCustomersReport()
         {
-            return _dbConnection.Query<dynamic>(
+            using var dbConnection = CreateConnection();
+            return dbConnection.Query<dynamic>(
                 "SP_GetDelinquentCustomersReport",
                 commandType: CommandType.StoredProcedure);
         }
@@ -272,11 +289,12 @@ namespace AquentaLibrary.Repositories
         /// </summary>
         public IEnumerable<dynamic> GetCollectionPerformanceSummary(DateTime startDate, DateTime endDate)
         {
+            using var dbConnection = CreateConnection();
             var parameters = new DynamicParameters();
             parameters.Add("@StartDate", startDate, DbType.DateTime);
             parameters.Add("@EndDate", endDate, DbType.DateTime);
 
-            return _dbConnection.Query<dynamic>(
+            return dbConnection.Query<dynamic>(
                 "SP_GetCollectionPerformanceSummary",
                 parameters,
                 commandType: CommandType.StoredProcedure);
@@ -288,10 +306,11 @@ namespace AquentaLibrary.Repositories
         /// </summary>
         public IEnumerable<dynamic> GetMonthlyRevenueReport(int year)
         {
+            using var dbConnection = CreateConnection();
             var parameters = new DynamicParameters();
             parameters.Add("@Year", year, DbType.Int32);
 
-            return _dbConnection.Query<dynamic>(
+            return dbConnection.Query<dynamic>(
                 "SP_GetMonthlyRevenueReport",
                 parameters,
                 commandType: CommandType.StoredProcedure);
@@ -299,10 +318,11 @@ namespace AquentaLibrary.Repositories
 
         public IEnumerable<dynamic> GetMonthlyConsumptionReport(int year)
         {
+            using var dbConnection = CreateConnection();
             var parameters = new DynamicParameters();
             parameters.Add("@Year", year, DbType.Int32);
 
-            return _dbConnection.Query<dynamic>(
+            return dbConnection.Query<dynamic>(
                 "SP_GetMonthlyConsumptionReport",
                 parameters,
                 commandType: CommandType.StoredProcedure);
@@ -314,12 +334,13 @@ namespace AquentaLibrary.Repositories
         /// </summary>
         public IEnumerable<dynamic> GetMonthlyWaterLossReport(int year)
         {
+            using var dbConnection = CreateConnection();
             var parameters = new DynamicParameters();
             parameters.Add("@Year", year, DbType.Int32);
             parameters.Add("@MotherAccountNumber", "ACC-MOTHER-0001", DbType.String);
             parameters.Add("@MotherMeterNumber", "MTR-MOTHER-0001", DbType.String);
 
-            return _dbConnection.Query<dynamic>(
+            return dbConnection.Query<dynamic>(
                 "SP_GetMonthlyMotherMeterWaterLossReport",
                 parameters,
                 commandType: CommandType.StoredProcedure);
@@ -397,7 +418,8 @@ namespace AquentaLibrary.Repositories
         /// </summary>
         public dynamic GetLatestPeriodSelector()
         {
-            return _dbConnection.QuerySingleOrDefault<dynamic>(@"
+            using var dbConnection = CreateConnection();
+            return dbConnection.QuerySingleOrDefault<dynamic>(@"
                 SELECT TOP 1
                     p.PeriodID AS LatestPeriodID,
                     p.PeriodStart AS LatestPeriodStart,
@@ -415,10 +437,11 @@ namespace AquentaLibrary.Repositories
         /// </summary>
         public dynamic GetCustomerAccountDetailReport(int concessionerId)
         {
+            using var dbConnection = CreateConnection();
             var parameters = new DynamicParameters();
             parameters.Add("@ConcessionerID", concessionerId, DbType.Int32);
 
-            return _dbConnection.QuerySingleOrDefault<dynamic>(
+            return dbConnection.QuerySingleOrDefault<dynamic>(
                 "SP_GetCustomerAccountDetailReport",
                 parameters,
                 commandType: CommandType.StoredProcedure);
@@ -440,7 +463,8 @@ namespace AquentaLibrary.Repositories
 
                 // Use latest billing month present in billing records (Period-based),
                 // with fallback to CreatedAt month for older/incomplete datasets.
-                var latestPeriodConsumption = _dbConnection.QuerySingleOrDefault<int?>(@"
+                using var dbConnection = CreateConnection();
+                var latestPeriodConsumption = dbConnection.QuerySingleOrDefault<int?>(@"
                     SELECT ISNULL(SUM(CAST((b.CurrentReading - b.PrevReading) AS INT)), 0)
                     FROM tbl_Billing b
                     WHERE b.PeriodID = (
@@ -457,7 +481,7 @@ namespace AquentaLibrary.Repositories
                 }
                 else
                 {
-                    var latestBillingDate = _dbConnection.QueryFirstOrDefault<DateTime?>(
+                    var latestBillingDate = dbConnection.QueryFirstOrDefault<DateTime?>(
                         "SELECT MAX([CreatedAt]) FROM [tbl_Billing]");
 
                     if (!latestBillingDate.HasValue)

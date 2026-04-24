@@ -6,11 +6,22 @@ namespace AquentaLibrary.Repositories
 {
     public static class SqlConnectionResolver
     {
-        private static readonly Lazy<string> CachedConnectionString = new Lazy<string>(ResolveConnectionString);
+        private static string _cachedConnectionString;
+        private static readonly object _lock = new object();
 
         public static string GetWorkingConnectionString()
         {
-            return CachedConnectionString.Value;
+            if (_cachedConnectionString != null) return _cachedConnectionString;
+
+            lock (_lock)
+            {
+                if (_cachedConnectionString != null) return _cachedConnectionString;
+                
+                // We don't catch exceptions here, so if ResolveConnectionString fails,
+                // it throws and doesn't set _cachedConnectionString, allowing retry on next call.
+                _cachedConnectionString = ResolveConnectionString();
+                return _cachedConnectionString;
+            }
         }
 
         private static string ResolveConnectionString()
@@ -20,12 +31,12 @@ namespace AquentaLibrary.Repositories
             var fromEnv = Environment.GetEnvironmentVariable("AQUENTA_SQL_CONNECTION");
             if (!string.IsNullOrWhiteSpace(fromEnv))
             {
-                candidates.Add(fromEnv);
+                candidates.Add(EnsureResiliency(fromEnv));
             }
 
-            candidates.Add(@"Server=(localdb)\MSSQLLocalDB;Database=AquentaDB;Trusted_Connection=True;MultipleActiveResultSets=True;TrustServerCertificate=True;");
-            candidates.Add(@"Server=.\SQLEXPRESS;Database=AquentaDB;Trusted_Connection=True;MultipleActiveResultSets=True;TrustServerCertificate=True;");
-            candidates.Add(@"Server=localhost\SQLEXPRESS;Database=AquentaDB;Trusted_Connection=True;MultipleActiveResultSets=True;TrustServerCertificate=True;");
+            candidates.Add(EnsureResiliency(@"Server=(localdb)\MSSQLLocalDB;Database=AquentaDB;Trusted_Connection=True;MultipleActiveResultSets=True;TrustServerCertificate=True;"));
+            candidates.Add(EnsureResiliency(@"Server=.\SQLEXPRESS;Database=AquentaDB;Trusted_Connection=True;MultipleActiveResultSets=True;TrustServerCertificate=True;"));
+            candidates.Add(EnsureResiliency(@"Server=localhost\SQLEXPRESS;Database=AquentaDB;Trusted_Connection=True;MultipleActiveResultSets=True;TrustServerCertificate=True;"));
 
             Exception lastError = null;
 
@@ -51,6 +62,27 @@ namespace AquentaLibrary.Repositories
             throw new InvalidOperationException(
                 $"Unable to connect to AquentaDB. Set AQUENTA_SQL_CONNECTION to a valid SQL Server connection string or create AquentaDB in LocalDB/SQLEXPRESS{detailMessage}",
                 lastError);
+        }
+
+        private static string EnsureResiliency(string connectionString)
+        {
+            try
+            {
+                var builder = new SqlConnectionStringBuilder(connectionString);
+                
+                // Azure SQL best practice: Enable connection resiliency
+                // Connect Retry Count: Number of reconnections attempted after a transient failure (default 1)
+                // Connect Retry Interval: Delay between reconnection attempts (default 10s)
+                
+                if (builder.ConnectRetryCount <= 1) builder.ConnectRetryCount = 3;
+                if (builder.ConnectRetryInterval <= 0) builder.ConnectRetryInterval = 10;
+                
+                return builder.ConnectionString;
+            }
+            catch
+            {
+                return connectionString; // Return original if builder fails
+            }
         }
     }
 }
