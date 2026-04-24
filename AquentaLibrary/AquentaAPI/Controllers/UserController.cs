@@ -92,7 +92,7 @@ namespace AquentaAPI.Controllers
         }
 
         [HttpPut]
-        public ActionResult<bool> UpdateUser([FromBody] UserModel user) 
+        public ActionResult<bool> UpdateUser([FromBody] UserModel user)
         {
             if (user == null) return BadRequest("User data is required.");
             var result = userServices.Update(user);

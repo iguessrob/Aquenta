@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+This file is used by the publish/package process of your Web project. You can customize the behavior of this process
+by editing this MSBuild file. In order to learn more about this please visit https://go.microsoft.com/fwlink/?LinkID=208121. 
+-->
+<Project>
+  <PropertyGroup>
+    <TimeStampOfAssociatedLegacyPublishXmlFile />
+    <History>False|2026-04-23T17:26:52.1879332Z||;False|2026-04-24T01:24:09.2383123+08:00||;False|2026-04-24T01:22:45.7658722+08:00||;False|2026-04-24T01:21:05.8433456+08:00||;</History>
+    <LastFailureDetails />
+  </PropertyGroup>
+  <ItemGroup>
+    <AzureDBConnectionStrings Include="Data Source=aquentadb.database.windows.net,1433;Initial Catalog=AquentaDB;Authentication=ActiveDirectoryManagedIdentity" />
+    <AzureDBConnectionStrings Include="REDACTED" />
+    <AzureDBConnectionStrings Include="Server=tcp:aquentadb.database.windows.net;Authentication=Active Directory Default;Initial Catalog=AquentaDB" />
+  </ItemGroup>
+</Project>

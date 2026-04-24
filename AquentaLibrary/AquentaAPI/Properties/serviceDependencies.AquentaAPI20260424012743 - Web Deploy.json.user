@@ -1,0 +1,25 @@
+{
+  "dependencies": {
+    "mssql2": {
+      "restored": true,
+      "restoreTime": "2026-04-23T22:27:13.5655616Z"
+    }
+  },
+  "parameters": {
+    "mssql2.serviceConnectorResourceGroupName": {
+      "Name": "mssql2.serviceConnectorResourceGroupName",
+      "Type": "resourceGroup",
+      "Value": "aquenta_group"
+    },
+    "mssql2.resourceGroupName": {
+      "Name": "mssql2.resourceGroupName",
+      "Type": "resourceGroup",
+      "Value": "aquenta_group"
+    },
+    "mssql2.subscriptionId": {
+      "Name": "mssql2.subscriptionId",
+      "Type": "subscription",
+      "Value": "cae9769e-e21b-4aa9-857a-a702462af961"
+    }
+  }
+}
