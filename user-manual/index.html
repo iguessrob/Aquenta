@@ -5,249 +5,525 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Aquenta User Manual</title>
   <link rel="stylesheet" href="manual.css" />
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 <body id="top">
   <a class="skip-link" href="#manual-book">Skip to manual pages</a>
 
+  <header class="manual-toolbar" aria-label="Manual actions">
+    <button id="print-manual-btn" class="print-btn" type="button">Print User Manual</button>
+    <p>Use this action to print the complete Aquenta user manual.</p>
+  </header>
+
   <main id="manual-book" class="book" aria-label="Aquenta printed style user manual">
     <section id="cover" class="page cover-page" aria-labelledby="cover-title">
-      <div class="cover-layer"></div>
-      <div class="cover-content">
-        <p class="manual-type">Official User Manual</p>
-        <h1 id="cover-title">Aquenta Water Billing System</h1>
-        <p class="cover-subtitle">Printed-style reference guide for daily operations</p>
-        <img src="../assets/images/Aquenta_logo.png" alt="Aquenta logo" class="cover-logo" />
-        <dl class="meta">
-          <dt>Audience</dt>
-          <dd>Administrators, billing staff, concessioners</dd>
-          <dt>Version Date</dt>
-          <dd>April 24, 2026</dd>
-          <dt>Scope</dt>
-          <dd>Portal tasks only (login, records, billing, payments, reports, troubleshooting)</dd>
-        </dl>
+      <div class="cover-canvas" aria-hidden="true">
+        <div class="cover-blob cover-blob-left"></div>
+        <div class="cover-blob cover-blob-right"></div>
+        <div class="cover-drift"></div>
       </div>
-      <footer class="page-footer"><span>Front Cover</span></footer>
+
+      <div class="cover-stack">
+        <img class="cover-logo-image" src="../assets/images/Aquenta_logo-2.png" alt="Aquenta logo" />
+        <div class="cover-gap" aria-hidden="true"></div>
+        <h1 id="cover-title">Aquenta: A Centralized Water Utility Consumption and Billing Management System</h1>
+
+        <p class="cover-lead">User Manual</p>
+
+        <p class="cover-description">
+          Complete guide for administrators, billing officers, and concessionaires to manage customer records, meter readings,
+          billing, payments, reports, and account visibility.
+        </p>
+
+        <div class="cover-content-row">
+          <div class="cover-info-card" aria-label="Cover details">
+            <div>
+              <span class="cover-info-label">Prepared for</span>
+              <strong>Admin Staff and Customers</strong>
+            </div>
+            <div>
+              <span class="cover-info-label">Prepared by</span>
+              <strong>
+                Glenn Allen C. Agno<br />
+                Lexter M. Limbaga<br />
+                Rob Kjelle Gabrielle L. Mabilangan<br />
+                Angeline Ricajoy M. Manalo
+              </strong>
+            </div>
+            <div>
+              <span class="cover-info-label">Version Date</span>
+              <strong>April 2026</strong>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
     <section id="contents" class="page" aria-labelledby="contents-heading">
       <header class="page-header">
         <h2 id="contents-heading">Table of Contents</h2>
-        <p>Use the links to jump directly to the page section you need.</p>
       </header>
       <ol class="contents-list">
-        <li><a href="#page-intro">Purpose, Audience, and Basic Use</a><span>Page 1</span></li>
-        <li><a href="#page-login-customer">Tasks: Sign In and Add Customer</a><span>Page 2</span></li>
-        <li><a href="#page-billing-payment">Tasks: Generate Bill and Record Payment</a><span>Page 3</span></li>
-        <li><a href="#page-reports-visuals">Task: Reports and Screenshot Snippets</a><span>Page 4</span></li>
-        <li><a href="#page-support">Troubleshooting, FAQ, and Consistency Rules</a><span>Page 5</span></li>
+        <li><a href="#section-a">A. Introduction</a><span>Page 1</span></li>
+        <li><a href="#section-b">B. System Access</a><span>Page 2</span></li>
+        <li><a href="#section-c">C. User Authentication</a><span>Page 3</span></li>
+        <li><a href="#section-d">D. Dashboard Overview</a><span>Page 4</span></li>
+        <li><a href="#section-e">E. Module-by-Module Guide</a><span>Page 5</span></li>
+        <li><a href="#section-f">F. User Workflows</a><span>Page 7</span></li>
+        <li><a href="#section-g">G. Screenshots and Visuals</a><span>Page 8</span></li>
+        <li><a href="#section-h">H. Troubleshooting</a><span>Page 9</span></li>
+        <li><a href="#section-i">I. Logout Process</a><span>Page 10</span></li>
       </ol>
-      <aside class="note note-info" role="note">
-        <strong>Navigation tip:</strong> Each page includes a top link and page number for quick movement.
-      </aside>
       <footer class="page-footer"><span>Contents</span><span>i</span></footer>
     </section>
 
-    <section id="page-intro" class="page" aria-labelledby="intro-heading">
+    <section id="section-a" class="page spread-left" aria-labelledby="section-a-heading">
       <header class="page-header">
-        <h2 id="intro-heading">Purpose, Audience, and Basic Use</h2>
+        <h2 id="section-a-heading">A. Introduction</h2>
       </header>
 
-      <h3>Purpose and Scope</h3>
+      <h3>System Name</h3>
+      <p><strong>Aquenta: A Centralized Water Utility Consumption and Billing Management System</strong></p>
+
+      <h3>Purpose of the System</h3>
       <p>
-        This manual explains how to complete common tasks in the Aquenta Water Billing System.
-        It focuses on user actions, not software development.
+        Aquenta is a centralized web-based system designed to streamline and modernize the water utility operations of a community-based cooperative. It integrates essential processes—from meter reading and consumption computation to billing, payment tracking, and report generation—into a single, unified platform.
+</p>
+<p>
+The system is specifically developed to eliminate the inefficiencies of manual and spreadsheet-based workflows by providing automated and accurate processing of water consumption data. Through Aquenta, administrators can efficiently record meter readings, compute usage based on predefined tariff structures, generate billing statements, and monitor payment transactions and outstanding balances in real time.
+</p>
+<p>
+In addition, Aquenta enhances operational transparency and data consistency by maintaining a centralized database of customer records, billing histories, and financial reports. It also supports decision-making by enabling the generation of comprehensive reports such as consumption summaries, arrears tracking, and aging receivables.
+</p>
+<p>
+For customers, the system provides a dedicated portal that allows them to conveniently access their account information, review billing and payment history, and monitor their current balances without the need to visit the cooperative office.
+</p>
+<p>
+Overall, Aquenta aims to improve efficiency, accuracy, transparency, and service delivery within the cooperative’s water utility management operations.
       </p>
+
+      <h3>Target Users</h3>
       <ul>
-        <li>Covers: login, customer records, billing, payments, and reports.</li>
-        <li>Does not cover: database scripts, server setup, and source code edits.</li>
+        <li><strong>Admin and Staff (Billing Officers):</strong> Operate daily transactions, maintain records, process bills and payments, and generate reports.</li>
+        <li><strong>Customers (Concessionaires):</strong> Review account details, billing history, payment history, and outstanding balances.</li>
       </ul>
-
-      <h3>Clear Terms</h3>
-      <dl>
-        <dt>Concessioner</dt>
-        <dd>The account holder connected to a water meter and billing record.</dd>
-        <dt>Arrears</dt>
-        <dd>Past due balance from previous periods.</dd>
-        <dt>Tariff</dt>
-        <dd>The approved rate used to calculate charges.</dd>
-      </dl>
-
-      <aside class="note note-tip" role="note">
-        <strong>Consistency rule:</strong> This manual always uses the same action words: <em>Select</em>,
-        <em>Type</em>, and <em>Save</em>.
-      </aside>
-      <p class="top-link"><a href="#contents">Back to contents</a></p>
+      
       <footer class="page-footer"><span>Aquenta User Manual</span><span>1</span></footer>
     </section>
 
-    <section id="page-login-customer" class="page" aria-labelledby="login-customer-heading">
+    <section id="section-b" class="page spread-right" aria-labelledby="section-b-heading">
       <header class="page-header">
-        <h2 id="login-customer-heading">Tasks: Sign In and Add Customer</h2>
+        <h2 id="section-b-heading">B. System Access</h2>
       </header>
 
-      <article>
-        <h3>Task 1: Sign In Safely</h3>
-        <ol>
-          <li>Open the Aquenta login page.</li>
-          <li>Type your username in the <strong>Username</strong> field.</li>
-          <li>Type your password in the <strong>Password</strong> field.</li>
-          <li>Select <strong>Sign In</strong>.</li>
-          <li>Confirm that the dashboard opens and your name appears in the header.</li>
-        </ol>
-        <p class="result"><strong>Expected result:</strong> Dashboard modules are available.</p>
-      </article>
+      <h3>Access via URL</h3>
+      <ol>
+        <li>Open a web browser and type the official Aquenta URL: www.aquenta-coop.com.</li>
+        <li>Wait for the landing page to load completely.</li>
+        <li>Open the login page by cllcking the login or get started button from the landing page.</li>
+      </ol>
 
-      <article>
-        <h3>Task 2: Add a Customer Record</h3>
-        <ol>
-          <li>Select <strong>Customer Records</strong> from the dashboard.</li>
-          <li>Select <strong>Add Concessioner</strong>.</li>
-          <li>Type complete customer details (name, address, meter information).</li>
-          <li>Review entries for spelling and number accuracy.</li>
-          <li>Select <strong>Save</strong>.</li>
-        </ol>
-        <p class="result"><strong>Expected result:</strong> The new customer appears in the records list.</p>
-      </article>
+      <h3>Supported Devices</h3>
+      <ul>
+        <li>Desktop computers (recommended for full admin operations)</li>
+        <li>Laptops</li>
+        <li>Mobile devices (for quick portal access and account checking)</li>
+      </ul>
 
-      <p class="top-link"><a href="#contents">Back to contents</a></p>
+      <h3>Landing Page Walkthrough</h3>
+      <ol>
+        <li>Review quick links and announcements, if present.</li>
+        <li>Select <strong>Admin</strong> to open staff login, or <strong>Concessionaire</strong> to open customer login.</li>
+        <li>Proceed to authentication to continue.</li>
+      </ol>
+
       <footer class="page-footer"><span>Aquenta User Manual</span><span>2</span></footer>
     </section>
 
-    <section id="page-billing-payment" class="page" aria-labelledby="billing-payment-heading">
+    <section id="section-c" class="page spread-left" aria-labelledby="section-c-heading">
       <header class="page-header">
-        <h2 id="billing-payment-heading">Tasks: Generate Bill and Record Payment</h2>
+        <h2 id="section-c-heading">C. User Authentication</h2>
       </header>
 
-      <article>
-        <h3>Task 3: Generate a Bill</h3>
-        <ol>
-          <li>Select <strong>Billing</strong> from the menu.</li>
-          <li>Search and select the customer account.</li>
-          <li>Type latest meter reading and billing period.</li>
-          <li>Verify tariff and prior balance.</li>
-          <li>Select <strong>Generate Bill</strong>.</li>
-          <li>Review invoice summary before finalizing.</li>
-        </ol>
-        <aside class="note note-warning" role="note">
-          <strong>Warning:</strong> Do not generate duplicate bills for the same period.
-        </aside>
-      </article>
+      <h4>Admin Login Process</h4>
+      <ol>
+        <li>Enter username and password on the admin login screen.</li>
+        <li>Select <strong>Sign In</strong>.</li>
+        <li>On success, the admin dashboard opens with module navigation.</li>
+      </ol>
 
-      <article>
-        <h3>Task 4: Record a Payment</h3>
-        <ol>
-          <li>Select <strong>Payment</strong>.</li>
-          <li>Find the customer using account number or name.</li>
-          <li>Select the correct invoice.</li>
-          <li>Type payment amount, date, and reference.</li>
-          <li>Select <strong>Save</strong>.</li>
-          <li>Print or download receipt if required.</li>
-        </ol>
-        <p class="result"><strong>Expected result:</strong> Balance and payment history are updated.</p>
-      </article>
+      <h4>Customer Login Process</h4>
+      <ol>
+        <li>Open the customer login page from the landing page.</li>
+        <li>Enter your customer credentials.</li>
+        <li>Select <strong>Sign In</strong> to access the customer dashboard.</li>
+      </ol>
 
-      <p class="top-link"><a href="#contents">Back to contents</a></p>
+      <h4>Input Validation and Error Handling</h4>
+      <ul>
+        <li>Required fields must not be empty.</li>
+        <li>Invalid credentials show an error and require correction before access is granted.</li>
+        <li>Users should confirm keyboard case and spacing when login fails.</li>
+      </ul>
+      
       <footer class="page-footer"><span>Aquenta User Manual</span><span>3</span></footer>
     </section>
 
-    <section id="page-reports-visuals" class="page" aria-labelledby="reports-visuals-heading">
+    <section id="section-d" class="page spread-right" aria-labelledby="section-d-heading">
       <header class="page-header">
-        <h2 id="reports-visuals-heading">Task: Reports and Screenshot Snippets</h2>
+        <h2 id="section-d-heading">D. Dashboard Overview</h2>
       </header>
 
-      <article>
-        <h3>Task 5: Run a Report</h3>
-        <ol>
-          <li>Select <strong>Reports</strong>.</li>
-          <li>Choose the report type (example: Total Consumption, Arrear Summary).</li>
-          <li>Set date range and filters.</li>
-          <li>Select <strong>Generate</strong>.</li>
-          <li>Review totals and export if needed.</li>
-        </ol>
-        <p class="result"><strong>Expected result:</strong> The selected report displays correctly.</p>
-      </article>
+      <h3>Admin Dashboard Overview</h3>
+      <p>
+        The admin dashboard is the control center for customer management, tariff setup, billing, payment encoding, and report generation.
+      </p>
 
-      <h3>Screenshot Snippets of the Site</h3>
-      <p>These are live preview snippets of real Aquenta pages.</p>
-      <div class="snippet-grid" aria-label="Website screenshot snippets">
-        <figure class="snippet-card">
-          <figcaption>Login Page Snippet</figcaption>
-          <div class="snippet-frame">
-            <iframe src="../auth.html" title="Auth page snippet" loading="lazy"></iframe>
-          </div>
-        </figure>
-        <figure class="snippet-card">
-          <figcaption>Dashboard Snippet</figcaption>
-          <div class="snippet-frame">
-            <iframe src="../admin-dashboard.html" title="Admin dashboard snippet" loading="lazy"></iframe>
-          </div>
-        </figure>
-        <figure class="snippet-card">
-          <figcaption>Billing Snippet</figcaption>
-          <div class="snippet-frame">
-            <iframe src="../billing.html" title="Billing page snippet" loading="lazy"></iframe>
-          </div>
-        </figure>
-        <figure class="snippet-card">
-          <figcaption>Reports Snippet</figcaption>
-          <div class="snippet-frame">
-            <iframe src="../reports.html" title="Reports page snippet" loading="lazy"></iframe>
-          </div>
-        </figure>
-      </div>
+      <h3>Customer Portal Overview</h3>
+      <p>
+        The customer portal provides account visibility including outstanding balances, billing history, payment records, and customer profile details.
+      </p>
 
-      <p class="top-link"><a href="#contents">Back to contents</a></p>
+      <h3>Navigation Menu Explanation</h3>
+      <ul>
+        <li><strong>Customer Records:</strong> Add, edit, and view customer records.</li>
+        <li><strong>Invoice:</strong> Review and print detailed charges, including consumption and total amount due.</li>
+        <li><strong>Tariffs:</strong> Create, update, and remove rate entries.</li>
+        <li><strong>Billing:</strong> Input meter readings and generate bills.</li>
+        <li><strong>Payments:</strong> Record customer payments and update balances.</li>
+        <li><strong>Reports:</strong> View and print operational and financial reports.</li>
+      </ul>
+
       <footer class="page-footer"><span>Aquenta User Manual</span><span>4</span></footer>
     </section>
 
-    <section id="page-support" class="page" aria-labelledby="support-heading">
+    <section id="section-e" class="page spread-left" aria-labelledby="section-e-heading">
       <header class="page-header">
-        <h2 id="support-heading">Troubleshooting, FAQ, and Consistency Rules</h2>
+        <h2 id="section-e-heading">E. Module-by-Module Guide</h2>
+      </header>
+
+      <article>
+        <h3>1. Customer Management Module</h3>
+        <h4>Add Customer</h4>
+        <ol>
+          <li>Open <strong>Customer Records</strong> and select <strong>Add Concessioner</strong>.</li>
+          <li>Enter complete details: account name, address, meter details, and contact information.</li>
+          <li>Select <strong>Add Concessioner</strong>.</li>
+        </ol>
+        <p class="result"><strong>Expected output:</strong> New customer record appears in the list and is available for billing.</p>
+
+        <h4>Edit Customer</h4>
+        <ol>
+          <li>Search for the customer in records.</li>
+          <li>Select <strong>Edit</strong> and update needed fields.</li>
+          <li>Select <strong>Save Changes</strong>.</li>
+        </ol>
+        <p class="result"><strong>Expected output:</strong> Updated customer information is saved and reflected in account views.</p>
+
+        <h4>View Records</h4>
+        <ol>
+          <li>Open <strong>Customer Records</strong>.</li>
+          <li>Use filters or search by name/account number.</li>
+          <li>Select the record for detailed view.</li>
+        </ol>
+        <p class="result"><strong>Expected output:</strong> Selected customer details and related records are displayed.</p>
+      </article>
+
+      <article>
+        <h3>2. Tariffs Module</h3>
+        <h4>Create Tariff</h4>
+        <ol>
+          <li>Open <strong>Tariffs</strong> and select <strong>Add Rate</strong>.</li>
+          <li>Enter cubic meter rate and amount details.</li>
+          <li>Select <strong>Add Rate</strong>.</li>
+        </ol>
+        <p class="result"><strong>Expected output:</strong> New tariff is available for billing computations.</p>
+      </article>
+      
+      <footer class="page-footer"><span>Aquenta User Manual</span><span>5</span></footer>
+    </section>
+
+    <section id="section-e2" class="page spread-right" aria-labelledby="section-e-continued-heading">
+
+        <h2 id="section-e-continued-heading"></h2>
+
+      <article>
+        <h4>Update Tariff</h4>
+        <ol>
+          <li>Select an existing tariff from the list.</li>
+          <li>Edit the rate and relevant information.</li>
+          <li>Select <strong>Save Changes</strong>.</li>
+        </ol>
+        <p class="result"><strong>Expected output:</strong> Modified tariff is applied for future billing runs.</p>
+
+        <h4>Delete Tariff</h4>
+        <ol>
+          <li>Locate the tariff entry.</li>
+          <li>Select <strong>Delete</strong> and confirm the prompt.</li>
+        </ol>
+        <p class="result"><strong>Expected output:</strong> Tariff is removed from active listing.</p>
+
+        <h3>3. Billing Module</h3>
+        <h4>Input Meter Readings</h4>
+        <ol>
+          <li>Open <strong>Billing</strong> and select the customer account.</li>
+          <li>Choose the desired billing period.</li>
+          <li>Enter current meter reading.</li>
+          <li>Validate previous reading reference before saving.</li>
+        </ol>
+        <h4>Automatic Consumption Computation</h4>
+        <ol>
+          <li>After saving reading, the system computes consumption based on meter difference.</li>
+          <li>The selected tariff is applied automatically.</li>
+        </ol>
+      
+      <footer class="page-footer"><span>Aquenta User Manual</span><span>6</span></footer>
+    </section>
+
+    <section id="section-f" class="page spread-left" aria-labelledby="section-f-heading">
+      <header class="page-header">
+        <h2 id="section-f-heading">F. User Workflows</h2>
+      </header>
+
+      <h3>Admin Workflow</h3>
+      <ol>
+        <li>Access the system URL.</li>
+        <li>Login as Admin.</li>
+        <li>Navigate through dashboard modules.</li>
+        <li>Add and manage customer records.</li>
+        <li>Set or update tariffs.</li>
+        <li>Input meter readings.</li>
+        <li>Generate monthly bills.</li>
+        <li>Record payments.</li>
+        <li>Generate required reports.</li>
+        <li>Logout securely.</li>
+      </ol>
+
+      <h3>Customer (User) Workflow</h3>
+      <ol>
+        <li>Access the system URL.</li>
+        <li>Navigate the landing page.</li>
+        <li>Login to Customer Portal.</li>
+        <li>Check outstanding balances.</li>
+        <li>Check billing history.</li>
+        <li>View payment records.</li>
+        <li>View account details.</li>
+        <li>Logout securely.</li>
+      </ol>
+
+      <footer class="page-footer"><span>Aquenta User Manual</span><span>7</span></footer>
+    </section>
+
+    <section id="section-g" class="page spread-right" aria-labelledby="section-g-heading">
+      <header class="page-header">
+        <h2 id="section-g-heading">G. Screenshots and Visuals</h2>
+      </header>
+
+      <p>The following visuals are real generated snapshots from existing Aquenta pages:</p>
+      <div class="snippet-grid" aria-label="Aquenta system visuals">
+        <div class="visual-column visual-column-left">
+          <figure class="snippet-card">
+            <figcaption>Login Page</figcaption>
+            <div class="snippet-frame">
+              <img class="snippet-image" alt="Login page screenshot" src="../assets/images/manual-login-screenshot.png" />
+            </div>
+          </figure>
+          <figure class="snippet-card">
+            <figcaption>Customer Records</figcaption>
+            <div class="snippet-frame">
+              <img class="snippet-image" alt="Customer records screenshot" src="../assets/images/manual-customer-records-screenshot.png" />
+            </div>
+          </figure>
+          <figure class="snippet-card">
+            <figcaption>Billing Page</figcaption>
+            <div class="snippet-frame">
+              <img class="snippet-image" alt="Billing page screenshot" src="../assets/images/manual-billing-screenshot.png" />
+            </div>
+          </figure>
+        </div>
+        <div class="visual-column visual-column-right">
+          <figure class="snippet-card">
+            <figcaption>Admin Dashboard</figcaption>
+            <div class="snippet-frame">
+              <img class="snippet-image" alt="Admin dashboard screenshot" src="../assets/images/manual-admin-dashboard-screenshot.png" />
+            </div>
+          </figure>
+          <figure class="snippet-card snippet-card-wide">
+            <figcaption>Reports Page</figcaption>
+            <div class="snippet-frame">
+              <img class="snippet-image" alt="Reports page screenshot" src="../assets/images/manual-reports-screenshot.png" />
+            </div>
+          </figure>
+        </div>
+      </div>
+
+      
+      <footer class="page-footer"><span>Aquenta User Manual</span><span>8</span></footer>
+    </section>
+
+    <section id="section-h" class="page spread-left" aria-labelledby="section-h-heading">
+      <header class="page-header">
+        <h2 id="section-h-heading">H. Troubleshooting</h2>
       </header>
 
       <table>
-        <caption>Common issues and direct solutions</caption>
+        <caption>Common issues and clear solutions</caption>
         <thead>
           <tr>
             <th scope="col">Issue</th>
             <th scope="col">Possible Cause</th>
-            <th scope="col">Action</th>
+            <th scope="col">Solution</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>Cannot sign in</td>
-            <td>Wrong credentials or expired password</td>
-            <td>Type credentials again carefully. If it fails, request password reset.</td>
+            <td>Incorrect meter readings</td>
+            <td>Typing error, wrong meter selected, or skipped validation.</td>
+            <td>Re-open billing entry, verify previous and current reading values, then correct and regenerate bill.</td>
           </tr>
           <tr>
-            <td>Customer not visible in billing</td>
-            <td>Record not saved or active filter is hiding it</td>
-            <td>Confirm customer exists in records and clear filters.</td>
+            <td>Missing customer data</td>
+            <td>Record was not saved completely or filtered out in listing views.</td>
+            <td>Check customer records, clear active filters, and update or re-save incomplete profile fields.</td>
           </tr>
           <tr>
-            <td>Bill total is incorrect</td>
-            <td>Wrong reading, tariff, or billing period</td>
-            <td>Check values then generate the bill again.</td>
-          </tr>
-          <tr>
-            <td>Payment did not reduce balance</td>
-            <td>Payment posted to wrong invoice</td>
-            <td>Open payment history, verify invoice ID, and correct entry.</td>
+            <td>Login errors</td>
+            <td>Invalid credentials, incorrect role portal, or input formatting mistakes.</td>
+            <td>Confirm role-specific login page, re-enter username/password carefully, and contact admin for credential reset if needed.</td>
           </tr>
         </tbody>
       </table>
 
-      <h3>Consistency Checklist</h3>
-      <ul>
-        <li>Use exact menu names as shown on screen.</li>
-        <li>Follow task steps in order.</li>
-        <li>Document page name, account ID, and error message when asking support.</li>
-      </ul>
+      <aside class="note note-tip" role="note">
+        <strong>Support best practice:</strong> Capture the exact page, account number, date/time, and displayed error message before escalation.
+      </aside>
+
+      
+      <footer class="page-footer"><span>Aquenta User Manual</span><span>9</span></footer>
+    </section>
+
+    <section id="section-i" class="page spread-right" aria-labelledby="section-i-heading">
+      <header class="page-header">
+        <h2 id="section-i-heading">I. Logout Process</h2>
+      </header>
+
+      <h3>Admin Logout Steps</h3>
+      <ol>
+        <li>Complete current transaction and ensure all changes are saved.</li>
+        <li>Select profile or account menu in the top bar.</li>
+        <li>Select <strong>Logout</strong>.</li>
+        <li>Confirm that the login page is displayed again.</li>
+      </ol>
+
+      <h3>Customer Logout Steps</h3>
+      <ol>
+        <li>Review account and history screens as needed.</li>
+        <li>Select the account menu in the customer portal.</li>
+        <li>Select <strong>Logout</strong>.</li>
+        <li>Confirm that portal access is closed and login screen appears.</li>
+      </ol>
+
+      <aside class="note note-warning" role="note">
+        <strong>Security reminder:</strong> Always logout after each session, especially on shared devices.
+      </aside>
 
       <p class="top-link"><a href="#cover">Back to front cover</a></p>
-      <footer class="page-footer"><span>Aquenta User Manual</span><span>5</span></footer>
+      <footer class="page-footer"><span>Aquenta User Manual</span><span>10</span></footer>
     </section>
   </main>
+
+  <script>
+    function getInsertionPoint(page) {
+      return page.querySelector(".top-link") || page.querySelector(".page-footer") || null;
+    }
+
+    function wait(ms) {
+      return new Promise(function (resolve) {
+        setTimeout(resolve, ms);
+      });
+    }
+
+    function getMovableBlocks(page) {
+      return Array.from(page.children).filter(function (child) {
+        return !child.classList.contains("page-header") &&
+          !child.classList.contains("top-link") &&
+          !child.classList.contains("page-footer");
+      });
+    }
+
+    function isOverflowing(page) {
+      return page.scrollHeight > page.clientHeight + 1;
+    }
+
+    function applyCompactIfNeeded(page) {
+      if (isOverflowing(page) && !page.classList.contains("compact-print")) {
+        page.classList.add("compact-print");
+        return true;
+      }
+      return false;
+    }
+
+    function balanceSpreadFlow() {
+      var pages = Array.from(document.querySelectorAll(".page.spread-left, .page.spread-right"));
+      if (!pages.length) {
+        return;
+      }
+
+      pages.forEach(function (page) {
+        page.classList.remove("compact-print");
+      });
+
+      var maxPasses = 15;
+      for (var pass = 0; pass < maxPasses; pass++) {
+        var movedAny = false;
+
+        for (var i = 0; i < pages.length - 1; i++) {
+          var source = pages[i];
+          var target = pages[i + 1];
+          var targetInsert = getInsertionPoint(target);
+
+          if (!targetInsert) {
+            continue;
+          }
+
+          if (applyCompactIfNeeded(source)) {
+            movedAny = true;
+          }
+
+          while (isOverflowing(source)) {
+            var blocks = getMovableBlocks(source);
+            if (!blocks.length) {
+              break;
+            }
+
+            var blockToMove = blocks[blocks.length - 1];
+            target.insertBefore(blockToMove, targetInsert);
+            movedAny = true;
+
+            if (applyCompactIfNeeded(source)) {
+              movedAny = true;
+            }
+            applyCompactIfNeeded(target);
+          }
+        }
+
+        if (!movedAny) {
+          break;
+        }
+      }
+    }
+
+    window.addEventListener("beforeprint", function () {
+      balanceSpreadFlow();
+    });
+
+    document.getElementById("print-manual-btn").addEventListener("click", function () {
+      balanceSpreadFlow();
+      window.print();
+    });
+  </script>
 </body>
 </html>
+
+
+
