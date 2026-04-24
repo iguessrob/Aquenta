@@ -47,8 +47,9 @@ namespace AquentaLibrary.Repositories
                 }
             }
 
+            var detailMessage = lastError != null ? $". Last Error: {lastError.Message}" : "";
             throw new InvalidOperationException(
-                "Unable to connect to AquentaDB. Set AQUENTA_SQL_CONNECTION to a valid SQL Server connection string or create AquentaDB in LocalDB/SQLEXPRESS.",
+                $"Unable to connect to AquentaDB. Set AQUENTA_SQL_CONNECTION to a valid SQL Server connection string or create AquentaDB in LocalDB/SQLEXPRESS{detailMessage}",
                 lastError);
         }
     }

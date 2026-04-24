@@ -87,7 +87,12 @@ app.MapGet("/health", () =>
     }
     catch (Exception ex)
     {
-        return Results.Problem(detail: ex.Message, title: "Database Connection Failed");
+        var message = ex.Message;
+        if (ex.InnerException != null)
+        {
+            message += " Details: " + ex.InnerException.Message;
+        }
+        return Results.Problem(detail: message, title: "Database Connection Failed");
     }
 });
 

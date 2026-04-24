@@ -1,0 +1,16 @@
+## Visual Studio ignore
+.vs/
+[Bb]in/
+[Ob]j/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## OS ignore
+Thumbs.db
+.DS_Store
+
+## Environment variables
+.env
+*.local
