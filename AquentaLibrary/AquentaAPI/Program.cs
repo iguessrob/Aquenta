@@ -35,21 +35,25 @@ app.Use(async (context, next) =>
     await next();
 });
 
-// Explicitly handle CORS preflight for custom domains
+// 2. BULLETPROOF CORS (Handles Custom Domains)
 app.Use(async (context, next) =>
 {
+    var origin = context.Request.Headers["Origin"].ToString();
+    if (!string.IsNullOrEmpty(origin))
+    {
+        context.Response.Headers["Access-Control-Allow-Origin"] = origin;
+        context.Response.Headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS";
+        context.Response.Headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With";
+    }
+
     if (context.Request.Method == "OPTIONS")
     {
-        context.Response.Headers["Access-Control-Allow-Origin"] = context.Request.Headers["Origin"];
-        context.Response.Headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS";
-        context.Response.Headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization";
         context.Response.StatusCode = 200;
         return;
     }
+
     await next();
 });
-
-app.UseCors("AllowFrontend");
 
 // Configure the HTTP request pipeline.
 app.UseSwagger();
