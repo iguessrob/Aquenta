@@ -35,12 +35,28 @@ app.Use(async (context, next) =>
     await next();
 });
 
+// Explicitly handle CORS preflight for custom domains
+app.Use(async (context, next) =>
+{
+    if (context.Request.Method == "OPTIONS")
+    {
+        context.Response.Headers["Access-Control-Allow-Origin"] = context.Request.Headers["Origin"];
+        context.Response.Headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS";
+        context.Response.Headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization";
+        context.Response.StatusCode = 200;
+        return;
+    }
+    await next();
+});
+
+app.UseCors("AllowFrontend");
+
 // Configure the HTTP request pipeline.
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Aquenta API v1");
-    c.RoutePrefix = string.Empty; // Set Swagger at the root (optional, but helpful for discovery)
+    c.RoutePrefix = string.Empty;
 });
 
 if (app.Environment.IsDevelopment())
@@ -49,17 +65,11 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    // Enable developer exception page in production temporarily for debugging if needed, 
-    // but better to use a diagnostic endpoint.
     app.UseExceptionHandler("/error");
 }
 
 app.UseRouting();
-
-app.UseCors("AllowFrontend");
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.MapGet("/health", () =>
