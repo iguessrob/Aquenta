@@ -143,8 +143,12 @@ function updateDashboardStats(billings, concessioner) {
   }, 0);
 
   const unpaidEl = document.getElementById('statUnpaid');
+  const balanceEl = document.getElementById('statBalance');
   if (unpaidEl) {
     unpaidEl.textContent = '₱' + totalUnpaid.toLocaleString('en-PH', { minimumFractionDigits: 2 });
+  }
+  if (balanceEl) {
+    balanceEl.textContent = '₱' + totalUnpaid.toLocaleString('en-PH', { minimumFractionDigits: 2 });
   }
 
   const unpaidCountEl = document.getElementById('statUnpaidCount');
