@@ -13,6 +13,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   currentConcessioner = concessioner;
+  
+  const editBtn = document.getElementById('editBtn');
+  if (editBtn) {
+    editBtn.addEventListener('click', function() {
+      console.log('Edit button clicked');
+      toggleEdit();
+    });
+  }
+
   loadAccountDetails();
 });
 
@@ -37,7 +46,10 @@ async function loadAccountDetails() {
 
 function findName(list, key1, key2, id, nameKey1, nameKey2) {
   if (!list || !Array.isArray(list)) return '--';
-  var item = list.find(function (x) { return (x[key1] || x[key2]) === id; });
+  var item = list.find(function (x) { 
+    if (!x) return false;
+    return (x[key1] || x[key2]) === id; 
+  });
   if (item) return item[nameKey1] || item[nameKey2] || '--';
   return '--';
 }

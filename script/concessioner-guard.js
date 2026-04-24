@@ -71,18 +71,23 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // C. Profile Dropdown Logic
-    const userInfo = document.querySelector('.user-info');
-    const profileDropdown = document.querySelector('.profile-dropdown');
+    const userInfo = document.getElementById('userInfoBtn');
+    const profileDropdown = document.getElementById('profileDropdown');
+    const userProfile = document.querySelector('.user-profile');
 
     if (userInfo && profileDropdown) {
-        userInfo.addEventListener('click', (e) => {
+        const toggleDropdown = (e) => {
             e.stopPropagation();
             profileDropdown.classList.toggle('show');
-        });
+            if (userProfile) userProfile.classList.toggle('active');
+        };
+
+        userInfo.addEventListener('click', toggleDropdown);
 
         document.addEventListener('click', (e) => {
             if (!profileDropdown.contains(e.target) && !userInfo.contains(e.target)) {
                 profileDropdown.classList.remove('show');
+                if (userProfile) userProfile.classList.remove('active');
             }
         });
     }

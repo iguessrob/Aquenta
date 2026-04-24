@@ -135,7 +135,22 @@ body { font-family: 'Inter', sans-serif; background: #f0f4f8; color: #1e293b; ov
 }
 
 /* ===== MOBILE OVERLAY ===== */
-.mobile-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 90; }
+.mobile-overlay { 
+  display: none; 
+  position: fixed; 
+  inset: 0; 
+  background: rgba(0,0,0,0.5); 
+  z-index: 90; 
+  pointer-events: none;
+}
+.mobile-overlay.active {
+  display: block;
+  pointer-events: auto;
+}
+
+@media (min-width: 1024px) {
+  .mobile-overlay { display: none !important; pointer-events: none !important; }
+}
 
 /* ===== MAIN CONTAINER ===== */
 .main-container {
@@ -153,7 +168,7 @@ body { font-family: 'Inter', sans-serif; background: #f0f4f8; color: #1e293b; ov
   border-bottom: 1px solid #e5e7eb;
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 1000;
 }
 .topbar > div {
   display: flex;
@@ -200,6 +215,7 @@ body { font-family: 'Inter', sans-serif; background: #f0f4f8; color: #1e293b; ov
   display: flex;
   align-items: center;
   gap: 12px;
+  cursor: pointer;
 }
 
 .user-details {
@@ -267,7 +283,7 @@ body { font-family: 'Inter', sans-serif; background: #f0f4f8; color: #1e293b; ov
   display: none;
   flex-direction: column;
   padding: 6px;
-  z-index: 1001;
+  z-index: 1010;
   animation: slideIn 0.2s ease-out;
 }
 
@@ -370,7 +386,13 @@ body { font-family: 'Inter', sans-serif; background: #f0f4f8; color: #1e293b; ov
 .notif-empty { padding: 30px 20px; text-align: center; color: #94a3b8; font-size: 13px; }
 
 /* ===== CONTENT AREA ===== */
-.content { padding: 28px 32px; flex: 1; background: #eef2f6; }
+.content { 
+  padding: 28px 32px; 
+  flex: 1; 
+  background: #eef2f6; 
+  position: relative;
+  z-index: 1;
+}
 
 /* ===== WELCOME BANNER ===== */
 .welcome-banner {
