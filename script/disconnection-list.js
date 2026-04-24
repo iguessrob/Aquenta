@@ -7,6 +7,9 @@
   const disconnectionTableBody = document.getElementById('disconnectionTableBody');
   const disconnectionCountElem = document.getElementById('disconnectionCount');
   const recordCountText = document.querySelector('.table-footer p');
+  const monthFilter = document.getElementById('monthFilter');
+
+  let allDelinquents = [];
 
   function getApi() {
     if (!window.AquentaApiClient) {
@@ -44,38 +47,79 @@
     return fallback;
   }
 
+  function getUnpaidMonthCount(item) {
+    return Number(getValue(item, ['unpaidBillCount', 'UnpaidBillCount'], 0)) || 0;
+  }
+
+  function renderDisconnectionRows(rows) {
+    if (!disconnectionTableBody) return;
+    disconnectionTableBody.innerHTML = '';
+
+    if (rows.length === 0) {
+      disconnectionTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No accounts subject to disconnection.</td></tr>';
+      return;
+    }
+
+    rows.forEach(c => {
+      const monthCount = getUnpaidMonthCount(c);
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${getValue(c, ['accountNumber', 'AccountNumber'], '')}</td>
+        <td>${getValue(c, ['fullName', 'FullName'], '')}</td>
+        <td>${getValue(c, ['lastReading', 'LastReading'], '0')}</td>
+        <td>${monthCount} Months</td>
+        <td>${formatCurrency(getValue(c, ['totalDebt', 'TotalDebt']))}</td>
+      `;
+      disconnectionTableBody.appendChild(row);
+    });
+  }
+
+  function populateMonthFilterOptions(rows) {
+    if (!monthFilter) return;
+
+    const monthValues = rows.map(getUnpaidMonthCount).filter(month => month >= 2);
+    const maxMonth = monthValues.length ? Math.max(...monthValues) : 1;
+
+    monthFilter.innerHTML = '';
+
+    const allOption = document.createElement('option');
+    allOption.value = '';
+    allOption.textContent = 'Months: All';
+    monthFilter.appendChild(allOption);
+
+    for (let month = 2; month <= maxMonth; month += 1) {
+      const option = document.createElement('option');
+      option.value = String(month);
+      option.textContent = `Months: ${month}`;
+      monthFilter.appendChild(option);
+    }
+  }
+
+  function applyFilters() {
+    const selectedMonth = Number(monthFilter?.value || 0);
+
+    const filtered = selectedMonth
+      ? allDelinquents.filter(item => getUnpaidMonthCount(item) === selectedMonth)
+      : allDelinquents;
+
+    if (disconnectionCountElem) {
+      disconnectionCountElem.textContent = `Concessioners to be Disconnected: ${filtered.length}`;
+    }
+    if (recordCountText) {
+      recordCountText.textContent = `Showing 1 to ${filtered.length} of ${filtered.length} records`;
+    }
+
+    renderDisconnectionRows(filtered);
+  }
+
   async function loadDisconnectionList() {
     try {
       const api = getApi();
       const data = await api.get('/report/delinquent-customers');
-      const delinquents = data || [];
+      allDelinquents = data || [];
 
-      if (disconnectionCountElem) {
-        disconnectionCountElem.textContent = `Concessioners to be Disconnected: ${delinquents.length}`;
-      }
-      if (recordCountText) {
-        recordCountText.textContent = `Showing 1 to ${delinquents.length} of ${delinquents.length} records`;
-      }
-
-      if (!disconnectionTableBody) return;
-      disconnectionTableBody.innerHTML = '';
-
-      if (delinquents.length === 0) {
-        disconnectionTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No accounts subject to disconnection.</td></tr>';
-        return;
-      }
-
-      delinquents.forEach(c => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${getValue(c, ['accountNumber', 'AccountNumber'], '')}</td>
-          <td>${getValue(c, ['fullName', 'FullName'], '')}</td>
-          <td>${getValue(c, ['lastReading', 'LastReading'], '0')}</td>
-          <td>${getValue(c, ['unpaidBillCount', 'UnpaidBillCount'], 0)} Months</td>
-          <td>${formatCurrency(getValue(c, ['totalDebt', 'TotalDebt']))}</td>
-        `;
-        disconnectionTableBody.appendChild(row);
-      });
+      populateMonthFilterOptions(allDelinquents);
+      applyFilters();
 
     } catch (error) {
       console.error('Failed to load disconnection list:', error);
@@ -99,6 +143,9 @@
   async function init() {
     bindSidebar();
     setupPaginationGuards();
+    if (monthFilter) {
+      monthFilter.addEventListener('change', applyFilters);
+    }
     await loadDisconnectionList();
   }
 
