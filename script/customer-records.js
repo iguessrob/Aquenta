@@ -176,7 +176,7 @@
     await api.post('/User', {
       userId: 0,
       userName: data.accountNumber,
-      password: data.accountNumber,
+      pass: data.accountNumber, // Changed from 'password' to 'pass' to match UserModel
       firstName: data.firstName,
       lastName: data.lastName,
       userRole: 'Concessioner',
@@ -257,7 +257,7 @@
     await api.put('/User', {
       userId,
       userName: updates.accountNumber,
-      password: pickValue(user, ['password', 'Password'], updates.accountNumber),
+      pass: pickValue(user, ['pass', 'Pass', 'password', 'Password'], updates.accountNumber),
       firstName: updates.firstName,
       lastName: updates.lastName,
       userRole: pickValue(user, ['userRole', 'UserRole'], 'Concessioner'),
