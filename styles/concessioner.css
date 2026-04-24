@@ -577,6 +577,7 @@ html, body {
   .menu-btn, .close-btn { display: flex; }
   .content { padding: 16px; }
   .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .form-grid { grid-template-columns: 1fr; gap: 16px; } /* Stack forms on tablet too */
 }
 
 @media (max-width: 768px) {
@@ -586,8 +587,14 @@ html, body {
   .welcome-banner { padding: 20px; border-radius: 12px; }
   .stats-grid { grid-template-columns: 1fr; }
   
-  /* Force tables to stay in their boxes */
-  .table-wrapper, .customer-table-wrapper, .section-card {
+  /* Force everything to stay within parent width */
+  .section-card, .form-input, .form-group, .form-grid {
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .customer-table-wrapper, .table-wrapper {
     max-width: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
