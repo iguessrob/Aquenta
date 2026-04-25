@@ -73,6 +73,47 @@
     return fallback;
   }
 
+  function getSortedUniqueNames(items, nameKeys) {
+    return [...new Set((items || [])
+      .map((item) => String(pickValue(item, nameKeys, '')).trim())
+      .filter(Boolean))]
+      .sort((a, b) => a.localeCompare(b));
+  }
+
+  function populateSelectOptions(selectEl, values) {
+    if (!selectEl) return;
+
+    const placeholderText = selectEl.options.length > 0
+      ? selectEl.options[0].textContent
+      : 'Select option';
+
+    selectEl.innerHTML = '';
+
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = placeholderText;
+    selectEl.appendChild(placeholder);
+
+    values.forEach((value) => {
+      const option = document.createElement('option');
+      option.value = value;
+      option.textContent = value;
+      selectEl.appendChild(option);
+    });
+  }
+
+  async function hydrateConcessionerLookupSelects(isEditPage = false) {
+    const lookups = await fetchLookups();
+    const rateValues = getSortedUniqueNames(lookups.categories, ['categoryName', 'CategoryName']);
+    const membershipValues = getSortedUniqueNames(lookups.memberships, ['membershipName', 'MembershipName']);
+
+    const rateSelect = document.getElementById(isEditPage ? 'editRateClassification' : 'rateClassification');
+    const membershipSelect = document.getElementById(isEditPage ? 'editMembership' : 'membership');
+
+    populateSelectOptions(rateSelect, rateValues);
+    populateSelectOptions(membershipSelect, membershipValues);
+  }
+
   async function fetchLookups() {
     const api = getApi();
     const [concessioners, users, categories, districts, memberships] = await Promise.all([
@@ -376,6 +417,12 @@
     const form = document.getElementById('concessionerForm');
     if (!form) return;
 
+    try {
+      await hydrateConcessionerLookupSelects(false);
+    } catch (error) {
+      console.error('Failed to load rate class/membership options from API.', error);
+    }
+
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
 
@@ -408,18 +455,6 @@
         return;
       }
 
-      const allowedRateClassifications = ['Residential', 'Commercial'];
-      if (!allowedRateClassifications.includes(data.rateClassification)) {
-        window.alert('Rate Classification must be either Residential or Commercial.');
-        return;
-      }
-
-      const allowedMemberships = ['Member', 'Non-Member', 'Full Subsidy'];
-      if (!allowedMemberships.includes(data.membership)) {
-        window.alert('Membership must be Member, Non-Member, or Full Subsidy.');
-        return;
-      }
-
       try {
         const created = await createCustomer(data);
         window.location.href = `view-customer.html?id=${encodeURIComponent(created.concessionerId)}`;
@@ -433,6 +468,12 @@
   async function initEditConcessionerPage() {
     const form = document.getElementById('editConcessionerForm');
     if (!form) return;
+
+    try {
+      await hydrateConcessionerLookupSelects(true);
+    } catch (error) {
+      console.error('Failed to load rate class/membership options from API.', error);
+    }
 
     const concessionerId = Number(parseQueryParam('id'));
     const header = document.querySelector('.customer-header');

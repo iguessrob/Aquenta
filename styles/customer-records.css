@@ -725,6 +725,30 @@ body[data-page="edit-concessioner"] .concessioner-footer {
   gap: 12px;
 }
 
+body[data-page="add-concessioner"] .concessioner-footer .btn-secondary,
+body[data-page="edit-concessioner"] .concessioner-footer .btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 120px;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+
+body[data-page="add-concessioner"] .concessioner-footer .btn-secondary:hover,
+body[data-page="edit-concessioner"] .concessioner-footer .btn-secondary:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #1e293b;
+}
+
 body[data-page="view-customer"] .customer-profile-header {
   padding-bottom: 20px;
   border-bottom: 1px solid #e2e8f0;
