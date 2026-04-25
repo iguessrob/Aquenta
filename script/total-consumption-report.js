@@ -61,8 +61,8 @@
       if (idx >= 0 && idx < 12) {
         const motherMeterConsumption = Number(item.motherMeterConsumption ?? item.MotherMeterConsumption ?? 0);
         const concessionerConsumption = Number(item.concessionerConsumption ?? item.ConcessionerConsumption ?? 0);
-        const memberConsumption = Number(item.memberConsumption ?? item.MemberConsumption ?? 0);
-        const nonMemberConsumption = Number(item.nonMemberConsumption ?? item.NonMemberConsumption ?? 0);
+        const memberConsumption = Number(item.memberConsumption ?? item.MemberConsumption ?? item.Member ?? item.member ?? 0);
+        const nonMemberConsumption = Number(item.nonMemberConsumption ?? item.NonMemberConsumption ?? item.NonMember ?? item.nonMember ?? 0);
         const waterLoss = Number(item.waterLoss ?? item.WaterLoss ?? (motherMeterConsumption - concessionerConsumption));
 
         monthlyReport[idx] = {
@@ -116,7 +116,7 @@
         monthlyReport[monthIndex].concessionerConsumption += consumption;
 
         // Split by membership
-        const membership = String(item.membershipName ?? item.MembershipName ?? '').trim().toLowerCase();
+        const membership = String(item.membershipName ?? item.MembershipName ?? item.Membership ?? item.membership ?? '').trim().toLowerCase();
         if (membership === 'member') {
           monthlyReport[monthIndex].memberConsumption += consumption;
         } else {
@@ -134,13 +134,13 @@
 
   async function getMonthlyWaterLossData(api, year) {
     try {
-      const endpointRows = await api.get(`/report/consumption-water-loss/${year}`);
-      return normalizeReportRows(endpointRows);
-    } catch (endpointError) {
-      // Fallback path if the running API build does not yet include the new endpoint.
-      console.warn('Primary endpoint unavailable; falling back to billing-summary aggregation.', endpointError);
+      // The specific consumption-water-loss endpoint does not return member/non-member data.
+      // We use the billing-summary endpoint which contains the necessary membership details to aggregate.
       const billingRows = await api.get('/report/billing-summary');
       return aggregateFromBillingSummary(billingRows, year);
+    } catch (error) {
+      console.error('Failed to aggregate report data from billing summary:', error);
+      throw error;
     }
   }
 
