@@ -82,9 +82,9 @@ function resolveBillingDate(item, periodById) {
     const period = periodById.get(periodId);
     const periodEndRaw = period.periodEnd ?? period.PeriodEnd;
     if (periodEndRaw) {
-      const periodEnd = new Date(periodEndRaw);
-      if (!Number.isNaN(periodEnd.getTime()) && periodEnd.getFullYear() > 1900) {
-        return periodEnd;
+      const parsedPeriodEnd = new Date(periodEndRaw);
+      if (!Number.isNaN(parsedPeriodEnd.getTime()) && parsedPeriodEnd.getFullYear() > 1900) {
+        return parsedPeriodEnd;
       }
     }
 
@@ -289,10 +289,13 @@ async function loadDashboardData() {
   }
 
   if (monthlyConsumptionReport && Array.isArray(monthlyConsumptionReport)) {
-    latestMonthWaterData = monthlyConsumptionReport.find((row) => {
+    const monthlyRow = monthlyConsumptionReport.find((row) => {
       const rowMonthIndex = toNumber(row.monthIndex ?? row.MonthIndex ?? 0);
       return rowMonthIndex === latestWaterMonthIndex;
     });
+    if (monthlyRow) {
+      latestMonthWaterData = monthlyRow;
+    }
   }
 
   const fallbackMetrics = buildFallbackDashboardMetrics(billings, payments, periods, currentYear);
