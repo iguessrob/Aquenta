@@ -61,6 +61,41 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.classList.add('loading-active');
     }
 
+    function getAuthenticatedUser() {
+        const loggedIn = localStorage.getItem('aquentaLoggedIn') === 'true';
+        const userRaw = localStorage.getItem('aquentaUser');
+
+        if (!loggedIn || !userRaw) {
+            return null;
+        }
+
+        try {
+            return JSON.parse(userRaw);
+        } catch (error) {
+            localStorage.removeItem('aquentaUser');
+            localStorage.removeItem('aquentaLoggedIn');
+            localStorage.removeItem('aquentaLoginTime');
+            return null;
+        }
+    }
+
+    function redirectAuthenticatedUser() {
+        const user = getAuthenticatedUser();
+        if (!user) return false;
+
+        const dashboardPath = resolveDashboardPath(user);
+        window.location.replace(dashboardPath);
+        return true;
+    }
+
+    if (redirectAuthenticatedUser()) {
+        return;
+    }
+
+    window.addEventListener('pageshow', function() {
+        redirectAuthenticatedUser();
+    });
+
     // Clear credential error when user starts typing
     accountNumberInput.addEventListener('input', clearFormErrors);
     passwordInput.addEventListener('input', clearFormErrors);

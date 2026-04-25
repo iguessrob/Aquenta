@@ -10,15 +10,26 @@ namespace AquentaAPI.Controllers
     {
         ConcessionerServices concessionerServices = new ConcessionerServices();
 
+        private static void NormalizeOptionalFields(ConcessionerModel concessioner)
+        {
+            if (concessioner == null) return;
+
+            concessioner.Address = (concessioner.Address ?? string.Empty).Trim();
+            concessioner.ContactNumber = (concessioner.ContactNumber ?? string.Empty).Trim();
+            concessioner.EmailAddress = (concessioner.EmailAddress ?? string.Empty).Trim();
+        }
+
         [HttpPost]
         public bool AddConcessioner(ConcessionerModel concessioner)
         {
+            NormalizeOptionalFields(concessioner);
             return concessionerServices.Add(concessioner);
         }
 
         [HttpPut]
         public bool UpdateConcessioner(ConcessionerModel concessioner)
         {
+            NormalizeOptionalFields(concessioner);
             return concessionerServices.Update(concessioner);
         }
 
