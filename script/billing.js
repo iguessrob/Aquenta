@@ -511,13 +511,12 @@ function populateDistrictFilter() {
       id: toNumber(pick(item, ['districtId', 'DistrictId', 'districtID', 'DistrictID'], 0), 0),
       name: String(pick(item, ['districtName', 'DistrictName'], '')).trim(),
     }))
-    .filter((item) => item.id > 0)
+    .filter((item) => item.id > 0 && item.name)
     .sort((a, b) => a.id - b.id);
 
   const options = ['<option value="all">District: All</option>'];
   districts.forEach((district) => {
-    const label = district.name || `District ${district.id}`;
-    options.push(`<option value="${district.id}">${escapeHtml(label)}</option>`);
+    options.push(`<option value="${escapeHtml(district.name)}">${escapeHtml(district.name)}</option>`);
   });
 
   select.innerHTML = options.join('');
@@ -753,15 +752,23 @@ function applyBillingFilters() {
   const search = String(searchInput?.value || '').trim().toLowerCase();
   const district = String(districtSelect?.value || 'all').trim().toLowerCase();
 
+  const districtNameById = new Map(
+    districtCache.map((item) => [
+      toNumber(pick(item, ['districtId', 'DistrictId', 'districtID', 'DistrictID'], 0), 0),
+      String(pick(item, ['districtName', 'DistrictName'], '')).trim().toLowerCase(),
+    ]),
+  );
+
   const allRows = buildNormalizedRows();
 
   filteredBilling = allRows.filter((item) => {
     const account = String(item.accountNumber || '').toLowerCase();
     const concessioner = String(item.concessionerName || '').toLowerCase();
     const itemDistrictId = toNumber(item.districtId, 0);
+    const itemDistrictName = String(districtNameById.get(itemDistrictId) || '').trim().toLowerCase();
 
     const matchesSearch = !search || account.includes(search) || concessioner.includes(search);
-    const matchesDistrict = district === 'all' || toNumber(district, 0) === itemDistrictId;
+    const matchesDistrict = district === 'all' || district === itemDistrictName;
 
     return matchesSearch && matchesDistrict;
   });
