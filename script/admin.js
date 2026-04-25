@@ -116,6 +116,112 @@ function resolveBillingDate(item, periodById) {
   return null;
 }
 
+function isMotherMeterConcessioner(item) {
+  const firstName = String(item.firstName ?? item.FirstName ?? '').trim().toUpperCase();
+  const accountNumber = String(item.accountNumber ?? item.AccountNumber ?? '').trim().toUpperCase();
+  const meterNumber = String(item.meterNumber ?? item.MeterNumber ?? '').trim().toUpperCase();
+
+  return firstName === 'MOTHER METER'
+    || accountNumber === 'ACC-MOTHER-0001'
+    || meterNumber === 'MTR-MOTHER-0001';
+}
+
+function getLatestPeriodId(periodList, billingList) {
+  const billingPeriodIds = new Set(
+    (billingList || [])
+      .map((b) => toNumber(b.periodId ?? b.PeriodID ?? b.PeriodId))
+      .filter((id) => id > 0)
+  );
+
+  let latestPeriodId = 0;
+  let latestPeriodDate = null;
+
+  (periodList || []).forEach((period) => {
+    const periodId = toNumber(period.periodId ?? period.PeriodID ?? period.PeriodId);
+    if (periodId <= 0 || !billingPeriodIds.has(periodId)) return;
+
+    const effectiveDateRaw = period.periodEnd ?? period.PeriodEnd ?? period.periodStart ?? period.PeriodStart;
+    if (!effectiveDateRaw) return;
+
+    const effectiveDate = new Date(effectiveDateRaw);
+    if (Number.isNaN(effectiveDate.getTime())) return;
+
+    if (!latestPeriodDate || effectiveDate > latestPeriodDate) {
+      latestPeriodDate = effectiveDate;
+      latestPeriodId = periodId;
+    }
+  });
+
+  return latestPeriodId;
+}
+
+function computeLatestConcessionerCardMetrics(billingList, paymentList, periodList, concessionerList) {
+  const latestPeriodId = getLatestPeriodId(periodList, billingList);
+  if (latestPeriodId <= 0) {
+    return {
+      pendingCollections: 0,
+      waterConsumed: 0,
+    };
+  }
+
+  const motherConcessionerIds = new Set(
+    (concessionerList || [])
+      .filter((c) => isMotherMeterConcessioner(c))
+      .map((c) => toNumber(c.concessionerId ?? c.ConcessionerID ?? c.ConcessionerId))
+      .filter((id) => id > 0)
+  );
+
+  const latestBills = (billingList || []).filter((bill) => {
+    const periodId = toNumber(bill.periodId ?? bill.PeriodID ?? bill.PeriodId);
+    if (periodId !== latestPeriodId) return false;
+
+    const concessionerId = toNumber(bill.concessionerId ?? bill.ConcessionerID ?? bill.ConcessionerId);
+    return !motherConcessionerIds.has(concessionerId);
+  });
+
+  const latestBillIdSet = new Set(
+    latestBills
+      .map((bill) => toNumber(bill.billingId ?? bill.BillingID ?? bill.BillingId))
+      .filter((id) => id > 0)
+  );
+
+  const paidByBillingId = new Map();
+  (paymentList || []).forEach((payment) => {
+    const billingId = toNumber(payment.billingId ?? payment.BillingID ?? payment.BillingId);
+    if (!latestBillIdSet.has(billingId)) return;
+
+    const amountPaid = toNumber(payment.amountPaid ?? payment.AmountPaid);
+    paidByBillingId.set(billingId, toNumber(paidByBillingId.get(billingId)) + amountPaid);
+  });
+
+  let pendingCollections = 0;
+  let waterConsumed = 0;
+
+  latestBills.forEach((bill) => {
+    const billingId = toNumber(bill.billingId ?? bill.BillingID ?? bill.BillingId);
+    const billAmount = toNumber(bill.billAmount ?? bill.BillAmount);
+    const penalty = toNumber(bill.penalty ?? bill.Penalty);
+    const paidAmount = toNumber(paidByBillingId.get(billingId));
+    const remaining = (billAmount + penalty) - paidAmount;
+
+    if (remaining > 0) {
+      pendingCollections += remaining;
+    }
+
+    const prevReading = toNumber(bill.prevReading ?? bill.PrevReading);
+    const currentReading = toNumber(bill.currentReading ?? bill.CurrentReading);
+    const consumption = currentReading - prevReading;
+    if (consumption > 0) {
+      waterConsumed += consumption;
+    }
+  });
+
+  return {
+    pendingCollections,
+    waterConsumed,
+  };
+}
+
 function buildFallbackDashboardMetrics(billings, payments, periods, selectedYear) {
   const billingList = Array.isArray(billings) ? billings : [];
   const paymentList = Array.isArray(payments) ? payments : [];
@@ -252,6 +358,7 @@ async function loadDashboardData() {
     billings,
     payments,
     periods,
+    concessioners,
   ] = await Promise.all([
     safeGetActiveMembersCount(),
     safeApiGet('/Report/latest-month-pending-collections', null),
@@ -259,6 +366,7 @@ async function loadDashboardData() {
     safeApiGet('/Billing', []),
     safeApiGet('/Payment', []),
     safeApiGet('/Period', []),
+    safeApiGet('/Concessioner', []),
   ]);
 
   // Water distribution must be anchored to the latest month in billing records.
@@ -299,9 +407,21 @@ async function loadDashboardData() {
   }
 
   const fallbackMetrics = buildFallbackDashboardMetrics(billings, payments, periods, currentYear);
-  const latestMonthPendingCollections = latestMonthPendingCollectionsRaw === null
-    ? fallbackMetrics.latestMonthPendingCollections
-    : toNumber(latestMonthPendingCollectionsRaw);
+  const cardMetrics = computeLatestConcessionerCardMetrics(
+    billingList,
+    Array.isArray(payments) ? payments : [],
+    periodList,
+    Array.isArray(concessioners) ? concessioners : []
+  );
+
+  const latestMonthPendingCollections = cardMetrics.pendingCollections > 0
+    ? cardMetrics.pendingCollections
+    : (latestMonthPendingCollectionsRaw === null
+      ? fallbackMetrics.latestMonthPendingCollections
+      : toNumber(latestMonthPendingCollectionsRaw));
+  const latestMonthWaterConsumedConcessioners = cardMetrics.waterConsumed > 0
+    ? cardMetrics.waterConsumed
+    : toNumber(latestMonthWaterConsumed);
 
   const activeMembersElement = document.querySelector('.summary-card:nth-of-type(1) .card-value');
   if (activeMembersElement) {
@@ -320,7 +440,7 @@ async function loadDashboardData() {
 
   const waterConsumedElement = document.querySelector('.summary-card:nth-of-type(3) .card-value');
   if (waterConsumedElement) {
-    waterConsumedElement.textContent = `${toNumber(latestMonthWaterConsumed).toLocaleString()} m³`;
+    waterConsumedElement.textContent = `${toNumber(latestMonthWaterConsumedConcessioners).toLocaleString()} m³`;
   }
 
   const totalAnnualElement = document.getElementById('totalAnnual');
