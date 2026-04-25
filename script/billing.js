@@ -653,7 +653,9 @@ function renderBillingRows(rows) {
     const initialValidation = validatePresentReading(item, displayValue);
     const hasReading = initialValidation.hasValue && initialValidation.isValid;
     const previewConsumption = hasReading ? Math.max(0, toNumber(displayValue, 0) - item.previous) : 0;
-    const previewAmount = hasReading ? getTariffAmount(item.categoryId, previewConsumption) : 0;
+    const previewAmount = (item.hasExistingBilling && !item.isEditing)
+      ? item.amount
+      : (hasReading ? getTariffAmount(item.categoryId, previewConsumption) : 0);
     const account = escapeHtml(item.accountNumber || `#${item.concessionerId}`);
     const name = escapeHtml(item.concessionerName || 'Unknown');
     const presentValue = displayValue;

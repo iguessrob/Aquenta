@@ -113,12 +113,17 @@
       const tr = document.createElement('tr');
       const status = String(pick(bill, ['billStatus', 'BillStatus'], 'Unpaid')).toLowerCase();
       
+      const amount = toNumber(pick(bill, ['billAmount', 'BillAmount'], 0), 0);
+      const penalty = toNumber(pick(bill, ['penalty', 'Penalty'], 0), 0);
+      const total = amount + penalty;
+
       tr.innerHTML = `
         <td>${periodLabel}</td>
         <td>${pick(bill, ['currentReading', 'CurrentReading'], 0)}</td>
         <td>${Math.max(0, pick(bill, ['currentReading', 'CurrentReading'], 0) - pick(bill, ['prevReading', 'PrevReading'], 0))}</td>
-        <td>${formatPeso(pick(bill, ['billAmount', 'BillAmount'], 0))}</td>
-        <td>${formatPeso(pick(bill, ['penalty', 'Penalty'], 0))}</td>
+        <td>${formatPeso(amount)}</td>
+        <td>${formatPeso(penalty)}</td>
+        <td>${formatPeso(total)}</td>
         <td><span class="status-pill status-${status === 'paid' ? 'active' : 'disconnected'}">${status.toUpperCase()}</span></td>
         <td>${formatDate(pick(period, ['periodEnd', 'PeriodEnd']))}</td>
         <td></td>
