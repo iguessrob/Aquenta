@@ -27,7 +27,10 @@ SELECT
     BillingID,
     CreatedAt,
     (CurrentReading - PrevReading) AS WaterConsumed
-FROM tbl_Billing;
+FROM tbl_Billing b
+INNER JOIN tbl_Concessioner c ON c.ConcessionerID = b.ConcessionerID
+INNER JOIN tbl_User u ON u.UserID = c.UserID
+WHERE UPPER(LTRIM(RTRIM(ISNULL(u.FirstName, '')))) <> 'MOTHER METER';
 
 
 
@@ -50,8 +53,11 @@ CREATE VIEW view_pending_bills AS
 SELECT 
     BillingID,
     BillAmount
-FROM tbl_Billing
-WHERE BillStatus <> 'Paid';
+FROM tbl_Billing b
+INNER JOIN tbl_Concessioner c ON c.ConcessionerID = b.ConcessionerID
+INNER JOIN tbl_User u ON u.UserID = c.UserID
+WHERE b.BillStatus <> 'Paid'
+    AND UPPER(LTRIM(RTRIM(ISNULL(u.FirstName, '')))) <> 'MOTHER METER';
 
 
 

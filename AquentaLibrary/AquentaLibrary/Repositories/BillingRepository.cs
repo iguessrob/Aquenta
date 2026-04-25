@@ -157,12 +157,15 @@ namespace AquentaLibrary.Repositories
             var latestPeriodConsumption = dbConnection.QuerySingleOrDefault<int?>(@"
                 SELECT ISNULL(SUM(CAST((b.CurrentReading - b.PrevReading) AS INT)), 0)
                 FROM tbl_Billing b
+                INNER JOIN tbl_Concessioner c ON c.ConcessionerID = b.ConcessionerID
+                INNER JOIN tbl_User u ON u.UserID = c.UserID
                 WHERE b.PeriodID = (
                     SELECT TOP 1 b2.PeriodID
                     FROM tbl_Billing b2
                     INNER JOIN tbl_Period p ON b2.PeriodID = p.PeriodID
                     ORDER BY p.PeriodEnd DESC, b2.CreatedAt DESC
-                );");
+                )
+                AND UPPER(LTRIM(RTRIM(ISNULL(u.FirstName, '')))) <> 'MOTHER METER';");
 
             if (latestPeriodConsumption.HasValue)
             {

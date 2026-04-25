@@ -10,6 +10,8 @@ BEGIN
     SELECT
         ISNULL(SUM(b.BillAmount + ISNULL(b.Penalty, 0) - ISNULL(p.TotalAmountPaid, 0)), 0) AS LatestMonthPendingCollections
     FROM tbl_Billing b
+    INNER JOIN tbl_Concessioner c ON c.ConcessionerID = b.ConcessionerID
+    INNER JOIN tbl_User u ON u.UserID = c.UserID
     LEFT JOIN (
         SELECT
             BillingID,
@@ -22,7 +24,8 @@ BEGIN
         FROM tbl_Billing b2
         INNER JOIN tbl_Period pe ON b2.PeriodID = pe.PeriodID
         ORDER BY pe.PeriodEnd DESC
-    );
+    )
+    AND UPPER(LTRIM(RTRIM(ISNULL(u.FirstName, '')))) <> 'MOTHER METER';
 END
 GO
 

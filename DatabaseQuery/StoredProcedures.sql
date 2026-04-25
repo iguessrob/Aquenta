@@ -1078,7 +1078,10 @@ AS
 BEGIN
 	SELECT SUM(b.CurrentReading - b.PrevReading) AS WaterConsumed
 	FROM tbl_Billing b
-	WHERE b.CreatedAt >= @StartDate AND b.CreatedAt < @EndDate;
+	INNER JOIN tbl_Concessioner c ON c.ConcessionerID = b.ConcessionerID
+	INNER JOIN tbl_User u ON u.UserID = c.UserID
+	WHERE b.CreatedAt >= @StartDate AND b.CreatedAt < @EndDate
+	  AND UPPER(LTRIM(RTRIM(ISNULL(u.FirstName, '')))) <> 'MOTHER METER';
 END
 GO
 
@@ -1089,8 +1092,11 @@ AS
 BEGIN
 	SELECT 
 	SUM(BillAmount) AS PendingCollections
-	FROM tbl_Billing
-	WHERE BillStatus <> 'Paid';
+	FROM tbl_Billing b
+	INNER JOIN tbl_Concessioner c ON c.ConcessionerID = b.ConcessionerID
+	INNER JOIN tbl_User u ON u.UserID = c.UserID
+	WHERE b.BillStatus <> 'Paid'
+	  AND UPPER(LTRIM(RTRIM(ISNULL(u.FirstName, '')))) <> 'MOTHER METER';
 END
 GO
 
