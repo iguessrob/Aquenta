@@ -947,9 +947,9 @@ CREATE PROCEDURE SP_GetAllPayment
 AS
 BEGIN
 	SELECT 
-		p.PaymentID,
-		p.BillingID,
-		p.AmountPaid,
+		ISNULL(p.PaymentID, 0) AS PaymentID,
+		b.BillingID,
+		ISNULL(p.AmountPaid, 0) AS AmountPaid,
 		p.DatePaid,
 		b.BillAmount,
 		b.Penalty,
@@ -958,8 +958,8 @@ BEGIN
 		per.PeriodStart,
 		per.PeriodEnd,
 		ISNULL(arrCalc.Arrears, 0) AS Arrears
-	FROM tbl_Payment p
-	INNER JOIN tbl_Billing b ON p.BillingID = b.BillingID
+	FROM tbl_Billing b
+	LEFT JOIN tbl_Payment p ON b.BillingID = p.BillingID
 	INNER JOIN tbl_Period per ON b.PeriodID = per.PeriodID
 	CROSS APPLY (
 		SELECT SUM(outstanding) AS Arrears
@@ -976,7 +976,7 @@ BEGIN
 		) sub
 		WHERE sub.outstanding > 0
 	) arrCalc
-	ORDER BY p.PaymentID DESC;
+	ORDER BY b.BillingID DESC;
 END
 GO
 

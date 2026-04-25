@@ -193,18 +193,14 @@ function validateAmountPaidInput(rawValue) {
   };
 }
 
-function getPaymentRowPaymentId(row) {
-  return toNumber(row?.paymentId ?? row?.PaymentId, 0);
+function getPaymentCacheEntry(billingId) {
+  const normalizedId = toNumber(billingId, 0);
+  return paymentCache.find((payment) => toNumber(pick(payment, ['billingId', 'BillingId'], 0), 0) === normalizedId) || null;
 }
 
-function getPaymentCacheEntry(paymentId) {
-  const normalizedId = toNumber(paymentId, 0);
-  return paymentCache.find((payment) => toNumber(pick(payment, ['paymentId', 'PaymentId'], 0), 0) === normalizedId) || null;
-}
-
-function getRenderedPaymentRow(paymentId) {
-  const normalizedId = toNumber(paymentId, 0);
-  return filteredPaymentRows.find((row) => toNumber(row?.paymentId, 0) === normalizedId) || null;
+function getRenderedPaymentRow(billingId) {
+  const normalizedId = toNumber(billingId, 0);
+  return filteredPaymentRows.find((row) => toNumber(row?.billingId, 0) === normalizedId) || null;
 }
 
 function getConcessionerIdForPayment(payment) {
@@ -222,8 +218,8 @@ function getConcessionerIdForPayment(payment) {
   return toNumber(pick(billing, ['concessionerId', 'ConcessionerId', 'concessionerID', 'ConcessionerID'], 0), 0);
 }
 
-function setPaymentRowEditState(paymentId, isEditing) {
-  const payment = getPaymentCacheEntry(paymentId);
+function setPaymentRowEditState(billingId, isEditing) {
+  const payment = getPaymentCacheEntry(billingId);
   if (!payment) return null;
 
   const currentAmountPaid = toNumber(pick(payment, ['amountPaid', 'AmountPaid'], 0), 0);
@@ -237,8 +233,8 @@ function setPaymentRowEditState(paymentId, isEditing) {
   return payment;
 }
 
-function updatePaymentCacheAmountPaid(paymentId, amountPaid) {
-  const payment = getPaymentCacheEntry(paymentId);
+function updatePaymentCacheAmountPaid(billingId, amountPaid) {
+  const payment = getPaymentCacheEntry(billingId);
   if (!payment) return;
 
   payment.amountPaid = amountPaid;
@@ -272,15 +268,15 @@ function setPaymentAmountInputState(input, validation, isEditing) {
 }
 
 function buildPaymentActionButtons(row) {
-  const paymentId = getPaymentRowPaymentId(row);
+  const billingId = row.billingId;
   return `
-    <button class="payment-action-btn edit-btn" data-role="edit-payment" data-payment-id="${paymentId}" title="Edit amount paid" aria-label="Edit amount paid">
+    <button class="payment-action-btn edit-btn" data-role="edit-payment" data-billing-id="${billingId}" title="Edit amount paid" aria-label="Edit amount paid">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M12 20h9"></path>
         <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"></path>
       </svg>
     </button>
-    <button class="payment-action-btn delete-btn" data-role="clear-payment" data-payment-id="${paymentId}" title="Clear amount paid" aria-label="Clear amount paid">
+    <button class="payment-action-btn delete-btn" data-role="clear-payment" data-billing-id="${billingId}" title="Clear amount paid" aria-label="Clear amount paid">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <polyline points="3 6 5 6 21 6"></polyline>
         <path d="M19 6l-1 14H6L5 6"></path>
@@ -400,6 +396,7 @@ function buildPaymentRows() {
 
       return {
         paymentId,
+        billingId,
         datePaid: pick(payment, ['datePaid', 'DatePaid'], null),
         accountNumber: String(pick(concessioner, ['accountNumber', 'AccountNumber'], '--')).trim() || '--',
         name: getConcessionerDisplayName(concessioner, user),
@@ -500,8 +497,8 @@ function renderRows() {
   }
 
   tbody.innerHTML = pageRows.map((row) => `
-    <tr class="${row.isEditing ? 'editing-row' : row.amountPaid > 0 ? 'saved-row' : ''}" data-row-key="${row.paymentId}">
-      <td>${escapeHtml(formatDateTime(row.datePaid))}</td>
+    <tr class="${row.isEditing ? 'editing-row' : row.amountPaid > 0 ? 'saved-row' : ''}" data-row-key="${row.billingId}">
+      <td>${row.datePaid ? escapeHtml(formatDateTime(row.datePaid)) : '--'}</td>
       <td>${escapeHtml(row.accountNumber || '--')}</td>
       <td>${escapeHtml(row.name || '--')}</td>
       <td>${escapeHtml(row.periodCover || '--')}</td>
@@ -514,7 +511,7 @@ function renderRows() {
           type="number"
           class="payment-amount-input${row.isEditing ? ' is-editing' : ''}"
           data-role="amount-paid"
-          data-payment-id="${row.paymentId}"
+          data-billing-id="${row.billingId}"
           value="${escapeHtml(getPaymentRowDraftAmount(row))}"
           min="0"
           step="0.01"
@@ -590,8 +587,8 @@ function setupFilters() {
   }
 }
 
-async function savePaymentRow(paymentId) {
-  const payment = getPaymentCacheEntry(paymentId);
+async function savePaymentRow(billingId) {
+  const payment = getPaymentCacheEntry(billingId);
   if (!payment) return;
 
   const draftValue = getPaymentRowDraftAmount(payment);
@@ -601,7 +598,7 @@ async function savePaymentRow(paymentId) {
     return;
   }
 
-  const billingId = toNumber(pick(payment, ['billingId', 'BillingId'], 0), 0);
+  const billingIdValue = toNumber(pick(payment, ['billingId', 'BillingId'], 0), 0);
   const concessionerId = getConcessionerIdForPayment(payment);
 
   if (concessionerId <= 0) {
@@ -616,7 +613,7 @@ async function savePaymentRow(paymentId) {
     await api.post('/Payment/distribute', {
       concessionerID: concessionerId,
       amountPaid: validation.value,
-      currentBillingID: billingId,
+      currentBillingID: billingIdValue,
     });
 
     // Reload all data to reflect the distributed payments across multiple billings
@@ -630,8 +627,8 @@ async function savePaymentRow(paymentId) {
   }
 }
 
-function cancelPaymentRowEdit(paymentId) {
-  const payment = getPaymentCacheEntry(paymentId);
+function cancelPaymentRowEdit(billingId) {
+  const payment = getPaymentCacheEntry(billingId);
   if (!payment) return;
 
   payment.isEditing = false;
@@ -648,14 +645,14 @@ function setupRowActions() {
   container.addEventListener('click', (event) => {
     const editBtn = event.target.closest('[data-role="edit-payment"]');
     if (editBtn) {
-      const paymentId = toNumber(editBtn.getAttribute('data-payment-id'), 0);
-      const payment = setPaymentRowEditState(paymentId, true);
+      const billingId = toNumber(editBtn.getAttribute('data-billing-id'), 0);
+      const payment = setPaymentRowEditState(billingId, true);
       if (!payment) return;
 
       renderRows();
 
       requestAnimationFrame(() => {
-        const input = document.querySelector(`.payment-amount-input[data-payment-id="${paymentId}"]`);
+        const input = document.querySelector(`.payment-amount-input[data-billing-id="${billingId}"]`);
         if (input) {
           input.focus();
           input.select();
@@ -666,8 +663,8 @@ function setupRowActions() {
 
     const clearBtn = event.target.closest('[data-role="clear-payment"]');
     if (clearBtn) {
-      const paymentId = toNumber(clearBtn.getAttribute('data-payment-id'), 0);
-      const payment = getPaymentCacheEntry(paymentId);
+      const billingId = toNumber(clearBtn.getAttribute('data-billing-id'), 0);
+      const payment = getPaymentCacheEntry(billingId);
       if (!payment) return;
 
       const concessionerId = getConcessionerIdForPayment(payment);
@@ -702,10 +699,10 @@ function setupRowActions() {
     const input = event.target.closest('.payment-amount-input[data-role="amount-paid"]');
     if (!input) return;
 
-    const paymentId = toNumber(input.getAttribute('data-payment-id'), 0);
-    const payment = getPaymentCacheEntry(paymentId);
+    const billingId = toNumber(input.getAttribute('data-billing-id'), 0);
+    const payment = getPaymentCacheEntry(billingId);
     if (!payment) return;
-    const renderedRow = getRenderedPaymentRow(paymentId);
+    const renderedRow = getRenderedPaymentRow(billingId);
 
     payment.draftAmountPaid = String(input.value || '').trim();
     payment.DraftAmountPaid = payment.draftAmountPaid;
@@ -725,8 +722,8 @@ function setupRowActions() {
     const input = event.target.closest('.payment-amount-input[data-role="amount-paid"]');
     if (!input || event.key !== 'Enter') return;
 
-    const paymentId = toNumber(input.getAttribute('data-payment-id'), 0);
-    const payment = getPaymentCacheEntry(paymentId);
+    const billingId = toNumber(input.getAttribute('data-billing-id'), 0);
+    const payment = getPaymentCacheEntry(billingId);
     if (!payment) return;
 
     if (!payment.isEditing) {
@@ -737,7 +734,7 @@ function setupRowActions() {
     const changed = isPaymentDraftChanged(payment);
     if (changed) {
       event.preventDefault();
-      savePaymentRow(paymentId);
+      savePaymentRow(billingId);
       return;
     }
 
@@ -749,8 +746,8 @@ function setupRowActions() {
     const input = event.target.closest('.payment-amount-input[data-role="amount-paid"]');
     if (!input) return;
 
-    const paymentId = toNumber(input.getAttribute('data-payment-id'), 0);
-    const payment = getPaymentCacheEntry(paymentId);
+    const billingId = toNumber(input.getAttribute('data-billing-id'), 0);
+    const payment = getPaymentCacheEntry(billingId);
     if (!payment || !payment.isEditing) return;
 
     const validation = validateAmountPaidInput(payment.draftAmountPaid);
@@ -761,7 +758,7 @@ function setupRowActions() {
     }
 
     if (isPaymentDraftChanged(payment)) {
-      savePaymentRow(paymentId);
+      savePaymentRow(billingId);
       return;
     }
 
