@@ -128,8 +128,9 @@
 }
 
 .arrear-filters {
-  display: grid;
-  grid-template-columns: 1.5fr 0.7fr 0.7fr;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
   gap: 16px;
   margin-bottom: 18px;
 }
@@ -143,6 +144,8 @@
   padding: 10px 14px;
   background: #f9fafb;
   color: #94a3b8;
+  flex: 1 1 auto;
+  min-width: 320px;
 }
 
 .search-box input {
@@ -163,6 +166,8 @@
   padding: 10px 12px;
   font-size: 16px;
   font-family: inherit;
+  flex: 0 0 180px;
+  min-width: 0;
 }
 
 .table-wrapper {
@@ -266,6 +271,23 @@
   .arrear-table td,
   .table-footer {
     font-size: 14px;
+  }
+
+  .arrear-filters select {
+    flex-basis: 160px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .arrear-filters {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .search-box,
+  .arrear-filters select {
+    min-width: 0;
+    width: 100%;
   }
 }
 
