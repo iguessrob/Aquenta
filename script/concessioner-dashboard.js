@@ -150,16 +150,19 @@ function updateDashboardStats(billings, concessioner) {
     return sum + parseFloat(b.billAmount || b.BillAmount || 0) + parseFloat(b.penalty || b.Penalty || 0);
   }, 0);
 
-  // Latest/Current Month Unpaid
-  const currentMonthUnpaid = unpaidBills.filter(b => {
-    const billDate = new Date(b.periodEnd || b.PeriodEnd || b.createdAt || b.CreatedAt || 0);
-    return (billDate.getMonth() === currentMonth && billDate.getFullYear() === currentYear);
-  }).reduce((sum, b) => {
-    return sum + parseFloat(b.billAmount || b.BillAmount || 0) + parseFloat(b.penalty || b.Penalty || 0);
-  }, 0);
+  // Latest Bill Amount (from the first item in the billings array)
+  let latestBillAmount = 0;
+  if (billings && billings.length > 0) {
+    const latest = billings[0];
+    const status = (latest.billStatus || latest.BillStatus || '').toLowerCase();
+    // Only add it if it is actually unpaid
+    if (status === 'unpaid' || status === 'overdue') {
+      latestBillAmount = parseFloat(latest.billAmount || latest.BillAmount || 0) + parseFloat(latest.penalty || latest.Penalty || 0);
+    }
+  }
 
-  // Total Unpaid: Balance + Latest/Current Month
-  const totalUnpaid = totalBalance + currentMonthUnpaid;
+  // Total Unpaid: Balance + Latest Bill
+  const totalUnpaid = totalBalance + latestBillAmount;
 
   const unpaidEl = document.getElementById('statUnpaid');
   const balanceEl = document.getElementById('statBalance');
