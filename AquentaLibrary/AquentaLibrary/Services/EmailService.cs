@@ -2,69 +2,82 @@ using System;
 using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 
 namespace AquentaLibrary.Services
 {
     public class EmailService
     {
-        // For testing, we will use the user's specified email.
-        private const string TestRecipient = "mabilanganrob@gmail.com";
+        private readonly IConfiguration _configuration;
 
-        public async Task<bool> SendPasswordResetEmail(string userEmail, string resetLink)
+        public EmailService(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
+        public async Task<bool> SendPasswordResetEmail(string adminEmail, string userName, string accountNumber, string resetLink)
         {
             try
             {
-                // In this specific task, the user wants the email to go to mabilanganrob@gmail.com
-                string recipient = TestRecipient; 
+                var smtpSettings = _configuration.GetSection("SmtpSettings");
+                string host = smtpSettings["Host"] ?? "smtp.gmail.com";
+                int port = int.Parse(smtpSettings["Port"] ?? "587");
+                string senderEmail = smtpSettings["SenderEmail"] ?? "";
+                string senderName = smtpSettings["SenderName"] ?? "AQUENTA Support";
+                string password = smtpSettings["Password"] ?? "";
 
-                string subject = "AQUENTA - Password Reset Request";
+                string subject = "AQUENTA - Password Reset Request from User";
                 string body = $@"
                     <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;'>
-                        <h2 style='color: #136A4D;'>Password Reset</h2>
-                        <p>Hello,</p>
-                        <p>We received a request to reset your password for your AQUENTA account. If you didn't make this request, you can safely ignore this email.</p>
-                        <p>To reset your password, click the button below:</p>
+                        <h2 style='color: #136A4D;'>User Password Reset Request</h2>
+                        <p>Hello Admin,</p>
+                        <p>The following user has requested a password reset:</p>
+                        <div style='background-color: #f9f9f9; padding: 15px; border-radius: 4px; margin: 20px 0;'>
+                            <p><strong>Name:</strong> {userName}</p>
+                            <p><strong>Account Number:</strong> {accountNumber}</p>
+                        </div>
+                        <p>As the administrator, you are the only one who can reset this password. Please click the button below to set a new password for this user:</p>
                         <div style='text-align: center; margin: 30px 0;'>
-                            <a href='{resetLink}' style='background-color: #136A4D; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;'>Reset Password</a>
+                            <a href='{resetLink}' style='background-color: #136A4D; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;'>Reset User's Password</a>
                         </div>
                         <p>If the button doesn't work, copy and paste this link into your browser:</p>
                         <p style='word-break: break-all; color: #666;'>{resetLink}</p>
                         <hr style='border: 0; border-top: 1px solid #eee; margin: 20px 0;' />
-                        <p style='font-size: 12px; color: #999;'>This link will expire in 1 hour.</p>
                         <p style='font-size: 12px; color: #999;'>&copy; 2026 AQUENTA Water Services</p>
                     </div>";
 
-                // LOGGING FOR DEVELOPMENT (since we don't have SMTP credentials yet)
+                // LOGGING FOR DEVELOPMENT
                 Console.WriteLine("------------------------------------------");
-                Console.WriteLine($"SENDING EMAIL TO: {recipient}");
-                Console.WriteLine($"SUBJECT: {subject}");
-                Console.WriteLine($"RESET LINK: {resetLink}");
+                Console.WriteLine($"SENDING ADMIN NOTIFICATION TO: {adminEmail}");
+                Console.WriteLine($"USER REQUESTING: {userName} ({accountNumber})");
+                Console.WriteLine($"USING SENDER: {senderEmail}");
                 Console.WriteLine("------------------------------------------");
 
-                // MOCK SMTP IMPLEMENTATION (Uncomment and configure when ready)
-                /*
                 using (var message = new MailMessage())
                 {
-                    message.To.Add(new MailAddress(recipient));
-                    message.From = new MailAddress("noreply@aquenta.com", "AQUENTA Support");
+                    message.To.Add(new MailAddress(adminEmail));
+                    message.From = new MailAddress(senderEmail, senderName);
                     message.Subject = subject;
                     message.Body = body;
                     message.IsBodyHtml = true;
 
-                    using (var client = new SmtpClient("smtp.gmail.com", 587))
+                    using (var client = new SmtpClient(host, port))
                     {
                         client.EnableSsl = true;
-                        client.Credentials = new NetworkCredential("YOUR_EMAIL", "YOUR_APP_PASSWORD");
+                        client.Credentials = new NetworkCredential(senderEmail, password);
                         await client.SendMailAsync(message);
                     }
                 }
-                */
 
                 return true;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Email sending failed: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner Error: {ex.InnerException.Message}");
+                }
                 return false;
             }
         }

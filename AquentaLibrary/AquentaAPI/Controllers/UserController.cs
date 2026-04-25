@@ -9,11 +9,16 @@ namespace AquentaAPI.Controllers
     [ApiController]
     public class UserController : Controller
     {
-        UserServices userServices = new UserServices();
-        ConcessionerServices concessionerServices = new ConcessionerServices();
-        TokenService tokenService = new TokenService();
-        EmailService emailService = new EmailService();
-        AquentaLibrary.Repositories.UserRepository userRepository = new AquentaLibrary.Repositories.UserRepository();
+        private readonly UserServices userServices = new UserServices();
+        private readonly ConcessionerServices concessionerServices = new ConcessionerServices();
+        private readonly TokenService tokenService = new TokenService();
+        private readonly EmailService _emailService;
+        private readonly AquentaLibrary.Repositories.UserRepository userRepository = new AquentaLibrary.Repositories.UserRepository();
+
+        public UserController(EmailService emailService)
+        {
+            _emailService = emailService;
+        }
 
         public class LoginRequest
         {
@@ -144,15 +149,18 @@ namespace AquentaAPI.Controllers
 
             var token = tokenService.GenerateResetToken(user.UserId);
             
-            // Get user's email from concessioner record
+            // Get user's details for the admin email
             var concessioner = concessionerServices.GetAll().FirstOrDefault(c => c.UserId == user.UserId);
-            string userEmail = concessioner?.EmailAddress ?? "";
+            string userName = $"{user.FirstName} {user.LastName}";
+            string accountNumber = concessioner?.AccountNumber ?? "N/A";
 
             // Use provided frontend base URL or default to current
             string baseUrl = request.FrontendBaseUrl ?? "http://localhost:5500"; 
             string resetLink = $"{baseUrl}/reset-password.html?token={token}";
 
-            await emailService.SendPasswordResetEmail(userEmail, resetLink);
+            // The recipient is the admin (you)
+            string adminEmail = "mabilanganrob@gmail.com"; 
+            await _emailService.SendPasswordResetEmail(adminEmail, userName, accountNumber, resetLink);
 
             return Ok("If an account exists with that identifier, a reset link has been sent.");
         }
