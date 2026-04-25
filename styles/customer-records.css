@@ -794,7 +794,71 @@ body[data-page="view-customer"] .profile-toolbar {
   body[data-page="add-concessioner"] .content,
   body[data-page="edit-concessioner"] .content,
   body[data-page="view-customer"] .content {
-    padding: 20px;
+    padding: 16px;
+  }
+
+  .customer-header-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .back-link {
+    width: fit-content;
+    max-width: 100%;
+  }
+
+  body[data-page="add-concessioner"] .customer-table-card,
+  body[data-page="edit-concessioner"] .customer-table-card,
+  body[data-page="view-customer"] .customer-table-card {
+    padding: 18px 16px;
+    margin-bottom: 16px;
+  }
+
+  body[data-page="add-concessioner"] .concessioner-grid,
+  body[data-page="edit-concessioner"] .concessioner-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  body[data-page="view-customer"] .customer-profile-header {
+    gap: 16px;
+  }
+
+  body[data-page="view-customer"] .profile-main {
+    width: 100%;
+    align-items: flex-start;
+  }
+
+  body[data-page="view-customer"] .profile-actions {
+    width: 100%;
+  }
+
+  body[data-page="view-customer"] .profile-actions .btn-compact {
+    width: 100%;
+  }
+
+  body[data-page="view-customer"] .profile-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  body[data-page="view-customer"] .profile-toolbar-right {
+    width: 100%;
+  }
+
+  body[data-page="view-customer"] .profile-search-small {
+    max-width: none;
+    width: 100%;
+  }
+
+  body[data-page="view-customer"] .profile-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  body[data-page="view-customer"] .profile-tab {
+    white-space: nowrap;
   }
 
   .customer-toolbar {
@@ -812,6 +876,57 @@ body[data-page="view-customer"] .profile-toolbar {
   .customer-profile-header {
     flex-direction: column;
     align-items: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  body[data-page="add-concessioner"] .content,
+  body[data-page="edit-concessioner"] .content,
+  body[data-page="view-customer"] .content {
+    padding: 12px;
+  }
+
+  .customer-header-title {
+    font-size: 18px;
+  }
+
+  .back-primary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  body[data-page="add-concessioner"] .customer-table-card,
+  body[data-page="edit-concessioner"] .customer-table-card,
+  body[data-page="view-customer"] .customer-table-card {
+    padding: 16px 12px;
+  }
+
+  body[data-page="add-concessioner"] .concessioner-footer,
+  body[data-page="edit-concessioner"] .concessioner-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  body[data-page="add-concessioner"] .concessioner-footer .btn-secondary,
+  body[data-page="edit-concessioner"] .concessioner-footer .btn-secondary,
+  body[data-page="add-concessioner"] .concessioner-footer .btn-primary,
+  body[data-page="edit-concessioner"] .concessioner-footer .btn-primary {
+    width: 100%;
+    min-width: 0;
+  }
+
+  body[data-page="view-customer"] .profile-main {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  body[data-page="view-customer"] .profile-name {
+    font-size: 18px;
+  }
+
+  body[data-page="view-customer"] .profile-meta,
+  body[data-page="view-customer"] .profile-contact-row {
+    gap: 6px;
   }
 }
 
