@@ -151,7 +151,11 @@
               <h3 class="section-title">Residential Tariff</h3>
               <button class="add-rate-btn">Add Rate</button>
             </div>
-            <div class="table-wrapper">
+            <div class="table-wrapper table-loading-wrap" id="residentialTableWrap">
+              <div class="table-loading-overlay" id="residentialTableLoading">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading residential rates...</p>
+              </div>
               <table class="tariff-table">
                 <thead>
                   <tr>
@@ -172,7 +176,11 @@
               <h3 class="section-title">Commercial Tariff</h3>
               <button class="add-rate-btn">Add Rate</button>
             </div>
-            <div class="table-wrapper">
+            <div class="table-wrapper table-loading-wrap" id="commercialTableWrap">
+              <div class="table-loading-overlay" id="commercialTableLoading">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading commercial rates...</p>
+              </div>
               <table class="tariff-table">
                 <thead>
                   <tr>
@@ -292,13 +300,3 @@
   <script src="/script/tariffs.js"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-

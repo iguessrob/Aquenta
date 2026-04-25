@@ -135,6 +135,9 @@
   }
 
   async function loadArrearSummary() {
+    const loadingOverlay = document.getElementById('arrearTableLoading');
+    if (loadingOverlay) loadingOverlay.classList.add('active');
+
     try {
       const api = getApi();
       const data = await api.get('/report/arrear-summary');
@@ -153,6 +156,8 @@
         arrearTableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:red;">Error loading arrear summary.</td></tr>';
       }
       updateFooter(0);
+    } finally {
+      if (loadingOverlay) loadingOverlay.classList.remove('active');
     }
   }
 

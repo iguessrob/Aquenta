@@ -853,25 +853,35 @@ function setupPaginationActions() {
 }
 
 async function loadData() {
-  const api = getApi();
-  const [billings, payments, concessioners, users, categories, periods] = await Promise.all([
-    api.get('/Billing'),
-    api.get('/Payment'),
-    api.get('/Concessioner/active'),
-    api.get('/User'),
-    api.get('/Category'),
-    api.get('/Period'),
-  ]);
+  const loadingOverlay = document.getElementById('invoiceTableLoading');
+  if (loadingOverlay) loadingOverlay.classList.add('active');
 
-  billingCache = Array.isArray(billings) ? billings : [];
-  paymentCache = Array.isArray(payments) ? payments : [];
-  concessionerCache = Array.isArray(concessioners) ? concessioners : [];
-  userCache = Array.isArray(users) ? users : [];
-  categoryCache = Array.isArray(categories) ? categories : [];
-  periodCache = Array.isArray(periods) ? periods : [];
+  try {
+    const api = getApi();
+    const [billings, payments, concessioners, users, categories, periods] = await Promise.all([
+      api.get('/Billing'),
+      api.get('/Payment'),
+      api.get('/Concessioner/active'),
+      api.get('/User'),
+      api.get('/Category'),
+      api.get('/Period'),
+    ]);
 
-  populatePeriodFilter();
-  renderRows();
+    billingCache = Array.isArray(billings) ? billings : [];
+    paymentCache = Array.isArray(payments) ? payments : [];
+    concessionerCache = Array.isArray(concessioners) ? concessioners : [];
+    userCache = Array.isArray(users) ? users : [];
+    categoryCache = Array.isArray(categories) ? categories : [];
+    periodCache = Array.isArray(periods) ? periods : [];
+
+    populatePeriodFilter();
+    renderRows();
+  } catch (error) {
+    console.error('Failed to load data:', error);
+    throw error;
+  } finally {
+    if (loadingOverlay) loadingOverlay.classList.remove('active');
+  }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {

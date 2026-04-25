@@ -166,6 +166,7 @@
       border: 1px solid #e5e7eb;
       padding: 24px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      position: relative; /* Needed for loading overlay */
     }
 
     .report-section-title {
@@ -214,7 +215,7 @@
     }
 
     @media print {
-      .sidebar, .topbar, .print-report-btn, .breadcrumb {
+      .sidebar, .topbar, .print-report-btn, .breadcrumb, .table-loading-overlay {
         display: none !important;
       }
       .main-container {
@@ -385,7 +386,11 @@
           </button>
         </div>
 
-        <div class="report-table-container">
+        <div class="report-table-container table-loading-wrap" id="reportTableWrap">
+          <div class="table-loading-overlay" id="reportTableLoading">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">Loading consumption data...</p>
+          </div>
           <h3 class="report-section-title">Total Consumption</h3>
           <table class="consumption-table">
             <thead>
@@ -435,12 +440,3 @@
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-

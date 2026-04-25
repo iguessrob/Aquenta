@@ -145,6 +145,9 @@
   }
 
   async function loadConsumptionReport() {
+    const loadingOverlay = document.getElementById('reportTableLoading');
+    if (loadingOverlay) loadingOverlay.classList.add('active');
+
     try {
       const api = getApi();
       const monthlyReport = await getMonthlyWaterLossData(api, selectedYear);
@@ -204,6 +207,8 @@
       if (tableBody) {
         tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">Error loading data.</td></tr>';
       }
+    } finally {
+      if (loadingOverlay) loadingOverlay.classList.remove('active');
     }
   }
 

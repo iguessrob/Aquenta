@@ -163,7 +163,11 @@
           </div>
 
           <div class="invoice-content">
-            <div class="table-wrapper">
+            <div class="table-wrapper table-loading-wrap" id="invoiceTableWrap">
+              <div class="table-loading-overlay" id="invoiceTableLoading">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading invoices...</p>
+              </div>
               <table class="invoice-table">
                 <thead>
                   <tr>
@@ -233,12 +237,3 @@
   <script src="/script/invoices.js"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-

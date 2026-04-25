@@ -173,15 +173,29 @@ function renderTariffTables() {
 }
 
 async function loadTariffs() {
-  const api = getApi();
-  const [categories, tariffs] = await Promise.all([
-    api.get('/Category'),
-    api.get('/Tariffs'),
-  ]);
+  const resLoading = document.getElementById('residentialTableLoading');
+  const comLoading = document.getElementById('commercialTableLoading');
+  
+  if (resLoading) resLoading.classList.add('active');
+  if (comLoading) comLoading.classList.add('active');
 
-  categoriesCache = Array.isArray(categories) ? categories : [];
-  tariffsCache = Array.isArray(tariffs) ? tariffs : [];
-  renderTariffTables();
+  try {
+    const api = getApi();
+    const [categories, tariffs] = await Promise.all([
+      api.get('/Category'),
+      api.get('/Tariffs'),
+    ]);
+
+    categoriesCache = Array.isArray(categories) ? categories : [];
+    tariffsCache = Array.isArray(tariffs) ? tariffs : [];
+    renderTariffTables();
+  } catch (error) {
+    console.error('Failed to load tariffs:', error);
+    throw error;
+  } finally {
+    if (resLoading) resLoading.classList.remove('active');
+    if (comLoading) comLoading.classList.remove('active');
+  }
 }
 
 function setupAddRateButtons() {

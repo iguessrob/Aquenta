@@ -207,6 +207,12 @@
   }
 
   async function loadAgingReceivables() {
+    const summaryLoading = document.getElementById('agingSummaryLoading');
+    const detailsLoading = document.getElementById('agingDetailsLoading');
+    
+    if (summaryLoading) summaryLoading.classList.add('active');
+    if (detailsLoading) detailsLoading.classList.add('active');
+
     try {
       const api = getApi();
       const data = await api.get('/report/active-customers-debt');
@@ -217,6 +223,9 @@
       updateView();
     } catch (error) {
       console.error('Failed to load aging receivables:', error);
+    } finally {
+      if (summaryLoading) summaryLoading.classList.remove('active');
+      if (detailsLoading) detailsLoading.classList.remove('active');
     }
   }
 
