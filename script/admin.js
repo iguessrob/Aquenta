@@ -280,9 +280,14 @@ async function loadDashboardData() {
   const latestWaterYear = latestBillingDate ? latestBillingDate.getFullYear() : new Date().getFullYear();
   const latestWaterMonthIndex = latestBillingDate ? latestBillingDate.getMonth() + 1 : new Date().getMonth() + 1;
 
+  const latestMonthWaterSummary = await safeApiGet('/Report/latest-month-water-distribution', null);
   const monthlyConsumptionReport = await safeApiGet(`/Report/consumption-water-loss/${latestWaterYear}`, []);
 
   let latestMonthWaterData = null;
+  if (latestMonthWaterSummary) {
+    latestMonthWaterData = latestMonthWaterSummary;
+  }
+
   if (monthlyConsumptionReport && Array.isArray(monthlyConsumptionReport)) {
     latestMonthWaterData = monthlyConsumptionReport.find((row) => {
       const rowMonthIndex = toNumber(row.monthIndex ?? row.MonthIndex ?? 0);
@@ -371,9 +376,15 @@ async function loadDashboardData() {
   // Update distribution date based on the latest period end (using PeriodEnd as month basis)
   const distributionDateEl = document.getElementById('distributionDate');
   if (distributionDateEl) {
-    if (latestBillingDate && !Number.isNaN(latestBillingDate.getTime())) {
-      const latestMonthName = latestBillingDate.toLocaleString('en-US', { month: 'long' });
-      distributionDateEl.textContent = `Data for ${latestMonthName} ${latestBillingDate.getFullYear()}`;
+    const summaryDateRaw = latestMonthWaterData?.LatestPeriodEnd ?? latestMonthWaterData?.latestPeriodEnd;
+    const summaryDate = summaryDateRaw ? new Date(summaryDateRaw) : null;
+    const displayDate = summaryDate && !Number.isNaN(summaryDate.getTime())
+      ? summaryDate
+      : latestBillingDate;
+
+    if (displayDate && !Number.isNaN(displayDate.getTime())) {
+      const latestMonthName = displayDate.toLocaleString('en-US', { month: 'long' });
+      distributionDateEl.textContent = `Data for ${latestMonthName} ${displayDate.getFullYear()}`;
     }
   }
 
