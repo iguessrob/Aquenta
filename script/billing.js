@@ -8,6 +8,7 @@ let concessionerCache = [];
 let userCache = [];
 let periodCache = [];
 let tariffsCache = [];
+let districtCache = [];
 let filteredBilling = [];
 let currentBillingPage = 1;
 const savingRows = new Set();
@@ -505,17 +506,25 @@ function populateDistrictFilter() {
   if (!select) return;
 
   const previous = select.value;
-  const districtIds = [...new Set(concessionerCache.map((item) => toNumber(pick(item, ['districtId', 'DistrictId', 'districtID', 'DistrictID'], 0), 0)).filter((id) => id > 0))]
-    .sort((a, b) => a - b);
+  const districts = [...districtCache]
+    .map((item) => ({
+      id: toNumber(pick(item, ['districtId', 'DistrictId', 'districtID', 'DistrictID'], 0), 0),
+      name: String(pick(item, ['districtName', 'DistrictName'], '')).trim(),
+    }))
+    .filter((item) => item.id > 0)
+    .sort((a, b) => a.id - b.id);
 
-  const options = ['<option value="District: All">District: All</option>'];
-  districtIds.forEach((id) => {
-    options.push(`<option value="District ${id}">District ${id}</option>`);
+  const options = ['<option value="all">District: All</option>'];
+  districts.forEach((district) => {
+    const label = district.name || `District ${district.id}`;
+    options.push(`<option value="${district.id}">${escapeHtml(label)}</option>`);
   });
 
   select.innerHTML = options.join('');
   if (previous && select.querySelector(`option[value="${previous}"]`)) {
     select.value = previous;
+  } else {
+    select.value = 'all';
   }
 }
 
@@ -742,16 +751,17 @@ function applyBillingFilters() {
   const districtSelect = document.querySelector('.filter-select');
 
   const search = String(searchInput?.value || '').trim().toLowerCase();
-  const district = String(districtSelect?.value || 'District: All').trim().toLowerCase();
+  const district = String(districtSelect?.value || 'all').trim().toLowerCase();
 
   const allRows = buildNormalizedRows();
 
   filteredBilling = allRows.filter((item) => {
     const account = String(item.accountNumber || '').toLowerCase();
     const concessioner = String(item.concessionerName || '').toLowerCase();
+    const itemDistrictId = toNumber(item.districtId, 0);
 
     const matchesSearch = !search || account.includes(search) || concessioner.includes(search);
-    const matchesDistrict = district === 'district: all' || district === `district ${item.districtId}`;
+    const matchesDistrict = district === 'all' || toNumber(district, 0) === itemDistrictId;
 
     return matchesSearch && matchesDistrict;
   });
@@ -1392,11 +1402,20 @@ async function loadBilling() {
     api.get('/Tariffs'),
   ]);
 
+  let districts = [];
+  try {
+    districts = await api.get('/District');
+  } catch (error) {
+    console.warn('Failed to load districts for billing filter:', error);
+    showNotification('District filter options could not be fully loaded.', 'info');
+  }
+
   billingCache = Array.isArray(billing) ? billing : [];
   concessionerCache = Array.isArray(concessioners) ? concessioners : [];
   userCache = Array.isArray(users) ? users : [];
   periodCache = Array.isArray(periods) ? periods : [];
   tariffsCache = Array.isArray(tariffs) ? tariffs : [];
+  districtCache = Array.isArray(districts) ? districts : [];
   currentBillingPage = 1;
 
   populateDistrictFilter();
