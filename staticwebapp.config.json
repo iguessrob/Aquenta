@@ -2,7 +2,7 @@
   "trailingSlash": "auto",
   "navigationFallback": {
     "rewrite": "/index.html",
-    "exclude": ["/assets/**", "/*.css", "/*.js", "/*.png", "/*.jpg", "/*.svg"]
+    "exclude": ["/assets/*", "/assets/images/*", "/styles/*", "/script/*", "/*.css", "/*.js", "/*.png", "/*.jpg", "/*.svg"]
   },
   "routes": [
     {
