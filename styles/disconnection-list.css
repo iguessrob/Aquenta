@@ -121,9 +121,17 @@
 
 .disconnection-filters {
   display: grid;
-  grid-template-columns: 1.6fr 0.5fr;
+  grid-template-columns: minmax(0, 1fr) 220px 220px;
   gap: 16px;
   margin-bottom: 18px;
+}
+
+.disconnection-filters .search-box {
+  min-width: 0;
+}
+
+.disconnection-filters select {
+  width: 100%;
 }
 
 .search-box {

@@ -1,0 +1,191 @@
+AQUENTA WATER BILLING AND MANAGEMENT SYSTEM
+
+Official Website Domain: https://aquenta-coop.com
+
+PROJECT DESCRIPTION
+AQUENTA is a web-based water billing and account management system designed to support the daily operations of a water cooperative. It helps office staff manage concessioner records, billing cycles, payments, and operational reports in one centralized platform.
+
+The system is organized into clear modules so that both technical and non-technical users can understand and use it with minimal difficulty.
+
+Target users:
+- Administrative staff
+- Billing and collections staff
+- Concessioners
+- Technical support and development team
+
+
+1) FEATURES
+
+1.1 User and Access Module
+- Login for Admin and Concessioner roles
+- Role-based page access
+- Session validation on protected pages
+- Logout hardening to prevent access through browser back navigation
+
+1.2 Concessioner Management Module
+- Create and update concessioner profiles
+- Manage account details, meter details, district, and status
+- Maintain linked user and account records
+
+1.3 Billing Module
+- Create and update billing records
+- Record previous and current meter readings
+- Compute and store bill amounts, penalties, and statuses
+- Manage billing periods
+
+1.4 Payment Module
+- Record payments per billing account
+- Arrears-first payment distribution
+- Reverse payment distribution when correction is needed
+- View payment ledger and status tracking
+
+1.5 Reporting Module
+- Dashboard summary metrics
+- Aging receivables
+- Arrear summary
+- Disconnection list
+- Consumption and water-loss reporting
+- Revenue and collection analytics
+
+1.6 Contact and Inquiry Module
+- Submit inquiry/contact form entries
+- Admin-side retrieval of submitted inquiries
+
+
+2) SYSTEM ARCHITECTURE
+
+The system is composed of three major layers:
+- Frontend: User interface in the browser
+- Backend API: Business and data processing services
+- Database: SQL Server storage for all records
+
+How the system works:
+1. A user enters or requests information from a page.
+2. The frontend sends a request to the backend API.
+3. The backend validates the request and applies business rules.
+4. The backend reads or writes data in SQL Server.
+5. The backend returns a response to the frontend.
+6. The frontend displays the final result to the user.
+
+Technologies used:
+- Frontend: HTML, CSS, JavaScript
+- Backend: ASP.NET Core Web API (.NET)
+- Data access: Dapper with repository and service layers
+- Database: Microsoft SQL Server
+
+
+3) USAGE GUIDE
+
+3.1 Production access
+- Live website: https://aquenta-coop.com
+
+3.2 Administrator workflow
+1. Log in with admin credentials.
+2. Open the required module from the sidebar.
+3. Perform updates in records, billing, payment, or tariff screens.
+4. Review related reports to confirm the changes.
+5. Log out after completing tasks.
+
+Common admin modules:
+- Dashboard
+- Billing
+- Invoices
+- Customer Records
+- Payments
+- Tariffs
+- Reports
+
+3.3 Concessioner workflow
+1. Log in with concessioner credentials.
+2. Review account profile and billing history.
+3. Check payment history and current account standing.
+4. Log out after review.
+
+
+4) DATABASE STRUCTURE
+
+4.1 Main tables
+- tbl_User: user account, credentials, and role
+- tbl_Concessioner: concessioner profile and account details
+- tbl_Billing: meter readings, bill values, and status
+- tbl_Payment: payment transaction records
+- tbl_Period: billing month period ranges
+- tbl_Tariffs: tariff values and settings
+- tbl_District: district or area reference
+- tbl_Category: concessioner category reference
+- tbl_Membership: membership and discount setup
+- tbl_ContactSubmission: contact and inquiry entries
+
+4.2 Key relationships
+- Concessioner -> User, District, Category, Membership
+- Billing -> Concessioner, User, Period
+- Payment -> Billing
+
+4.3 Reporting database objects
+The system uses SQL views and stored procedures to produce report outputs for:
+- receivables and collection summaries
+- delinquent and disconnection monitoring
+- water consumption and water-loss computation
+- account-level billing and payment insights
+
+
+5) TESTING GUIDE
+
+Current testing method:
+- Manual functional testing
+- API checks using Swagger
+- SQL validation for procedures and report outputs
+
+5.1 Basic functional checklist
+- Admin login succeeds with valid credentials
+- Concessioner login succeeds with valid credentials
+- Invalid login displays the correct error message
+- Billing module loads and saves records correctly
+- Payment distribution and reverse distribution function correctly
+- Report pages display expected data
+- Logout prevents protected page reuse through the browser back button
+
+5.2 API testing quick checks
+- Open Swagger: http://localhost:5024
+- Test login, billing, payment, and report endpoints
+
+5.3 Health check
+- Open: http://localhost:5024/health
+
+
+6) SECURITY
+
+Implemented controls:
+- Page-level route guards for protected modules
+- Cache-control headers to reduce sensitive page caching
+- Back-navigation protection after logout
+- Input validation in contact submission APIs
+
+Important future enhancement recommendations:
+- Password hashing and salting
+- Token-based API authentication
+- Stronger server-side role authorization policies
+
+
+7) MAINTENANCE
+
+7.1 Routine maintenance tasks
+- Monitor system availability and API health
+- Back up the database regularly
+- Re-validate reports after changes
+- Keep SQL scripts versioned and documented
+
+7.2 Backup guidance
+- Schedule daily incremental backups
+- Schedule weekly full backups
+- Test the database restore process periodically
+
+7.3 Troubleshooting reference
+- Frontend cannot load records:
+  Verify that the backend is running on port 5024.
+
+- Database connection issue:
+  Verify the SQL Server instance and AQUENTA_SQL_CONNECTION value.
+
+- Port conflict:
+  Run stop-whole-system.bat and restart the services.

@@ -97,6 +97,25 @@ function formatPeriodOption(period) {
   return start.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 }
 
+function getPaymentMonthKey(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  return `${year}-${month}`;
+}
+
+function getPaymentMonthLabel(value) {
+  const date = new Date(`${value}-01T00:00:00`);
+  if (Number.isNaN(date.getTime())) return value;
+
+  return date.toLocaleDateString('en-US', {
+    month: 'long',
+    year: 'numeric',
+  });
+}
+
 function formatPeriodCover(period) {
   if (!period) return '--';
 
@@ -429,11 +448,31 @@ function populatePeriodFilter() {
   }
 }
 
+function populateMonthFilter() {
+  const select = document.getElementById('paymentMonthFilter');
+  if (!select) return;
+
+  const current = select.value;
+  const months = [...new Set(paymentCache
+    .map((payment) => getPaymentMonthKey(pick(payment, ['datePaid', 'DatePaid'], null)))
+    .filter(Boolean))]
+    .sort((a, b) => b.localeCompare(a));
+
+  select.innerHTML = '<option value="">All Months</option>' + months
+    .map((month) => `<option value="${month}">${getPaymentMonthLabel(month)}</option>`)
+    .join('');
+
+  if (current && select.querySelector(`option[value="${current}"]`)) {
+    select.value = current;
+  }
+}
+
 function renderRows() {
   const tbody = document.getElementById('paymentRows');
   if (!tbody) return;
 
   const search = String(document.getElementById('paymentSearch')?.value || '').trim().toLowerCase();
+  const monthFilter = String(document.getElementById('paymentMonthFilter')?.value || '').trim();
   const periodFilter = toNumber(document.getElementById('paymentPeriodFilter')?.value, 0);
   const statusFilter = String(document.getElementById('paymentStatusFilter')?.value || 'all').trim().toLowerCase();
 
@@ -442,10 +481,11 @@ function renderRows() {
       || String(row.name).toLowerCase().includes(search)
       || String(row.accountNumber).toLowerCase().includes(search);
 
+    const matchesMonth = !monthFilter || getPaymentMonthKey(row.datePaid) === monthFilter;
     const matchesPeriod = periodFilter <= 0 || row.periodId === periodFilter;
     const matchesStatus = statusFilter === 'all' || row.status === statusFilter;
 
-    return matchesSearch && matchesPeriod && matchesStatus;
+    return matchesSearch && matchesMonth && matchesPeriod && matchesStatus;
   });
 
   filteredPaymentRows = rows;
@@ -517,11 +557,19 @@ function setupSidebar() {
 
 function setupFilters() {
   const search = document.getElementById('paymentSearch');
+  const month = document.getElementById('paymentMonthFilter');
   const period = document.getElementById('paymentPeriodFilter');
   const status = document.getElementById('paymentStatusFilter');
 
   if (search) {
     search.addEventListener('input', () => {
+      currentPaymentPage = 1;
+      renderRows();
+    });
+  }
+
+  if (month) {
+    month.addEventListener('change', () => {
       currentPaymentPage = 1;
       renderRows();
     });
@@ -768,6 +816,7 @@ async function loadData() {
   userCache = Array.isArray(users) ? users : [];
   periodCache = Array.isArray(periods) ? periods : [];
 
+  populateMonthFilter();
   populatePeriodFilter();
   renderRows();
 }

@@ -127,14 +127,11 @@ document.addEventListener('DOMContentLoaded', function() {
             // SECURITY: Add login timestamp for session timeout validation
             localStorage.setItem('aquentaLoginTime', new Date().getTime().toString());
     
-            // SECURITY: Replace history entry to prevent back navigation to login
-            window.history.replaceState({ isLoggedIn: true }, '', window.location.href);
-    
             const dashboardPath = resolveDashboardPath(result);
             showLoadingOverlay();
     
             setTimeout(function() {
-                window.location.href = dashboardPath;
+                window.location.replace(dashboardPath);
             }, 1100);
         } catch (error) {
             console.error('Login failed:', error);
