@@ -131,20 +131,17 @@
       if (!tableBody) return;
       tableBody.innerHTML = '';
 
-      let annualMotherMeter = 0;
       let annualConcessioners = 0;
       let annualWaterLoss = 0;
 
       MONTH_NAMES.forEach((name, i) => {
         const monthData = monthlyReport[i];
-        annualMotherMeter += monthData.motherMeterConsumption;
         annualConcessioners += monthData.concessionerConsumption;
         annualWaterLoss += monthData.waterLoss;
 
         const row = document.createElement('tr');
         row.innerHTML = `
           <td>${name}</td>
-          <td class="text-right">${monthData.motherMeterConsumption.toLocaleString()}</td>
           <td class="text-right">${monthData.concessionerConsumption.toLocaleString()}</td>
           <td class="text-right">${monthData.waterLoss.toLocaleString()}</td>
         `;
@@ -156,7 +153,6 @@
       totalRow.className = 'total-row';
       totalRow.innerHTML = `
         <td>TOTAL ANNUAL</td>
-        <td class="text-right">${annualMotherMeter.toLocaleString()}</td>
         <td class="text-right">${annualConcessioners.toLocaleString()}</td>
         <td class="text-right">${annualWaterLoss.toLocaleString()}</td>
       `;
@@ -165,7 +161,7 @@
     } catch (error) {
       console.error('Failed to load consumption report:', error);
       if (tableBody) {
-        tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:red;">Error loading data.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:red;">Error loading data.</td></tr>';
       }
     }
   }
