@@ -119,6 +119,9 @@
   }
 
   async function loadDisconnectionList() {
+    const loadingOverlay = document.getElementById('disconnectionTableLoading');
+    if (loadingOverlay) loadingOverlay.classList.add('active');
+
     try {
       const api = getApi();
       const data = await api.get('/report/delinquent-customers');
@@ -131,6 +134,8 @@
       if (disconnectionTableBody) {
         disconnectionTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">Error loading data.</td></tr>';
       }
+    } finally {
+      if (loadingOverlay) loadingOverlay.classList.remove('active');
     }
   }
 

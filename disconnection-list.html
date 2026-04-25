@@ -161,19 +161,23 @@
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
-              <input type="text" placeholder="Search by Name or Account #" aria-label="Search by name or account number">
+              <input type="text" id="disconnectionSearch" placeholder="Search by Name or Account #" aria-label="Search by name or account number">
             </div>
 
             <select id="disconnectionMonthFilter" aria-label="Filter by months">
               <option value="">Months: All</option>
             </select>
 
-            <select aria-label="Filter by district">
-              <option>District: All</option>
+            <select id="disconnectionDistrictFilter" aria-label="Filter by district">
+              <option value="">District: All</option>
             </select>
           </div>
 
-          <div class="table-wrapper">
+          <div class="table-wrapper table-loading-wrap" id="disconnectionTableWrap">
+            <div class="table-loading-overlay" id="disconnectionTableLoading">
+              <div class="loading-spinner"></div>
+              <p class="loading-text">Loading disconnection list...</p>
+            </div>
             <table class="disconnection-table">
               <thead>
                 <tr>
@@ -191,15 +195,15 @@
           </div>
 
           <div class="table-footer">
-            <p>Showing 1 to 10 of 10 records</p>
-            <div class="pagination">
-              <button type="button" aria-label="Previous page">
+            <p id="paginationText">Showing 0 records</p>
+            <div class="pagination" id="paginationControls">
+              <button type="button" aria-label="Previous page" id="prevPageBtn">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="15 18 9 12 15 6"></polyline>
                 </svg>
               </button>
-              <button type="button" class="active" aria-current="page">1</button>
-              <button type="button" aria-label="Next page">
+              <button type="button" class="active" aria-current="page" id="currentPageBtn">1</button>
+              <button type="button" aria-label="Next page" id="nextPageBtn">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="9 18 15 12 9 6"></polyline>
                 </svg>
@@ -218,11 +222,3 @@
   <script src="script/disconnection-list.js"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-

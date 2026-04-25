@@ -138,5 +138,57 @@ namespace AquentaLibrary.Services
                 return false;
             }
         }
+        public async Task<bool> SendPasswordResetConfirmationEmail(string userEmail, string userName, string defaultPassword)
+        {
+            try
+            {
+                var smtpSettings = _configuration.GetSection("SmtpSettings");
+                string host = smtpSettings["Host"] ?? "smtp.gmail.com";
+                int port = int.Parse(smtpSettings["Port"] ?? "587");
+                string senderEmail = smtpSettings["SenderEmail"] ?? "";
+                string senderName = smtpSettings["SenderName"] ?? "AQUENTA Support";
+                string password = smtpSettings["Password"] ?? "";
+
+                string emailSubject = "AQUENTA - Password Reset Successful";
+                string body = $@"
+                    <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;'>
+                        <h2 style='color: #136A4D;'>Password Reset Successful</h2>
+                        <p>Hello {userName},</p>
+                        <p>Your password has been successfully reset by the administrator.</p>
+                        <div style='background-color: #f9f9f9; padding: 15px; border-radius: 4px; margin: 20px 0;'>
+                            <p><strong>Your new default password is:</strong> <span style='font-family: monospace; font-size: 1.2em; color: #136A4D;'>{defaultPassword}</span></p>
+                        </div>
+                        <p>For security reasons, we recommend that you log in and change this password immediately in your profile settings.</p>
+                        <div style='text-align: center; margin: 30px 0;'>
+                            <a href='https://aquenta-coop.com/auth' style='background-color: #136A4D; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;'>Log In Now</a>
+                        </div>
+                        <hr style='border: 0; border-top: 1px solid #eee; margin: 20px 0;' />
+                        <p style='font-size: 12px; color: #999;'>&copy; 2026 AQUENTA Water Services</p>
+                    </div>";
+
+                using (var mailMessage = new MailMessage())
+                {
+                    mailMessage.To.Add(new MailAddress(userEmail));
+                    mailMessage.From = new MailAddress(senderEmail, senderName);
+                    mailMessage.Subject = emailSubject;
+                    mailMessage.Body = body;
+                    mailMessage.IsBodyHtml = true;
+
+                    using (var client = new SmtpClient(host, port))
+                    {
+                        client.EnableSsl = true;
+                        client.Credentials = new NetworkCredential(senderEmail, password);
+                        await client.SendMailAsync(mailMessage);
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Reset confirmation email failed: {ex.Message}");
+                return false;
+            }
+        }
     }
 }

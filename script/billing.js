@@ -1400,34 +1400,41 @@ function setupPrintButton() {
 }
 
 async function loadBilling() {
+  const loadingOverlay = document.getElementById('billingTableLoading');
+  if (loadingOverlay) loadingOverlay.classList.add('active');
+
   const api = getApi();
-  const [billing, concessioners, users, periods, tariffs] = await Promise.all([
-    api.get('/Billing'),
-    api.get('/Concessioner/active'),
-    api.get('/User'),
-    api.get('/Period'),
-    api.get('/Tariffs'),
-  ]);
-
-  let districts = [];
   try {
-    districts = await api.get('/District');
-  } catch (error) {
-    console.warn('Failed to load districts for billing filter:', error);
-    showNotification('District filter options could not be fully loaded.', 'info');
+    const [billing, concessioners, users, periods, tariffs] = await Promise.all([
+      api.get('/Billing'),
+      api.get('/Concessioner/active'),
+      api.get('/User'),
+      api.get('/Period'),
+      api.get('/Tariffs'),
+    ]);
+
+    let districts = [];
+    try {
+      districts = await api.get('/District');
+    } catch (error) {
+      console.warn('Failed to load districts for billing filter:', error);
+      showNotification('District filter options could not be fully loaded.', 'info');
+    }
+
+    billingCache = Array.isArray(billing) ? billing : [];
+    concessionerCache = Array.isArray(concessioners) ? concessioners : [];
+    userCache = Array.isArray(users) ? users : [];
+    periodCache = Array.isArray(periods) ? periods : [];
+    tariffsCache = Array.isArray(tariffs) ? tariffs : [];
+    districtCache = Array.isArray(districts) ? districts : [];
+    currentBillingPage = 1;
+
+    populateDistrictFilter();
+    populatePeriodFilter();
+    applyBillingFilters();
+  } finally {
+    if (loadingOverlay) loadingOverlay.classList.remove('active');
   }
-
-  billingCache = Array.isArray(billing) ? billing : [];
-  concessionerCache = Array.isArray(concessioners) ? concessioners : [];
-  userCache = Array.isArray(users) ? users : [];
-  periodCache = Array.isArray(periods) ? periods : [];
-  tariffsCache = Array.isArray(tariffs) ? tariffs : [];
-  districtCache = Array.isArray(districts) ? districts : [];
-  currentBillingPage = 1;
-
-  populateDistrictFilter();
-  populatePeriodFilter();
-  applyBillingFilters();
 }
 
 document.addEventListener('DOMContentLoaded', async () => {

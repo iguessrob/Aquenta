@@ -318,6 +318,9 @@
     bindSidebar();
     bindFilterEvents();
 
+    const loadingOverlay = document.getElementById('customerTableLoading');
+    if (loadingOverlay) loadingOverlay.classList.add('active');
+
     try {
       allCustomers = await getCustomers();
       seedFilterOptions(allCustomers);
@@ -330,6 +333,8 @@
         customerTableBody.innerHTML = '<tr><td colspan="6" class="cr-empty">Failed to load customer records from API.</td></tr>';
       }
       window.alert('Failed to load customer records from API. Make sure the backend is running on localhost:5024.');
+    } finally {
+      if (loadingOverlay) loadingOverlay.classList.remove('active');
     }
   }
 

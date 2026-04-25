@@ -170,7 +170,11 @@
           </div>
 
           <div class="payment-content">
-            <div class="table-wrapper">
+            <div class="table-wrapper table-loading-wrap" id="paymentTableWrap">
+              <div class="table-loading-overlay" id="paymentTableLoading">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading payments...</p>
+              </div>
               <table class="payment-table">
                 <thead>
                   <tr>

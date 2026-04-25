@@ -172,18 +172,37 @@ namespace AquentaAPI.Controllers
         }
 
         [HttpPost("reset-password")]
-        public ActionResult ResetPassword([FromBody] ResetPasswordRequest request)
+        public async Task<ActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
         {
-            if (string.IsNullOrWhiteSpace(request.Token) || string.IsNullOrWhiteSpace(request.NewPassword))
-                return BadRequest("Token and new password are required.");
+            if (string.IsNullOrWhiteSpace(request.Token))
+                return BadRequest("Token is required.");
 
             var (userId, isValid) = tokenService.ValidateToken(request.Token);
             if (!isValid)
                 return BadRequest("Invalid or expired reset token.");
 
-            var success = userRepository.UpdatePassword(userId, request.NewPassword);
+            // Get user info for dynamic default password and email
+            var user = userRepository.GetUserById(userId);
+            if (user == null)
+                return NotFound("User not found.");
+
+            // Determine default password: LastName@2026
+            string defaultPassword = $"{user.LastName}@2026";
+            
+            // Always reset to default password as requested by the user
+            string finalPassword = defaultPassword;
+
+            var success = userRepository.UpdatePassword(userId, finalPassword);
             if (!success)
                 return StatusCode(500, "Failed to update password.");
+
+            // Get user's email from concessioner record
+            var concessioner = concessionerServices.GetAll().FirstOrDefault(c => c.UserId == userId);
+            if (concessioner != null && !string.IsNullOrEmpty(concessioner.EmailAddress))
+            {
+                string fullName = $"{user.FirstName} {user.LastName}";
+                await _emailService.SendPasswordResetConfirmationEmail(concessioner.EmailAddress, fullName, finalPassword);
+            }
 
             return Ok("Password has been reset successfully.");
         }

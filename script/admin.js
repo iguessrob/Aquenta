@@ -466,13 +466,6 @@ async function loadDashboardData() {
   let concessionerConsumption = toNumber(latestMonthWaterData?.concessionerConsumption ?? latestMonthWaterData?.ConcessionerConsumption ?? 0);
   let unaccountedWater = toNumber(latestMonthWaterData?.waterLoss ?? latestMonthWaterData?.WaterLoss ?? 0);
 
-  // Fallback to frontend-calculated metrics if API data is missing mother meter info
-  if (motherMeterConsumption <= 0 && cardMetrics.motherMeterConsumed > 0) {
-    motherMeterConsumption = cardMetrics.motherMeterConsumed;
-    concessionerConsumption = cardMetrics.waterConsumed;
-    unaccountedWater = Math.max(0, motherMeterConsumption - concessionerConsumption);
-  }
-
   // Calculate percentages based on mother meter
   let concessionerPercent = 0;
   let unaccountedPercent = 0;

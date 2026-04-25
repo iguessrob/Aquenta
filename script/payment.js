@@ -808,25 +808,32 @@ function setupPaginationActions() {
 }
 
 async function loadData() {
+  const loadingOverlay = document.getElementById('paymentTableLoading');
+  if (loadingOverlay) loadingOverlay.classList.add('active');
+
   const api = getApi();
 
-  const [payments, billings, concessioners, users, periods] = await Promise.all([
-    api.get('/Payment'),
-    api.get('/Billing'),
-    api.get('/Concessioner/active'),
-    api.get('/User'),
-    api.get('/Period'),
-  ]);
+  try {
+    const [payments, billings, concessioners, users, periods] = await Promise.all([
+      api.get('/Payment'),
+      api.get('/Billing'),
+      api.get('/Concessioner/active'),
+      api.get('/User'),
+      api.get('/Period'),
+    ]);
 
-  paymentCache = Array.isArray(payments) ? payments : [];
-  billingCache = Array.isArray(billings) ? billings : [];
-  concessionerCache = Array.isArray(concessioners) ? concessioners : [];
-  userCache = Array.isArray(users) ? users : [];
-  periodCache = Array.isArray(periods) ? periods : [];
+    paymentCache = Array.isArray(payments) ? payments : [];
+    billingCache = Array.isArray(billings) ? billings : [];
+    concessionerCache = Array.isArray(concessioners) ? concessioners : [];
+    userCache = Array.isArray(users) ? users : [];
+    periodCache = Array.isArray(periods) ? periods : [];
 
-  populateMonthFilter();
-  populatePeriodFilter();
-  renderRows();
+    populateMonthFilter();
+    populatePeriodFilter();
+    renderRows();
+  } finally {
+    if (loadingOverlay) loadingOverlay.classList.remove('active');
+  }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
