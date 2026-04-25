@@ -82,23 +82,9 @@ namespace AquentaLibrary.Repositories
         public decimal GetLatestMonthPendingCollections()
         {
             using var dbConnection = CreateConnection();
-            var result = dbConnection.QuerySingleOrDefault<decimal?>(@"
-                SELECT ISNULL(SUM(b.BillAmount + ISNULL(b.Penalty, 0) - ISNULL(p.TotalAmountPaid, 0)), 0)
-                FROM tbl_Billing b
-                INNER JOIN tbl_Concessioner c ON c.ConcessionerID = b.ConcessionerID
-                INNER JOIN tbl_User u ON u.UserID = c.UserID
-                LEFT JOIN (
-                    SELECT BillingID, SUM(AmountPaid) AS TotalAmountPaid
-                    FROM tbl_Payment
-                    GROUP BY BillingID
-                ) p ON p.BillingID = b.BillingID
-                WHERE b.PeriodID = (
-                    SELECT TOP 1 b2.PeriodID
-                    FROM tbl_Billing b2
-                    INNER JOIN tbl_Period pe ON pe.PeriodID = b2.PeriodID
-                    ORDER BY pe.PeriodEnd DESC, b2.CreatedAt DESC
-                )
-                AND UPPER(LTRIM(RTRIM(ISNULL(u.FirstName, '')))) <> 'MOTHER METER';");
+            var result = dbConnection.QuerySingleOrDefault<decimal?>(
+                "SP_GetLatestMonthPendingCollections",
+                commandType: CommandType.StoredProcedure);
 
             return result ?? 0;
         }
@@ -352,6 +338,8 @@ namespace AquentaLibrary.Repositories
             var parameters = new DynamicParameters();
             parameters.Add("@Year", year, DbType.Int32);
             parameters.Add("@MotherFirstName", "MOTHER METER", DbType.String);
+            parameters.Add("@MotherAccountNumber", "ACC-MOTHER-0001", DbType.String);
+            parameters.Add("@MotherMeterNumber", "MTR-MOTHER-0001", DbType.String);
 
             return dbConnection.Query<dynamic>(
                 "SP_GetMonthlyMotherMeterWaterLossReport",

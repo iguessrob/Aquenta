@@ -75,12 +75,14 @@ async function safeGetActiveMembersCount() {
     return 0;
   }
 }
+
 function resolveBillingDate(item, periodById) {
   const periodId = toNumber(item.periodId ?? item.PeriodID ?? item.PeriodId);
   if (periodId > 0 && periodById.has(periodId)) {
     const period = periodById.get(periodId);
     const periodEndRaw = period.periodEnd ?? period.PeriodEnd;
     if (periodEndRaw) {
+      const periodEnd = new Date(periodEndRaw);
       if (!Number.isNaN(periodEnd.getTime()) && periodEnd.getFullYear() > 1900) {
         return periodEnd;
       }
@@ -89,12 +91,6 @@ function resolveBillingDate(item, periodById) {
     const periodStartRaw = period.periodStart ?? period.PeriodStart;
     if (periodStartRaw) {
       const periodStart = new Date(periodStartRaw);
-
-    const concessionerConsumptionForCard = toNumber(
-      latestMonthWaterData?.concessionerConsumption ??
-      latestMonthWaterData?.ConcessionerConsumption ??
-      0
-    );
       if (!Number.isNaN(periodStart.getTime()) && periodStart.getFullYear() > 1900) {
         return periodStart;
       }
@@ -120,21 +116,6 @@ function resolveBillingDate(item, periodById) {
   return null;
 }
 
-function isMotherMeterRecord(item) {
-  const firstName = String(item.firstName ?? item.FirstName ?? '').trim().toUpperCase();
-  const fullName = String(item.fullName ?? item.FullName ?? '').trim().toUpperCase();
-  const accountNumber = String(item.accountNumber ?? item.AccountNumber ?? '').trim().toUpperCase();
-  const meterNumber = String(item.meterNumber ?? item.MeterNumber ?? '').trim().toUpperCase();
-
-  return (
-    firstName === 'MOTHER METER' ||
-    fullName === 'MOTHER METER' ||
-    fullName.startsWith('MOTHER METER ') ||
-    accountNumber === 'ACC-MOTHER-0001' ||
-    meterNumber === 'MTR-MOTHER-0001'
-  );
-}
-
 function buildFallbackDashboardMetrics(billings, payments, periods, selectedYear) {
   const billingList = Array.isArray(billings) ? billings : [];
   const paymentList = Array.isArray(payments) ? payments : [];
@@ -151,7 +132,6 @@ function buildFallbackDashboardMetrics(billings, payments, periods, selectedYear
   }));
 
   const billingIdToBucket = new Map();
-  const billingIdIsMotherMeter = new Map();
   const bucketByYearMonth = new Map();
 
   if (billingList.length === 0) {
@@ -193,24 +173,15 @@ function buildFallbackDashboardMetrics(billings, payments, periods, selectedYear
         monthIndex,
         receivable: 0,
         collection: 0,
-        concessionerReceivable: 0,
-        concessionerCollection: 0,
       });
     }
 
     const bucket = bucketByYearMonth.get(bucketKey);
-    const isMotherMeter = isMotherMeterRecord(item);
-    const billAmount = toNumber(item.billAmount ?? item.BillAmount) + toNumber(item.penalty ?? item.Penalty);
-
-    bucket.receivable += billAmount;
-    if (!isMotherMeter) {
-      bucket.concessionerReceivable += billAmount;
-    }
+    bucket.receivable += toNumber(item.billAmount ?? item.BillAmount) + toNumber(item.penalty ?? item.Penalty);
 
     const billingId = toNumber(item.billingId ?? item.BillingID ?? item.BillingId);
     if (billingId > 0) {
       billingIdToBucket.set(billingId, bucketKey);
-      billingIdIsMotherMeter.set(billingId, isMotherMeter);
     }
   });
 
@@ -222,12 +193,7 @@ function buildFallbackDashboardMetrics(billings, payments, periods, selectedYear
     const bucket = bucketByYearMonth.get(bucketKey);
     if (!bucket) return;
 
-    const amountPaid = toNumber(item.amountPaid ?? item.AmountPaid);
-    bucket.collection += amountPaid;
-
-    if (!billingIdIsMotherMeter.get(billingId)) {
-      bucket.concessionerCollection += amountPaid;
-    }
+    bucket.collection += toNumber(item.amountPaid ?? item.AmountPaid);
   });
 
   bucketByYearMonth.forEach((bucket) => {
@@ -241,12 +207,7 @@ function buildFallbackDashboardMetrics(billings, payments, periods, selectedYear
   const latestYear = latestDate.getFullYear();
   const latestMonthIndex = latestDate.getMonth();
   const latestBucketKey = `${latestYear}-${latestMonthIndex}`;
-  const latestBucket = bucketByYearMonth.get(latestBucketKey) || {
-    receivable: 0,
-    collection: 0,
-    concessionerReceivable: 0,
-    concessionerCollection: 0,
-  };
+  const latestBucket = bucketByYearMonth.get(latestBucketKey) || { receivable: 0, collection: 0 };
 
   const totalMonthlyAccountReceivable = latestBucket.receivable;
   const totalMonthlyCollection = latestBucket.collection;
@@ -263,7 +224,7 @@ function buildFallbackDashboardMetrics(billings, payments, periods, selectedYear
     latestMonthIndex,
     totalMonthlyAccountReceivable,
     totalMonthlyCollection,
-    latestMonthPendingCollections: latestBucket.concessionerReceivable - latestBucket.concessionerCollection,
+    latestMonthPendingCollections: totalMonthlyAccountReceivable - totalMonthlyCollection,
     totalAnnualAccountReceivable,
     monthlyDataForSelectedYear,
     totalAnnualAccountReceivableForSelectedYear,
@@ -287,12 +248,14 @@ async function loadDashboardData() {
   const [
     activeMembersCount,
     latestMonthPendingCollectionsRaw,
+    latestMonthWaterConsumed,
     billings,
     payments,
     periods,
   ] = await Promise.all([
     safeGetActiveMembersCount(),
     safeApiGet('/Report/latest-month-pending-collections', null),
+    safeApiGet('/Billing/water-consumption/latest-month', 0),
     safeApiGet('/Billing', []),
     safeApiGet('/Payment', []),
     safeApiGet('/Period', []),
@@ -337,12 +300,6 @@ async function loadDashboardData() {
     ? fallbackMetrics.latestMonthPendingCollections
     : toNumber(latestMonthPendingCollectionsRaw);
 
-  const concessionerConsumptionForCard = toNumber(
-    latestMonthWaterData?.concessionerConsumption ??
-    latestMonthWaterData?.ConcessionerConsumption ??
-    0
-  );
-
   const activeMembersElement = document.querySelector('.summary-card:nth-of-type(1) .card-value');
   if (activeMembersElement) {
     activeMembersElement.textContent = activeMembersCount.toLocaleString();
@@ -360,7 +317,7 @@ async function loadDashboardData() {
 
   const waterConsumedElement = document.querySelector('.summary-card:nth-of-type(3) .card-value');
   if (waterConsumedElement) {
-    waterConsumedElement.textContent = `${concessionerConsumptionForCard.toLocaleString()} m³`;
+    waterConsumedElement.textContent = `${toNumber(latestMonthWaterConsumed).toLocaleString()} m³`;
   }
 
   const totalAnnualElement = document.getElementById('totalAnnual');
@@ -1034,10 +991,7 @@ if (currentUser) {
 
   loadDashboardData().catch(error => {
     console.error('Failed to load dashboard data:', error);
-    const baseUrl = (window.AquentaApiClient && typeof window.AquentaApiClient.getApiBaseUrl === 'function')
-      ? window.AquentaApiClient.getApiBaseUrl()
-      : 'unknown API base URL';
-    alert(`Failed to load dashboard data from API (${baseUrl}). ${error && error.message ? error.message : ''}`);
+    alert('Failed to load dashboard data from API. Check if the backend is running on http://localhost:5024.');
   });
 
   const waterDistributionViewMore = document.getElementById('waterDistributionViewMore');
