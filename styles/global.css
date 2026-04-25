@@ -245,6 +245,7 @@ table td {
   overflow-x: hidden;
   overflow-y: auto;
   background: #eef2f6;
+  min-height: 0;
 }
 
 /* 6. MOBILE OVERLAY */

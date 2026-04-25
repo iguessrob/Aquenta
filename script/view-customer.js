@@ -186,6 +186,37 @@
     });
   });
 
+  // Reset Password Modal Logic
+  const resetBtn = document.getElementById('resetPasswordBtn');
+  const resetModal = document.getElementById('resetPasswordModal');
+  const closeResetModalBtn = document.getElementById('closeResetModalBtn');
+  const cancelResetBtn = document.getElementById('cancelResetBtn');
+  const confirmResetBtn = document.getElementById('confirmResetBtn');
+
+  const openResetModal = () => resetModal && resetModal.classList.add('active');
+  const closeResetModal = () => resetModal && resetModal.classList.remove('active');
+
+  if (resetBtn) resetBtn.addEventListener('click', openResetModal);
+  if (closeResetModalBtn) closeResetModalBtn.addEventListener('click', closeResetModal);
+  if (cancelResetBtn) cancelResetBtn.addEventListener('click', closeResetModal);
+  
+  if (confirmResetBtn) {
+    confirmResetBtn.addEventListener('click', () => {
+      // In a real app, this would call an API endpoint to reset the password
+      alert('Password has been successfully reset. The concessioner will be notified.');
+      closeResetModal();
+    });
+  }
+
+  // Close modal when clicking outside
+  if (resetModal) {
+    resetModal.addEventListener('click', (e) => {
+      if (e.target === resetModal) {
+        closeResetModal();
+      }
+    });
+  }
+
   // Load Initial Data
   loadHistory();
 })();
