@@ -154,6 +154,8 @@ async function handleSubmit(event) {
     event.preventDefault();
 
     clearFormErrors();
+    const contactMessage = document.getElementById('contactMessage');
+    contactMessage.style.display = 'none';
 
     const form = event.target;
     const submitButton = form.querySelector('.submit-btn');
@@ -167,6 +169,14 @@ async function handleSubmit(event) {
         email: (rawData.email || '').trim(),
         subject: (rawData.subject || '').trim(),
         message: (rawData.message || '').trim(),
+        submittedAt: new System.DateTime().toISOString(), // Mocking local time if needed or let backend handle
+        status: 'Pending'
+    };
+
+    // Correct payload for backend (matching ContactSubmissionModel)
+    const backendPayload = {
+        ...payload,
+        submittedAt: new Date().toISOString()
     };
 
     const fieldErrors = validateContactForm(payload);
@@ -178,18 +188,38 @@ async function handleSubmit(event) {
     try {
         if (submitButton) {
             submitButton.disabled = true;
-            submitButton.textContent = 'Opening Email...';
+            submitButton.textContent = 'Submitting...';
         }
 
-        const mailtoLink = buildContactMailto(payload);
-        window.location.href = mailtoLink;
+        const response = await fetch(`${window.AQUENTA_API_BASE_URL}/Contact`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(backendPayload)
+        });
 
-        alert('Your default email app will open with a prefilled message. Please click Send to complete submission.');
-        form.reset();
-        updateCharCount();
+        if (response.ok) {
+            contactMessage.textContent = 'Your inquiry has been submitted successfully! We will get back to you soon.';
+            contactMessage.style.backgroundColor = '#e8f5e9';
+            contactMessage.style.color = '#136A4D';
+            contactMessage.style.border = '1px solid #c8e6c9';
+            contactMessage.style.display = 'block';
+            
+            form.reset();
+            updateCharCount();
+            
+            // Scroll to message
+            contactMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+            const errorText = await response.text();
+            throw new Error(errorText || 'Failed to submit inquiry.');
+        }
     } catch (error) {
-        const message = error && error.message ? error.message : 'Unable to open your email app.';
-        alert(`Failed to prepare email: ${message}`);
+        console.error('Contact error:', error);
+        contactMessage.textContent = 'Failed to submit inquiry. Please try again later.';
+        contactMessage.style.backgroundColor = '#ffebee';
+        contactMessage.style.color = '#c62828';
+        contactMessage.style.border = '1px solid #ffcdd2';
+        contactMessage.style.display = 'block';
     } finally {
         if (submitButton) {
             submitButton.disabled = false;

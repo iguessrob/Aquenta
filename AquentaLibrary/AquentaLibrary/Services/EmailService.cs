@@ -81,5 +81,62 @@ namespace AquentaLibrary.Services
                 return false;
             }
         }
+
+        public async Task<bool> SendContactInquiryEmail(string adminEmail, string userName, string userEmail, string contactNumber, string accountNumber, string subject, string message)
+        {
+            try
+            {
+                var smtpSettings = _configuration.GetSection("SmtpSettings");
+                string host = smtpSettings["Host"] ?? "smtp.gmail.com";
+                int port = int.Parse(smtpSettings["Port"] ?? "587");
+                string senderEmail = smtpSettings["SenderEmail"] ?? "";
+                string senderName = smtpSettings["SenderName"] ?? "AQUENTA Support";
+                string password = smtpSettings["Password"] ?? "";
+
+                string emailSubject = $"AQUENTA - New Contact Inquiry: {subject}";
+                string body = $@"
+                    <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;'>
+                        <h2 style='color: #136A4D;'>New Inquiry Received</h2>
+                        <p>Hello Admin,</p>
+                        <p>A new inquiry has been submitted via the website contact form:</p>
+                        <div style='background-color: #f9f9f9; padding: 15px; border-radius: 4px; margin: 20px 0;'>
+                            <p><strong>Name:</strong> {userName}</p>
+                            <p><strong>Email:</strong> {userEmail}</p>
+                            <p><strong>Contact #:</strong> {contactNumber}</p>
+                            <p><strong>Account #:</strong> {accountNumber ?? "N/A"}</p>
+                            <p><strong>Subject:</strong> {subject}</p>
+                        </div>
+                        <p><strong>Message:</strong></p>
+                        <div style='background-color: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 4px;'>
+                            {message.Replace("\n", "<br/>")}
+                        </div>
+                        <hr style='border: 0; border-top: 1px solid #eee; margin: 20px 0;' />
+                        <p style='font-size: 12px; color: #999;'>&copy; 2026 AQUENTA Water Services</p>
+                    </div>";
+
+                using (var mailMessage = new MailMessage())
+                {
+                    mailMessage.To.Add(new MailAddress(adminEmail));
+                    mailMessage.From = new MailAddress(senderEmail, senderName);
+                    mailMessage.Subject = emailSubject;
+                    mailMessage.Body = body;
+                    mailMessage.IsBodyHtml = true;
+
+                    using (var client = new SmtpClient(host, port))
+                    {
+                        client.EnableSsl = true;
+                        client.Credentials = new NetworkCredential(senderEmail, password);
+                        await client.SendMailAsync(mailMessage);
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Contact inquiry email failed: {ex.Message}");
+                return false;
+            }
+        }
     }
 }

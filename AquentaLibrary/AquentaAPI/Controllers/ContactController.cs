@@ -9,6 +9,12 @@ namespace AquentaAPI.Controllers
     public class ContactController : Controller
     {
         private readonly ContactSubmissionServices _contactSubmissionServices = new ContactSubmissionServices();
+        private readonly EmailService _emailService;
+
+        public ContactController(EmailService emailService)
+        {
+            _emailService = emailService;
+        }
 
         [HttpPost]
         public ActionResult SubmitContact([FromBody] ContactSubmissionModel submission)
@@ -48,8 +54,21 @@ namespace AquentaAPI.Controllers
                 return BadRequest("Message cannot exceed 300 characters.");
             }
 
-            var createdId = _contactSubmissionServices.Submit(submission);
-            return Ok(new { contactSubmissionId = createdId, message = "Inquiry submitted successfully." });
+            // var createdId = _contactSubmissionServices.Submit(submission);
+
+            // Send notification email to Admin
+            string adminEmail = "mabilanganrob@gmail.com";
+            await _emailService.SendContactInquiryEmail(
+                adminEmail,
+                submission.FullName,
+                submission.Email,
+                submission.ContactNumber,
+                submission.AccountNumber,
+                submission.Subject,
+                submission.Message
+            );
+
+            return Ok(new { message = "Inquiry submitted successfully." });
         }
 
         [HttpGet]
