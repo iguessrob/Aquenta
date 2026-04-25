@@ -287,14 +287,12 @@ async function loadDashboardData() {
   const [
     activeMembersCount,
     latestMonthPendingCollectionsRaw,
-    latestMonthWaterConsumed,
     billings,
     payments,
     periods,
   ] = await Promise.all([
     safeGetActiveMembersCount(),
     safeApiGet('/Report/latest-month-pending-collections', null),
-    safeApiGet('/Billing/water-consumption/latest-month', 0),
     safeApiGet('/Billing', []),
     safeApiGet('/Payment', []),
     safeApiGet('/Period', []),
@@ -338,6 +336,12 @@ async function loadDashboardData() {
   const latestMonthPendingCollections = latestMonthPendingCollectionsRaw === null
     ? fallbackMetrics.latestMonthPendingCollections
     : toNumber(latestMonthPendingCollectionsRaw);
+
+  const concessionerConsumptionForCard = toNumber(
+    latestMonthWaterData?.concessionerConsumption ??
+    latestMonthWaterData?.ConcessionerConsumption ??
+    0
+  );
 
   const activeMembersElement = document.querySelector('.summary-card:nth-of-type(1) .card-value');
   if (activeMembersElement) {
@@ -1030,7 +1034,10 @@ if (currentUser) {
 
   loadDashboardData().catch(error => {
     console.error('Failed to load dashboard data:', error);
-    alert('Failed to load dashboard data from API. Check if the backend is running on http://localhost:5024.');
+    const baseUrl = (window.AquentaApiClient && typeof window.AquentaApiClient.getApiBaseUrl === 'function')
+      ? window.AquentaApiClient.getApiBaseUrl()
+      : 'unknown API base URL';
+    alert(`Failed to load dashboard data from API (${baseUrl}). ${error && error.message ? error.message : ''}`);
   });
 
   const waterDistributionViewMore = document.getElementById('waterDistributionViewMore');
