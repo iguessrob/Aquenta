@@ -638,12 +638,15 @@ html, body {
   .content { padding: 12px; }
   .welcome-title { font-size: 18px; }
   .stat-card { padding: 16px; }
-  
-  /* Prevent dropdowns from being too wide */
-  .notif-dropdown, .profile-dropdown {
-    width: calc(100vw - 20px) !important;
-    left: 10px !important;
-    right: 10px !important;
+
+  /* Keep the profile dropdown inside the viewport on small screens */
+  .profile-dropdown {
+    position: fixed;
+    top: 64px;
+    right: 12px;
+    left: auto;
+    width: min(180px, calc(100vw - 24px));
+    z-index: 1020;
   }
 }
 
