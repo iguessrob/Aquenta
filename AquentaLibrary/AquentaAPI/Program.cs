@@ -23,6 +23,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<EmailService>();
 
+// Register KeepAliveService and its HttpClient
+builder.Services.AddHttpClient("KeepAliveClient");
+builder.Services.AddHostedService<AquentaAPI.Services.KeepAliveService>();
+
 var app = builder.Build();
 
 // SECURITY: Add cache control headers
