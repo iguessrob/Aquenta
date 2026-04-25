@@ -345,62 +345,69 @@ function renderPaginationHost(rows) {
   host.innerHTML = renderPaginationFooter(rows);
 }
 
-function buildPaymentRows() {
+function buildPaymentRows(monthFilter = '', periodFilter = 0) {
   const periodMap = new Map(periodCache.map((period) => [toNumber(pick(period, ['periodId', 'PeriodId'], 0), 0), period]));
-  const billingMap = new Map(billingCache.map((billing) => [toNumber(pick(billing, ['billingId', 'BillingId', 'billingID', 'BillingID'], 0), 0), billing]));
-  const concessionerMap = new Map(concessionerCache.map((item) => [toNumber(pick(item, ['concessionerId', 'ConcessionerId', 'concessionerID', 'ConcessionerID'], 0), 0), item]));
   const userMap = new Map(userCache.map((user) => [toNumber(pick(user, ['userId', 'UserId', 'userID', 'UserID'], 0), 0), user]));
+  const selectedPeriodId = periodFilter > 0 ? periodFilter : toNumber(document.getElementById('paymentPeriodFilter')?.value, 0);
 
-  return paymentCache
-    .map((payment) => {
-      const paymentId = toNumber(pick(payment, ['paymentId', 'PaymentId'], 0), 0);
-      const billingId = toNumber(pick(payment, ['billingId', 'BillingId', 'billingID', 'BillingID'], 0), 0);
-      const billing = billingMap.get(billingId) || null;
+  // Map billings by concessioner and period
+  const billingByConcessionerAndPeriod = new Map();
+  billingCache.forEach((b) => {
+    const cid = toNumber(pick(b, ['concessionerID', 'ConcessionerID', 'concessionerId', 'ConcessionerId'], 0), 0);
+    const pid = toNumber(pick(b, ['periodId', 'PeriodId', 'periodID', 'PeriodID'], 0), 0);
+    if (!billingByConcessionerAndPeriod.has(cid)) billingByConcessionerAndPeriod.set(cid, new Map());
+    billingByConcessionerAndPeriod.get(cid).set(pid, b);
+  });
 
-      const concessionerId = toNumber(
-        pick(payment, ['concessionerId', 'ConcessionerId', 'concessionerID', 'ConcessionerID'], pick(billing, ['concessionerId', 'ConcessionerId', 'concessionerID', 'ConcessionerID'], 0)),
-        0,
-      );
-      const concessioner = concessionerMap.get(concessionerId) || null;
+  // Map payments by billing, filtered by month if provided
+  const paymentByBilling = new Map();
+  paymentCache.forEach((p) => {
+    if (monthFilter && getPaymentMonthKey(pick(p, ['datePaid', 'DatePaid'], null)) !== monthFilter) return;
+    const bid = toNumber(pick(p, ['billingId', 'BillingId', 'billingID', 'BillingID'], 0), 0);
+    paymentByBilling.set(bid, p);
+  });
 
+  return concessionerCache
+    .filter(c => {
+      const status = String(pick(c, ['status', 'Status'], '')).trim().toLowerCase();
+      return status === '' || status === 'active';
+    })
+    .map((concessioner) => {
+      const concessionerId = toNumber(pick(concessioner, ['concessionerId', 'ConcessionerId', 'concessionerID', 'ConcessionerID'], 0), 0);
       const userId = toNumber(pick(concessioner, ['userId', 'UserId', 'userID', 'UserID'], 0), 0);
       const user = userMap.get(userId) || null;
 
-      const periodId = toNumber(
-        pick(payment, ['periodId', 'PeriodId', 'periodID', 'PeriodID'], pick(billing, ['periodId', 'PeriodId', 'periodID', 'PeriodID'], 0)),
-        0,
-      );
-      const period = periodMap.get(periodId) || null;
+      // Find billing for selected period (or latest if none selected)
+      let targetPeriodId = selectedPeriodId;
+      if (targetPeriodId <= 0) {
+        // Fallback to latest period in cache
+        const sortedPeriods = [...periodCache].sort((a, b) => (getPeriodStart(b)?.getTime() || 0) - (getPeriodStart(a)?.getTime() || 0));
+        targetPeriodId = sortedPeriods[0] ? toNumber(pick(sortedPeriods[0], ['periodId', 'PeriodId'], 0), 0) : 0;
+      }
 
-      const amount = toNumber(
-        pick(payment, ['amount', 'Amount', 'billAmount', 'BillAmount'], pick(billing, ['amount', 'Amount', 'billAmount', 'BillAmount'], 0)),
-        0,
-      );
-      const arrears = toNumber(
-        pick(payment, ['arrears', 'Arrears'], pick(billing, ['arrears', 'Arrears'], 0)),
-        0,
-      );
-      const lpRf = toNumber(
-        pick(payment, ['lpRf', 'LpRf', 'lpRF', 'LPRF', 'lpOrRf', 'LPOrRF', 'penalty', 'Penalty'], pick(billing, ['lpRf', 'LpRf', 'lpRF', 'LPRF', 'lpOrRf', 'LPOrRF', 'penalty', 'Penalty'], 0)),
-        0,
-      );
+      const billing = (billingByConcessionerAndPeriod.get(concessionerId) || new Map()).get(targetPeriodId) || null;
+      const billingId = billing ? toNumber(pick(billing, ['billingId', 'BillingId', 'billingID', 'BillingID'], 0), 0) : 0;
+      const payment = billingId > 0 ? paymentByBilling.get(billingId) : null;
+      const period = periodMap.get(targetPeriodId) || null;
+
+      const amount = billing ? toNumber(pick(billing, ['billAmount', 'BillAmount'], 0), 0) : 0;
+      const arrears = billing ? toNumber(pick(billing, ['arrears', 'Arrears'], 0), 0) : 0;
+      const lpRf = billing ? toNumber(pick(billing, ['lpRf', 'LpRf', 'lpRF', 'LPRF', 'penalty', 'Penalty'], 0), 0) : 0;
       const total = amount + arrears + lpRf;
 
-      const amountPaid = toNumber(pick(payment, ['amountPaid', 'AmountPaid'], 0), 0);
+      const amountPaid = payment ? toNumber(pick(payment, ['amountPaid', 'AmountPaid'], 0), 0) : 0;
       const balance = Math.max(0, total - amountPaid);
-      const status = normalizeBillStatus(
-        pick(billing, ['billStatus', 'BillStatus'], pick(payment, ['billStatus', 'BillStatus'], deriveStatus(amountPaid, total)))
-      );
-      const isEditing = Boolean(pick(payment, ['isEditing', 'IsEditing'], false));
-      const draftAmountPaid = pick(payment, ['draftAmountPaid', 'DraftAmountPaid'], '');
+      const status = billing ? normalizeBillStatus(pick(billing, ['billStatus', 'BillStatus'], deriveStatus(amountPaid, total))) : 'unpaid';
+      const isEditing = payment ? Boolean(pick(payment, ['isEditing', 'IsEditing'], false)) : false;
+      const draftAmountPaid = payment ? pick(payment, ['draftAmountPaid', 'DraftAmountPaid'], '') : '';
 
       return {
-        paymentId,
+        paymentId: payment ? toNumber(pick(payment, ['paymentId', 'PaymentId'], 0), 0) : 0,
         billingId,
-        datePaid: pick(payment, ['datePaid', 'DatePaid'], null),
+        datePaid: payment ? pick(payment, ['datePaid', 'DatePaid'], null) : null,
         accountNumber: String(pick(concessioner, ['accountNumber', 'AccountNumber'], '--')).trim() || '--',
         name: getConcessionerDisplayName(concessioner, user),
-        periodId,
+        periodId: targetPeriodId,
         periodCover: formatPeriodCover(period),
         amount,
         arrears,
@@ -479,16 +486,14 @@ function renderRows() {
   const periodFilter = toNumber(document.getElementById('paymentPeriodFilter')?.value, 0);
   const statusFilter = String(document.getElementById('paymentStatusFilter')?.value || 'all').trim().toLowerCase();
 
-  const rows = buildPaymentRows().filter((row) => {
+  const rows = buildPaymentRows(monthFilter, periodFilter).filter((row) => {
     const matchesSearch = !search
       || String(row.name).toLowerCase().includes(search)
       || String(row.accountNumber).toLowerCase().includes(search);
 
-    const matchesMonth = !monthFilter || getPaymentMonthKey(row.datePaid) === monthFilter;
-    const matchesPeriod = periodFilter <= 0 || row.periodId === periodFilter;
     const matchesStatus = statusFilter === 'all' || row.status === statusFilter;
 
-    return matchesSearch && matchesMonth && matchesPeriod && matchesStatus;
+    return matchesSearch && matchesStatus;
   });
 
   filteredPaymentRows = rows;

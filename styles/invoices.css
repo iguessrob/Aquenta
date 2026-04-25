@@ -488,7 +488,7 @@ body {
 }
 
 .invoice-table tbody tr:hover {
-  background: #f8fbff;
+  background: #f1f5f9;
 }
 
 .invoice-table td:nth-child(2) {

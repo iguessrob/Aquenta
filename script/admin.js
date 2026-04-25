@@ -118,12 +118,15 @@ function resolveBillingDate(item, periodById) {
 
 function isMotherMeterConcessioner(item) {
   const firstName = String(item.firstName ?? item.FirstName ?? '').trim().toUpperCase();
+  const fullName = String(item.fullName ?? item.FullName ?? '').trim().toUpperCase();
   const accountNumber = String(item.accountNumber ?? item.AccountNumber ?? '').trim().toUpperCase();
   const meterNumber = String(item.meterNumber ?? item.MeterNumber ?? '').trim().toUpperCase();
 
-  return firstName === 'MOTHER METER'
-    || accountNumber === 'ACC-MOTHER-0001'
-    || meterNumber === 'MTR-MOTHER-0001';
+  const isMotherName = fullName.includes('MOTHER');
+  const isMotherAccount = accountNumber.includes('MOTHER');
+  const isMotherMeter = meterNumber.includes('MOTHER');
+
+  return isMotherName || isMotherAccount || isMotherMeter;
 }
 
 function getLatestPeriodId(periodList, billingList) {
@@ -161,6 +164,7 @@ function computeLatestConcessionerCardMetrics(billingList, paymentList, periodLi
     return {
       pendingCollections: 0,
       waterConsumed: 0,
+      motherMeterConsumed: 0,
     };
   }
 
@@ -171,16 +175,17 @@ function computeLatestConcessionerCardMetrics(billingList, paymentList, periodLi
       .filter((id) => id > 0)
   );
 
-  const latestBills = (billingList || []).filter((bill) => {
+  const allLatestBills = (billingList || []).filter((bill) => {
     const periodId = toNumber(bill.periodId ?? bill.PeriodID ?? bill.PeriodId);
-    if (periodId !== latestPeriodId) return false;
-
-    const concessionerId = toNumber(bill.concessionerId ?? bill.ConcessionerID ?? bill.ConcessionerId);
-    return !motherConcessionerIds.has(concessionerId);
+    return periodId === latestPeriodId;
   });
 
   const latestBillIdSet = new Set(
-    latestBills
+    allLatestBills
+      .filter(bill => {
+        const cid = toNumber(bill.concessionerId ?? bill.ConcessionerID ?? bill.ConcessionerId);
+        return !motherConcessionerIds.has(cid);
+      })
       .map((bill) => toNumber(bill.billingId ?? bill.BillingID ?? bill.BillingId))
       .filter((id) => id > 0)
   );
@@ -191,34 +196,42 @@ function computeLatestConcessionerCardMetrics(billingList, paymentList, periodLi
     if (!latestBillIdSet.has(billingId)) return;
 
     const amountPaid = toNumber(payment.amountPaid ?? payment.AmountPaid);
-    paidByBillingId.set(billingId, toNumber(paidByBillingId.get(billingId)) + amountPaid);
+    paidByBillingId.set(billingId, (paidByBillingId.get(billingId) || 0) + amountPaid);
   });
 
   let pendingCollections = 0;
   let waterConsumed = 0;
+  let motherMeterConsumed = 0;
 
-  latestBills.forEach((bill) => {
+  allLatestBills.forEach((bill) => {
     const billingId = toNumber(bill.billingId ?? bill.BillingID ?? bill.BillingId);
-    const billAmount = toNumber(bill.billAmount ?? bill.BillAmount);
-    const penalty = toNumber(bill.penalty ?? bill.Penalty);
-    const paidAmount = toNumber(paidByBillingId.get(billingId));
-    const remaining = (billAmount + penalty) - paidAmount;
-
-    if (remaining > 0) {
-      pendingCollections += remaining;
-    }
+    const concessionerId = toNumber(bill.concessionerId ?? bill.ConcessionerID ?? bill.ConcessionerId);
+    const isMother = motherConcessionerIds.has(concessionerId);
 
     const prevReading = toNumber(bill.prevReading ?? bill.PrevReading);
     const currentReading = toNumber(bill.currentReading ?? bill.CurrentReading);
-    const consumption = currentReading - prevReading;
-    if (consumption > 0) {
+    const consumption = Math.max(0, currentReading - prevReading);
+
+    if (isMother) {
+      motherMeterConsumed += consumption;
+    } else {
       waterConsumed += consumption;
+
+      const billAmount = toNumber(bill.billAmount ?? bill.BillAmount);
+      const penalty = toNumber(bill.penalty ?? bill.Penalty);
+      const paidAmount = toNumber(paidByBillingId.get(billingId) || 0);
+      const remaining = (billAmount + penalty) - paidAmount;
+
+      if (remaining > 0) {
+        pendingCollections += remaining;
+      }
     }
   });
 
   return {
     pendingCollections,
     waterConsumed,
+    motherMeterConsumed,
   };
 }
 
@@ -449,9 +462,16 @@ async function loadDashboardData() {
   }
 
   // Extract unified water distribution data from the monthly report (using report-page calculation logic)
-  const motherMeterConsumption = toNumber(latestMonthWaterData?.motherMeterConsumption ?? latestMonthWaterData?.MotherMeterConsumption ?? 0);
-  const concessionerConsumption = toNumber(latestMonthWaterData?.concessionerConsumption ?? latestMonthWaterData?.ConcessionerConsumption ?? 0);
-  const unaccountedWater = toNumber(latestMonthWaterData?.waterLoss ?? latestMonthWaterData?.WaterLoss ?? 0);
+  let motherMeterConsumption = toNumber(latestMonthWaterData?.motherMeterConsumption ?? latestMonthWaterData?.MotherMeterConsumption ?? 0);
+  let concessionerConsumption = toNumber(latestMonthWaterData?.concessionerConsumption ?? latestMonthWaterData?.ConcessionerConsumption ?? 0);
+  let unaccountedWater = toNumber(latestMonthWaterData?.waterLoss ?? latestMonthWaterData?.WaterLoss ?? 0);
+
+  // Fallback to frontend-calculated metrics if API data is missing mother meter info
+  if (motherMeterConsumption <= 0 && cardMetrics.motherMeterConsumed > 0) {
+    motherMeterConsumption = cardMetrics.motherMeterConsumed;
+    concessionerConsumption = cardMetrics.waterConsumed;
+    unaccountedWater = Math.max(0, motherMeterConsumption - concessionerConsumption);
+  }
 
   // Calculate percentages based on mother meter
   let concessionerPercent = 0;

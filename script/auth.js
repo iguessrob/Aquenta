@@ -1,7 +1,7 @@
 // Form validation functions
 function validateLoginForm(data) {
     if (!data.accountNumber || !data.accountNumber.trim()) {
-        return 'Account Number is required.';
+        return 'Username is required.';
     }
 
     if (!data.password || !data.password.trim()) {

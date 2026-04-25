@@ -205,9 +205,12 @@
   async function ensureConcessionerUser(data) {
     const api = getApi();
     const users = await api.get('/User');
+    const newUsername = (String(data.lastName || '').trim() + String(data.accountNumber || '').trim()).replace(/\s+/g, '');
+    const newPassword = (String(data.lastName || '').trim() + '@STB').replace(/\s+/g, '');
+
     let existing = (users || []).find((u) => {
       const username = String(pickValue(u, ['userName', 'UserName', 'username', 'Username'], '')).trim().toLowerCase();
-      return username === String(data.accountNumber || '').trim().toLowerCase();
+      return username === newUsername.toLowerCase();
     });
 
     if (existing) {
@@ -216,8 +219,8 @@
 
     await api.post('/User', {
       userId: 0,
-      userName: data.accountNumber,
-      pass: data.accountNumber, // Changed from 'password' to 'pass' to match UserModel
+      userName: newUsername,
+      pass: newPassword, // Changed from 'password' to 'pass' to match UserModel
       firstName: data.firstName,
       lastName: data.lastName,
       userRole: 'Concessioner',
@@ -228,7 +231,7 @@
     const refreshed = await api.get('/User');
     existing = (refreshed || []).find((u) => {
       const username = String(pickValue(u, ['userName', 'UserName', 'username', 'Username'], '')).trim().toLowerCase();
-      return username === String(data.accountNumber || '').trim().toLowerCase();
+      return username === newUsername.toLowerCase();
     });
 
     if (!existing) {
@@ -295,9 +298,11 @@
     const userId = Number(pickValue(existing, ['userId', 'UserId'], 0));
     const user = await api.get(`/User/${userId}`);
 
+    const newUsername = (String(updates.lastName || '').trim() + String(updates.accountNumber || '').trim()).replace(/\s+/g, '');
+
     await api.put('/User', {
       userId,
-      userName: updates.accountNumber,
+      userName: newUsername,
       pass: pickValue(user, ['pass', 'Pass', 'password', 'Password'], updates.accountNumber),
       firstName: updates.firstName,
       lastName: updates.lastName,
@@ -338,10 +343,20 @@
 
     let allCustomers = [];
     let visibleCustomers = [];
+    let currentPage = 1;
+    const PAGE_SIZE = 10;
 
     function renderTable(rows) {
       tbody.innerHTML = '';
-      rows.forEach((customer) => {
+      
+      const totalPages = Math.ceil(rows.length / PAGE_SIZE) || 1;
+      if (currentPage > totalPages) currentPage = totalPages;
+      if (currentPage < 1) currentPage = 1;
+
+      const startIndex = (currentPage - 1) * PAGE_SIZE;
+      const paginatedRows = rows.slice(startIndex, startIndex + PAGE_SIZE);
+
+      paginatedRows.forEach((customer) => {
         const tr = document.createElement('tr');
         const statusClass = formatStatusClass(customer.connectionStatus);
         const statusLabel = customer.connectionStatus || 'Active';
@@ -353,21 +368,47 @@
           <td>${customer.rateClassification || ''}</td>
           <td><span class="status-pill ${statusClass}">${statusLabel}</span></td>
           <td class="action-cell">
-            <a href="view-customer.html?id=${encodeURIComponent(customer.concessionerId)}" class="icon-btn view-btn" aria-label="View concessioner">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
-              </svg>
-            </a>
-            <a href="edit-concessioner.html?id=${encodeURIComponent(customer.concessionerId)}" class="icon-btn edit-btn" aria-label="Edit concessioner">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 20h9"></path>
-                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"></path>
-              </svg>
-            </a>
+            <div class="cr-action">
+              <a href="view-customer.html?id=${encodeURIComponent(customer.concessionerId)}" class="cr-icon-btn view-btn" aria-label="View concessioner">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </a>
+              <a href="edit-concessioner.html?id=${encodeURIComponent(customer.concessionerId)}" class="cr-icon-btn edit-btn" aria-label="Edit concessioner">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 20h9"></path>
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"></path>
+                </svg>
+              </a>
+            </div>
           </td>`;
         tbody.appendChild(tr);
       });
+
+      updatePaginationUI(rows.length);
+    }
+
+    function updatePaginationUI(totalCount) {
+      const paginationText = document.getElementById('paginationText');
+      const currentPageBtn = document.getElementById('currentPageBtn');
+      const prevBtn = document.getElementById('prevPageBtn');
+      const nextBtn = document.getElementById('nextPageBtn');
+
+      const totalPages = Math.ceil(totalCount / PAGE_SIZE) || 1;
+      
+      if (paginationText) {
+        paginationText.textContent = `Page ${currentPage} of ${totalPages}`;
+      }
+      if (currentPageBtn) {
+        currentPageBtn.textContent = String(currentPage);
+      }
+      if (prevBtn) {
+        prevBtn.disabled = currentPage <= 1;
+      }
+      if (nextBtn) {
+        nextBtn.disabled = currentPage >= totalPages;
+      }
     }
 
     function applyAllFilters() {
@@ -395,6 +436,7 @@
 
       visibleCustomers.sort((a, b) => String(a.accountNumber || '').localeCompare(String(b.accountNumber || ''), undefined, { numeric: true, sensitivity: 'base' }));
 
+      currentPage = 1;
       if (totalCountEl) totalCountEl.textContent = String(visibleCustomers.length);
       renderTable(visibleCustomers);
     }
@@ -411,6 +453,28 @@
     if (rateClassFilter) rateClassFilter.addEventListener('change', applyAllFilters);
     if (districtFilter) districtFilter.addEventListener('change', applyAllFilters);
     if (statusFilter) statusFilter.addEventListener('change', applyAllFilters);
+
+    const prevPageBtn = document.getElementById('prevPageBtn');
+    const nextPageBtn = document.getElementById('nextPageBtn');
+
+    if (prevPageBtn) {
+      prevPageBtn.addEventListener('click', () => {
+        if (currentPage > 1) {
+          currentPage--;
+          renderTable(visibleCustomers);
+        }
+      });
+    }
+
+    if (nextPageBtn) {
+      nextPageBtn.addEventListener('click', () => {
+        const totalPages = Math.ceil(visibleCustomers.length / PAGE_SIZE) || 1;
+        if (currentPage < totalPages) {
+          currentPage++;
+          renderTable(visibleCustomers);
+        }
+      });
+    }
   }
 
   async function initAddConcessionerPage() {
@@ -620,6 +684,44 @@
     if (phoneEl) phoneEl.textContent = customer.contactNumber || '';
     if (emailEl) emailEl.textContent = customer.email || '';
     if (editLink) editLink.href = `edit-concessioner.html?id=${encodeURIComponent(customer.concessionerId)}`;
+
+    // Add Reset Password button logic
+    const profileActions = document.querySelector('.profile-actions');
+    if (profileActions) {
+      const existingReset = document.getElementById('resetPasswordBtn');
+      if (!existingReset) {
+        const resetBtn = document.createElement('button');
+        resetBtn.id = 'resetPasswordBtn';
+        resetBtn.type = 'button';
+        resetBtn.className = 'btn-danger btn-compact';
+        resetBtn.style.marginLeft = '8px';
+        resetBtn.textContent = 'Reset Password';
+        resetBtn.addEventListener('click', async () => {
+          const confirmMsg = `Are you sure you want to reset ${customer.fullName || 'this customer'}'s password?`;
+          if (window.confirm(confirmMsg)) {
+            try {
+              const api = getApi();
+              const newPassword = (String(customer.lastName || '').trim() + '@STB').replace(/\s+/g, '');
+              
+              // We need the user record to update it
+              const user = await api.get(`/User/${customer.userId}`);
+              if (!user) throw new Error('User record not found.');
+
+              await api.put('/User', {
+                ...user,
+                pass: newPassword
+              });
+
+              window.alert('Password has been reset to the default: ' + newPassword);
+            } catch (error) {
+              console.error('Reset password failed:', error);
+              window.alert('Failed to reset password: ' + (error.message || 'Unknown error'));
+            }
+          }
+        });
+        profileActions.appendChild(resetBtn);
+      }
+    }
   }
 
   const pageType = document.body ? document.body.getAttribute('data-page') : null;

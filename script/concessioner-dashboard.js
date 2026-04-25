@@ -142,16 +142,24 @@ function updateDashboardStats(billings, concessioner) {
   const currentMonth = now.getMonth();
   const currentYear = now.getFullYear();
 
-  const totalUnpaid = unpaidBills.reduce((sum, b) => {
-    return sum + parseFloat(b.billAmount || b.BillAmount || 0) + parseFloat(b.penalty || b.Penalty || 0);
-  }, 0);
-
+  // Balance: Sum of all unpaid bills EXCLUDING the current month
   const totalBalance = unpaidBills.filter(b => {
     const billDate = new Date(b.periodEnd || b.PeriodEnd || b.createdAt || b.CreatedAt || 0);
     return !(billDate.getMonth() === currentMonth && billDate.getFullYear() === currentYear);
   }).reduce((sum, b) => {
     return sum + parseFloat(b.billAmount || b.BillAmount || 0) + parseFloat(b.penalty || b.Penalty || 0);
   }, 0);
+
+  // Latest/Current Month Unpaid
+  const currentMonthUnpaid = unpaidBills.filter(b => {
+    const billDate = new Date(b.periodEnd || b.PeriodEnd || b.createdAt || b.CreatedAt || 0);
+    return (billDate.getMonth() === currentMonth && billDate.getFullYear() === currentYear);
+  }).reduce((sum, b) => {
+    return sum + parseFloat(b.billAmount || b.BillAmount || 0) + parseFloat(b.penalty || b.Penalty || 0);
+  }, 0);
+
+  // Total Unpaid: Balance + Latest/Current Month
+  const totalUnpaid = totalBalance + currentMonthUnpaid;
 
   const unpaidEl = document.getElementById('statUnpaid');
   const balanceEl = document.getElementById('statBalance');
@@ -197,7 +205,11 @@ function checkBillingAlerts(unpaidBills) {
   let alertTitle = '';
   let alertMessage = '';
 
-  if (monthDiff >= 2) {
+  if (unpaidBills.length >= 3) {
+    alertType = 'disconnection';
+    alertTitle = 'NOTICE OF DISCONNECTION';
+    alertMessage = `Your water service is scheduled for disconnection due to having <strong>${unpaidBills.length} unpaid bills</strong>. Please settle your account immediately.`;
+  } else if (monthDiff >= 2) {
     alertType = 'disconnection';
     alertTitle = 'NOTICE OF DISCONNECTION';
     alertMessage = 'Your water service is scheduled for disconnection due to an outstanding balance from <strong>' + dateStr + '</strong>. Please settle your account immediately.';

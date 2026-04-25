@@ -85,12 +85,12 @@ function validatePresentReading(rowData, rawValue) {
     };
   }
 
-  if (reading <= toNumber(rowData?.previous, 0)) {
+  if (reading < toNumber(rowData?.previous, 0)) {
     return {
       isValid: false,
       reading,
       hasValue: true,
-      message: 'Present reading must be greater than Previous reading.',
+      message: 'Present reading must be greater than or equal to Previous reading.',
     };
   }
 
@@ -616,11 +616,7 @@ function buildNormalizedRows() {
     };
   });
 
-  rows.sort((a, b) => {
-    if (a.districtId !== b.districtId) return a.districtId - b.districtId;
-    if (a.accountOrder !== b.accountOrder) return a.accountOrder - b.accountOrder;
-    return String(a.accountNumber).localeCompare(String(b.accountNumber), undefined, { numeric: true, sensitivity: 'base' });
-  });
+  rows.sort((a, b) => a.concessionerId - b.concessionerId);
 
   return rows;
 }
@@ -664,7 +660,7 @@ function renderBillingRows(rows) {
     const amountText = hasReading ? formatPeso(previewAmount) : '--';
     const inputClassName = `reading-input${!initialValidation.isValid && initialValidation.hasValue ? ' is-invalid' : ''}`;
     const inputTitle = !initialValidation.isValid && initialValidation.hasValue
-      ? 'Present reading must be greater than Previous reading.'
+      ? 'Present reading must be greater than or equal to Previous reading.'
       : '';
     const readOnlyAttribute = item.hasExistingBilling && !item.isEditing ? 'readonly' : '';
     const savedRowClass = item.hasExistingBilling ? ' saved-row' : '';

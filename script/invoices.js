@@ -612,7 +612,33 @@ function buildInvoiceRows() {
       }, 0);
 
     const amount = selectedBilling ? toNumber(pick(selectedBilling, ['billAmount', 'BillAmount'], 0), 0) : 0;
-    const penalty = selectedBilling ? toNumber(pick(selectedBilling, ['penalty', 'Penalty'], 0), 0) : 0;
+    let penalty = selectedBilling ? toNumber(pick(selectedBilling, ['penalty', 'Penalty'], 0), 0) : 0;
+    const billingId = selectedBilling ? toNumber(pick(selectedBilling, ['billingId', 'BillingId', 'billingID', 'BillingID'], 0), 0) : 0;
+
+    // CRITICAL: Automatic penalty (₱200)
+    // If a customer was unpaid last month and is still unpaid by the 20th of the current month
+    const now = new Date();
+    const currentDay = now.getDate();
+    if (currentDay >= 20 && selectedBilling && selectedBilling.billStatus === 'Unpaid' && penalty === 0) {
+      // Check if there was a previous month's unpaid bill
+      const previousBilling = billings
+        .filter((b) => {
+          const pid = toNumber(pick(b, ['periodId', 'PeriodId', 'periodID', 'PeriodID'], 0), 0);
+          const order = periodOrder.get(pid) || 0;
+          return order > 0 && order < selectedOrder;
+        })
+        .sort((a, b) => {
+          const pa = toNumber(pick(a, ['periodId', 'PeriodId', 'periodID', 'PeriodID'], 0), 0);
+          const pb = toNumber(pick(b, ['periodId', 'PeriodId', 'periodID', 'PeriodID'], 0), 0);
+          return (periodOrder.get(pb) || 0) - (periodOrder.get(pa) || 0);
+        })[0];
+
+      if (previousBilling && previousBilling.billStatus === 'Unpaid') {
+        penalty = 200;
+        // In a real app, we might call an API here to persist this penalty
+      }
+    }
+
     const present = selectedBilling ? toNumber(pick(selectedBilling, ['currentReading', 'CurrentReading'], 0), 0) : null;
     const previous = selectedBilling ? toNumber(pick(selectedBilling, ['prevReading', 'PrevReading'], 0), 0) : null;
     const consumed = selectedBilling ? Math.max(0, present - previous) : null;
@@ -624,6 +650,7 @@ function buildInvoiceRows() {
     const period = periodMap.get(selectedPeriodId) || null;
 
     return {
+      billingId,
       name: getConcessionerDisplayName(concessioner, user),
       accountNumber: String(pick(concessioner, ['accountNumber', 'AccountNumber'], '')).trim(),
       meterNumber: String(pick(concessioner, ['meterNumber', 'MeterNumber'], '')).trim(),
@@ -684,14 +711,23 @@ function renderRows() {
       <td>${formatPeso(row.penalty)}</td>
       <td>${formatPeso(row.total)}</td>
       <td>
-        <button class="invoice-row-print-btn" type="button" data-role="print-row" data-row-index="${filteredInvoiceRows.indexOf(row)}" aria-label="Print invoice for ${escapeHtml(row.accountNumber || row.name)}">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="6 9 6 2 18 2 18 9"></polyline>
-            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-            <rect x="6" y="14" width="12" height="8"></rect>
-          </svg>
-          Print
-        </button>
+        <div class="invoice-actions" style="display: flex; gap: 4px;">
+          <button class="invoice-row-print-btn" type="button" data-role="print-row" data-row-index="${filteredInvoiceRows.indexOf(row)}" aria-label="Print invoice for ${escapeHtml(row.accountNumber || row.name)}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 6 2 18 2 18 9"></polyline>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+              <rect x="6" y="14" width="12" height="8"></rect>
+            </svg>
+            Print
+          </button>
+          <button class="invoice-row-edit-btn" type="button" data-role="edit-row" data-billing-id="${row.billingId}" data-amount="${row.amount}" data-penalty="${row.penalty}" style="display: inline-flex; align-items: center; justify-content: center; gap: 4px; height: 30px; padding: 0 10px; border: 1px solid #cbd5e1; border-radius: 6px; background: white; cursor: pointer; font-size: 12px; font-weight: 600;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 20h9"></path>
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"></path>
+            </svg>
+            Edit
+          </button>
+        </div>
       </td>
     </tr>
   `).join('');
@@ -754,8 +790,66 @@ function setupPaginationActions() {
       if (rowIndex >= 0) {
         printSingleInvoice(rowIndex);
       }
+      return;
+    }
+
+    const editRowBtn = event.target.closest('[data-role="edit-row"]');
+    if (editRowBtn) {
+      const billingId = editRowBtn.getAttribute('data-billing-id');
+      const amount = editRowBtn.getAttribute('data-amount');
+      const penalty = editRowBtn.getAttribute('data-penalty');
+      
+      const modal = document.getElementById('editInvoiceModal');
+      const idInput = document.getElementById('editBillingId');
+      const amountInput = document.getElementById('editAmount');
+      const penaltyInput = document.getElementById('editLPRF');
+
+      if (modal && idInput && amountInput && penaltyInput) {
+        idInput.value = billingId;
+        amountInput.value = amount;
+        penaltyInput.value = penalty;
+        modal.style.display = 'flex';
+      }
     }
   });
+
+  const closeBtn = document.getElementById('closeEditInvoiceModal');
+  const cancelBtn = document.getElementById('cancelEditInvoice');
+  const editModal = document.getElementById('editInvoiceModal');
+  const editForm = document.getElementById('editInvoiceForm');
+
+  if (closeBtn) closeBtn.addEventListener('click', () => { editModal.style.display = 'none'; });
+  if (cancelBtn) cancelBtn.addEventListener('click', () => { editModal.style.display = 'none'; });
+  
+  if (editForm) {
+    editForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const billingId = toNumber(document.getElementById('editBillingId').value);
+      const amount = toNumber(document.getElementById('editAmount').value);
+      const penalty = toNumber(document.getElementById('editLPRF').value);
+
+      if (billingId <= 0) return;
+
+      try {
+        const api = getApi();
+        const existing = billingCache.find(b => toNumber(pick(b, ['billingId', 'BillingId'], 0)) === billingId);
+        if (!existing) throw new Error('Billing record not found.');
+
+        await api.put('/Billing', {
+          ...existing,
+          billAmount: amount,
+          penalty: penalty
+        });
+
+        editModal.style.display = 'none';
+        showNotification('Invoice updated successfully.', 'success');
+        await loadData();
+      } catch (error) {
+        console.error(error);
+        showNotification(error.message || 'Failed to update invoice.', 'error');
+      }
+    });
+  }
 }
 
 async function loadData() {

@@ -25,7 +25,8 @@ BEGIN
         INNER JOIN tbl_Period pe ON b2.PeriodID = pe.PeriodID
         ORDER BY pe.PeriodEnd DESC
     )
-    AND UPPER(LTRIM(RTRIM(ISNULL(u.FirstName, '')))) <> 'MOTHER METER';
+    AND UPPER(LTRIM(RTRIM(ISNULL(u.FirstName, '')))) NOT LIKE '%MOTHER METER%'
+    AND UPPER(LTRIM(RTRIM(ISNULL(c.AccountNumber, '')))) NOT LIKE 'ACC-MOTHER%';
 END
 GO
 

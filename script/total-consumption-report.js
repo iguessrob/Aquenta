@@ -14,8 +14,8 @@
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
   const MOTHER_FIRST_NAME = 'MOTHER METER';
-  const MOTHER_ACCOUNT_NUMBER = 'ACC-MOTHER-0001';
-  const MOTHER_METER_NUMBER = 'MTR-MOTHER-0001';
+  const MOTHER_ACCOUNT_PREFIX = 'ACC-MOTHER';
+  const MOTHER_METER_PREFIX = 'MTR-MOTHER';
   let selectedYear = new Date().getFullYear();
 
   function getApi() {
@@ -47,6 +47,8 @@
     return new Array(12).fill(null).map(() => ({
       motherMeterConsumption: 0,
       concessionerConsumption: 0,
+      memberConsumption: 0,
+      nonMemberConsumption: 0,
       waterLoss: 0,
     }));
   }
@@ -59,11 +61,15 @@
       if (idx >= 0 && idx < 12) {
         const motherMeterConsumption = Number(item.motherMeterConsumption ?? item.MotherMeterConsumption ?? 0);
         const concessionerConsumption = Number(item.concessionerConsumption ?? item.ConcessionerConsumption ?? 0);
+        const memberConsumption = Number(item.memberConsumption ?? item.MemberConsumption ?? 0);
+        const nonMemberConsumption = Number(item.nonMemberConsumption ?? item.NonMemberConsumption ?? 0);
         const waterLoss = Number(item.waterLoss ?? item.WaterLoss ?? (motherMeterConsumption - concessionerConsumption));
 
         monthlyReport[idx] = {
           motherMeterConsumption,
           concessionerConsumption,
+          memberConsumption,
+          nonMemberConsumption,
           waterLoss,
         };
       }
@@ -81,9 +87,12 @@
     const matchesName =
       firstName === MOTHER_FIRST_NAME ||
       fullName === MOTHER_FIRST_NAME ||
-      fullName.startsWith(`${MOTHER_FIRST_NAME} `);
+      fullName.includes(MOTHER_FIRST_NAME);
 
-    return matchesName || accountNumber === MOTHER_ACCOUNT_NUMBER || meterNumber === MOTHER_METER_NUMBER;
+    const matchesAccount = accountNumber.startsWith(MOTHER_ACCOUNT_PREFIX);
+    const matchesMeter = meterNumber.startsWith(MOTHER_METER_PREFIX);
+
+    return matchesName || matchesAccount || matchesMeter;
   }
 
   function aggregateFromBillingSummary(rows, targetYear) {
@@ -105,6 +114,14 @@
         monthlyReport[monthIndex].motherMeterConsumption += consumption;
       } else {
         monthlyReport[monthIndex].concessionerConsumption += consumption;
+
+        // Split by membership
+        const membership = String(item.membershipName ?? item.MembershipName ?? '').trim().toLowerCase();
+        if (membership === 'member') {
+          monthlyReport[monthIndex].memberConsumption += consumption;
+        } else {
+          monthlyReport[monthIndex].nonMemberConsumption += consumption;
+        }
       }
     });
 
@@ -143,18 +160,26 @@
       if (!tableBody) return;
       tableBody.innerHTML = '';
 
+      let annualMother = 0;
       let annualConcessioners = 0;
+      let annualMembers = 0;
+      let annualNonMembers = 0;
       let annualWaterLoss = 0;
 
       MONTH_NAMES.forEach((name, i) => {
         const monthData = monthlyReport[i];
+        annualMother += monthData.motherMeterConsumption;
         annualConcessioners += monthData.concessionerConsumption;
+        annualMembers += monthData.memberConsumption;
+        annualNonMembers += monthData.nonMemberConsumption;
         annualWaterLoss += monthData.waterLoss;
 
         const row = document.createElement('tr');
         row.innerHTML = `
           <td>${name}</td>
+          <td class="text-right">${monthData.motherMeterConsumption.toLocaleString()}</td>
           <td class="text-right">${monthData.concessionerConsumption.toLocaleString()}</td>
+          <td class="text-right">${monthData.memberConsumption.toLocaleString()} / ${monthData.nonMemberConsumption.toLocaleString()}</td>
           <td class="text-right">${monthData.waterLoss.toLocaleString()}</td>
         `;
         tableBody.appendChild(row);
@@ -165,7 +190,9 @@
       totalRow.className = 'total-row';
       totalRow.innerHTML = `
         <td>TOTAL ${selectedYear}</td>
+        <td class="text-right">${annualMother.toLocaleString()}</td>
         <td class="text-right">${annualConcessioners.toLocaleString()}</td>
+        <td class="text-right">${annualMembers.toLocaleString()} / ${annualNonMembers.toLocaleString()}</td>
         <td class="text-right">${annualWaterLoss.toLocaleString()}</td>
       `;
       tableBody.appendChild(totalRow);
@@ -173,7 +200,7 @@
     } catch (error) {
       console.error('Failed to load consumption report:', error);
       if (tableBody) {
-        tableBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:red;">Error loading data.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">Error loading data.</td></tr>';
       }
     }
   }
