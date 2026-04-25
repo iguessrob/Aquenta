@@ -9,6 +9,12 @@
   const arrearCountStat = document.getElementById('arrearCountStat');
   const recordCountText = document.getElementById('arrearRecordCount');
   const pagination = document.querySelector('.pagination');
+  const searchInput = document.getElementById('arrearSearch');
+  const districtFilter = document.getElementById('arrearDistrictFilter');
+  const statusFilter = document.getElementById('arrearStatusFilter');
+  const membershipFilter = document.getElementById('arrearMembershipFilter');
+
+  let allRows = [];
 
   function getApi() {
     if (!window.AquentaApiClient) {
@@ -70,6 +76,107 @@
   function formatMonths(count) {
     const value = Math.max(0, toNumber(count, 0));
     return value === 1 ? '1 month' : `${value} months`;
+  }
+
+  function normalizeText(value) {
+    return String(value || '').trim().toLowerCase();
+  }
+
+  function populateSelect(selectEl, values, placeholderText) {
+    if (!selectEl) return;
+
+    const previous = selectEl.value;
+    const sortedValues = [...new Set(values.filter(Boolean))].sort((a, b) => a.localeCompare(b));
+
+    const options = [`<option value="">${placeholderText}</option>`];
+    sortedValues.forEach((value) => {
+      options.push(`<option value="${String(value)}">${String(value)}</option>`);
+    });
+
+    selectEl.innerHTML = options.join('');
+    if (previous && sortedValues.includes(previous)) {
+      selectEl.value = previous;
+    }
+  }
+
+  function getConcessionerId(row) {
+    return toNumber(pick(row, ['concessionerId', 'ConcessionerId', 'concessionerID', 'ConcessionerID'], 0), 0);
+  }
+
+  function getMembershipName(row) {
+    return String(pick(row, ['membershipName', 'MembershipName'], '')).trim();
+  }
+
+  function getStatusName(row) {
+    return String(pick(row, ['connectionStatus', 'ConnectionStatus', 'status', 'Status'], '')).trim();
+  }
+
+  function enrichArrearRows(reportRows, concessioners, memberships) {
+    const membershipNameById = new Map(
+      (Array.isArray(memberships) ? memberships : []).map((item) => [
+        toNumber(pick(item, ['membershipId', 'MembershipId', 'membershipID', 'MembershipID'], 0), 0),
+        String(pick(item, ['membershipName', 'MembershipName'], '')).trim(),
+      ]),
+    );
+
+    const concessionerById = new Map(
+      (Array.isArray(concessioners) ? concessioners : []).map((item) => [
+        toNumber(pick(item, ['concessionerId', 'ConcessionerId', 'concessionerID', 'ConcessionerID'], 0), 0),
+        item,
+      ]),
+    );
+
+    return reportRows.map((row) => {
+      const concessioner = concessionerById.get(getConcessionerId(row)) || {};
+      const membershipId = toNumber(pick(concessioner, ['membershipId', 'MembershipId', 'membershipID', 'MembershipID'], 0), 0);
+      const membershipName = membershipNameById.get(membershipId) || '';
+      const connectionStatus = String(pick(concessioner, ['status', 'Status'], '')).trim();
+
+      return {
+        ...row,
+        membershipName,
+        connectionStatus,
+      };
+    });
+  }
+
+  function applyFilters() {
+    const term = normalizeText(searchInput?.value);
+    const districtValue = normalizeText(districtFilter?.value);
+    const statusValue = normalizeText(statusFilter?.value);
+    const membershipValue = normalizeText(membershipFilter?.value);
+
+    const filteredRows = allRows.filter((row) => {
+      const accountNumber = normalizeText(pick(row, ['accountNumber', 'AccountNumber']));
+      const firstName = normalizeText(pick(row, ['firstName', 'FirstName']));
+      const lastName = normalizeText(pick(row, ['lastName', 'LastName']));
+      const fullName = `${firstName} ${lastName}`.trim();
+
+      const districtName = normalizeText(pick(row, ['districtName', 'DistrictName']));
+      const statusName = normalizeText(getStatusName(row));
+      const membershipName = normalizeText(getMembershipName(row));
+
+      const matchesSearch = !term || accountNumber.includes(term) || fullName.includes(term);
+      const matchesDistrict = !districtValue || districtName === districtValue;
+      const matchesStatus = !statusValue || statusName === statusValue;
+      const matchesMembership = !membershipValue || membershipName === membershipValue;
+
+      return matchesSearch && matchesDistrict && matchesStatus && matchesMembership;
+    });
+
+    const totalArrears = filteredRows.reduce((sum, row) => sum + toNumber(pick(row, ['totalArrears', 'TotalArrears'], 0)), 0);
+    const totalPenalty = filteredRows.reduce((sum, row) => sum + toNumber(pick(row, ['totalPenalty', 'TotalPenalty'], 0)), 0);
+
+    setSummary(totalArrears, totalPenalty, filteredRows.length);
+    renderRows(filteredRows);
+    updateFooter(filteredRows.length);
+  }
+
+  function bindFilters() {
+    if (searchInput) searchInput.addEventListener('input', applyFilters);
+    if (districtFilter) districtFilter.addEventListener('change', applyFilters);
+    if (statusFilter) statusFilter.addEventListener('change', applyFilters);
+    if (membershipFilter) membershipFilter.addEventListener('change', applyFilters);
   }
 
   function setSummary(totalArrears, totalPenalty, count) {
@@ -140,15 +247,34 @@
 
     try {
       const api = getApi();
-      const data = await api.get('/report/arrear-summary');
+      const [data, concessioners, memberships] = await Promise.all([
+        api.get('/report/arrear-summary'),
+        api.get('/Concessioner'),
+        api.get('/Membership'),
+      ]);
+
       const rows = Array.isArray(data) ? data : [];
+      allRows = enrichArrearRows(rows, concessioners, memberships);
 
-      const totalArrears = rows.reduce((sum, row) => sum + toNumber(pick(row, ['totalArrears', 'TotalArrears'], 0)), 0);
-      const totalPenalty = rows.reduce((sum, row) => sum + toNumber(pick(row, ['totalPenalty', 'TotalPenalty'], 0)), 0);
+      populateSelect(
+        districtFilter,
+        allRows.map((row) => String(pick(row, ['districtName', 'DistrictName'], '')).trim()),
+        'District: All',
+      );
 
-      setSummary(totalArrears, totalPenalty, rows.length);
-      renderRows(rows);
-      updateFooter(rows.length);
+      populateSelect(
+        statusFilter,
+        allRows.map((row) => getStatusName(row)),
+        'Status: All',
+      );
+
+      populateSelect(
+        membershipFilter,
+        allRows.map((row) => getMembershipName(row)),
+        'Membership: All',
+      );
+
+      applyFilters();
     } catch (error) {
       console.error('Failed to load arrear summary:', error);
       setSummary(0, 0, 0);
@@ -163,6 +289,7 @@
 
   async function init() {
     bindSidebar();
+    bindFilters();
     await loadArrearSummary();
   }
 
