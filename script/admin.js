@@ -77,6 +77,26 @@ async function safeGetActiveMembersCount() {
 }
 
 function resolveBillingDate(item, periodById) {
+  const periodId = toNumber(item.periodId ?? item.PeriodID ?? item.PeriodId);
+  if (periodId > 0 && periodById.has(periodId)) {
+    const period = periodById.get(periodId);
+    const periodEndRaw = period.periodEnd ?? period.PeriodEnd;
+    if (periodEndRaw) {
+      const periodEnd = new Date(periodEndRaw);
+      if (!Number.isNaN(periodEnd.getTime()) && periodEnd.getFullYear() > 1900) {
+        return periodEnd;
+      }
+    }
+
+    const periodStartRaw = period.periodStart ?? period.PeriodStart;
+    if (periodStartRaw) {
+      const periodStart = new Date(periodStartRaw);
+      if (!Number.isNaN(periodStart.getTime()) && periodStart.getFullYear() > 1900) {
+        return periodStart;
+      }
+    }
+  }
+
   const rawBillDate = item.billDate ?? item.BillDate;
   if (rawBillDate) {
     const billDate = new Date(rawBillDate);
@@ -90,18 +110,6 @@ function resolveBillingDate(item, periodById) {
     const createdAt = new Date(rawCreatedAt);
     if (!Number.isNaN(createdAt.getTime()) && createdAt.getFullYear() > 1900) {
       return createdAt;
-    }
-  }
-
-  const periodId = toNumber(item.periodId ?? item.PeriodID ?? item.PeriodId);
-  if (periodId > 0 && periodById.has(periodId)) {
-    const period = periodById.get(periodId);
-    const periodDateRaw = period.periodEnd ?? period.PeriodEnd ?? period.periodStart ?? period.PeriodStart;
-    if (periodDateRaw) {
-      const periodDate = new Date(periodDateRaw);
-      if (!Number.isNaN(periodDate.getTime())) {
-        return periodDate;
-      }
     }
   }
 

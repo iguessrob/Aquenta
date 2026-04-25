@@ -21,8 +21,8 @@ BEGIN TRY
     -- ------------------------------------------------------------------------
     DECLARE @Username        VARCHAR(50)  = 'mother_meter_01';
     DECLARE @Pass            VARCHAR(255) = 'MotherMeter@123';
-    DECLARE @FirstName       VARCHAR(50)  = 'Mother';
-    DECLARE @LastName        VARCHAR(50)  = 'Meter';
+    DECLARE @FirstName       VARCHAR(50)  = 'MOTHER METER';
+    DECLARE @LastName        VARCHAR(50)  = '';
     DECLARE @UserRole        VARCHAR(50)  = 'Concessioner';
 
     DECLARE @CategoryName    NVARCHAR(20) = N'Commercial';

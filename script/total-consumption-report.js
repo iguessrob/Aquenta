@@ -9,6 +9,7 @@
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
+  const MOTHER_FIRST_NAME = 'MOTHER METER';
   const MOTHER_ACCOUNT_NUMBER = 'ACC-MOTHER-0001';
   const MOTHER_METER_NUMBER = 'MTR-MOTHER-0001';
 
@@ -67,10 +68,17 @@
   }
 
   function isMotherMeterRecord(item) {
+    const firstName = String(item.firstName ?? item.FirstName ?? '').trim().toUpperCase();
+    const fullName = String(item.fullName ?? item.FullName ?? '').trim().toUpperCase();
     const accountNumber = String(item.accountNumber ?? item.AccountNumber ?? '').trim().toUpperCase();
     const meterNumber = String(item.meterNumber ?? item.MeterNumber ?? '').trim().toUpperCase();
 
-    return accountNumber === MOTHER_ACCOUNT_NUMBER || meterNumber === MOTHER_METER_NUMBER;
+    const matchesName =
+      firstName === MOTHER_FIRST_NAME ||
+      fullName === MOTHER_FIRST_NAME ||
+      fullName.startsWith(`${MOTHER_FIRST_NAME} `);
+
+    return matchesName || accountNumber === MOTHER_ACCOUNT_NUMBER || meterNumber === MOTHER_METER_NUMBER;
   }
 
   function aggregateFromBillingSummary(rows, targetYear) {

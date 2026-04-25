@@ -1426,6 +1426,7 @@ GO
 --          and water loss where WaterLoss = MotherMeterConsumption - ConcessionerConsumption
 CREATE PROCEDURE SP_GetMonthlyMotherMeterWaterLossReport
 	@Year INT,
+	@MotherFirstName NVARCHAR(100) = N'MOTHER METER',
 	@MotherAccountNumber NVARCHAR(20) = N'ACC-MOTHER-0001',
 	@MotherMeterNumber NVARCHAR(30) = N'MTR-MOTHER-0001'
 AS
@@ -1441,19 +1442,22 @@ BEGIN
 		SELECT
 			MONTH(p.PeriodEnd) AS MonthIndex,
 			SUM(CASE
-					WHEN UPPER(LTRIM(RTRIM(c.AccountNumber))) = UPPER(@MotherAccountNumber)
+					WHEN UPPER(LTRIM(RTRIM(ISNULL(u.FirstName, '')))) = UPPER(@MotherFirstName)
+					  OR UPPER(LTRIM(RTRIM(c.AccountNumber))) = UPPER(@MotherAccountNumber)
 					  OR UPPER(LTRIM(RTRIM(c.MeterNumber))) = UPPER(@MotherMeterNumber)
 					THEN (b.CurrentReading - b.PrevReading)
 					ELSE 0
 				END) AS MotherMeterConsumption,
 			SUM(CASE
-					WHEN UPPER(LTRIM(RTRIM(c.AccountNumber))) = UPPER(@MotherAccountNumber)
+					WHEN UPPER(LTRIM(RTRIM(ISNULL(u.FirstName, '')))) = UPPER(@MotherFirstName)
+					  OR UPPER(LTRIM(RTRIM(c.AccountNumber))) = UPPER(@MotherAccountNumber)
 					  OR UPPER(LTRIM(RTRIM(c.MeterNumber))) = UPPER(@MotherMeterNumber)
 					THEN 0
 					ELSE (b.CurrentReading - b.PrevReading)
 				END) AS ConcessionerConsumption
 		FROM tbl_Billing b
 		INNER JOIN tbl_Concessioner c ON c.ConcessionerID = b.ConcessionerID
+		INNER JOIN tbl_User u ON u.UserID = c.UserID
 		INNER JOIN tbl_Period p ON p.PeriodID = b.PeriodID
 		WHERE YEAR(p.PeriodEnd) = @Year
 		GROUP BY MONTH(p.PeriodEnd)
