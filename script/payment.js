@@ -410,13 +410,19 @@ function buildPaymentRows() {
         draftAmountPaid,
         isEditing,
         balance,
+        districtId: toNumber(pick(concessioner, ['districtId', 'DistrictId', 'districtID', 'DistrictID'], 0), 0),
+        accountOrder: toNumber(pick(concessioner, ['accountOrder', 'AccountOrder'], 0), 0),
         status,
       };
     })
     .sort((a, b) => {
-      const ad = new Date(a.datePaid || 0);
-      const bd = new Date(b.datePaid || 0);
-      return bd.getTime() - ad.getTime();
+      if (a.districtId !== b.districtId) {
+        return a.districtId - b.districtId;
+      }
+      if (a.accountOrder !== b.accountOrder) {
+        return a.accountOrder - b.accountOrder;
+      }
+      return String(a.accountNumber).localeCompare(String(b.accountNumber), undefined, { numeric: true, sensitivity: 'base' });
     });
 }
 
