@@ -62,6 +62,22 @@ namespace AquentaLibrary.Repositories
         }
 
         /// <summary>
+        /// Get user by email or account number
+        /// </summary>
+        public UserModel GetUserByEmailOrAccount(string identifier)
+        {
+            string query = @"
+                SELECT u.* 
+                FROM tbl_User u
+                LEFT JOIN tbl_Concessioner c ON u.UserId = c.UserId
+                WHERE (c.EmailAddress = @Identifier OR c.AccountNumber = @Identifier OR u.Username = @Identifier)
+                AND u.IsDeleted = 0";
+
+            using var connection = CreateConnection();
+            return connection.QueryFirstOrDefault<UserModel>(query, new { Identifier = identifier });
+        }
+
+        /// <summary>
         /// Insert user using SP_InsertUser
         /// </summary>
         public int InsertUser(UserModel user)
@@ -129,6 +145,14 @@ namespace AquentaLibrary.Repositories
         public bool UpdateUser(UserModel user)
         {
             return Update(user);
+        }
+
+        public bool UpdatePassword(int userId, string newPassword)
+        {
+            string query = "UPDATE tbl_User SET Pass = @Password WHERE UserId = @UserId";
+            using var connection = CreateConnection();
+            int affected = connection.Execute(query, new { UserId = userId, Password = newPassword });
+            return affected == 1;
         }
     }
 }

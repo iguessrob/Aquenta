@@ -173,9 +173,8 @@
                         </div>
                     </div>
 
-                    <!-- Forget Password Link -->
                     <div class="forgot-password-wrapper">
-                        <a href="#" class="forgot-password">
+                        <a href="forgot-password.html" class="forgot-password">
                             Forget Password?
                         </a>
                     </div>
@@ -285,6 +284,46 @@
             });
         })();
     </script>
+    <div id="forgotModalOverlay" class="forgot-modal-overlay">
+        <div class="forgot-modal">
+            <button id="closeForgotModal" class="close-modal" aria-label="Close">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+
+            <div class="forgot-header">
+                <h3 class="forgot-title">Forgot Password</h3>
+                <p class="forgot-subtitle">Enter your email or account number to reset your password.</p>
+            </div>
+
+            <div id="modalMessage" class="modal-message"></div>
+
+            <form id="forgotPasswordForm" class="login-form">
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect width="20" height="16" x="2" y="4" rx="2"></rect>
+                            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+                        </svg>
+                        <input
+                            type="text"
+                            id="forgotIdentifier"
+                            placeholder="Email or Account Number"
+                            class="form-input"
+                            required
+                        />
+                    </div>
+                </div>
+
+                <button type="submit" id="forgotSubmitBtn" class="login-button">
+                    Send Reset Link
+                </button>
+            </form>
+        </div>
+    </div>
+
     <script src="script/config.js"></script>
     <script src="script/api-client.js"></script>
     <script src="script/auth.js"></script>

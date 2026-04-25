@@ -14,3 +14,12 @@ Thumbs.db
 ## Environment variables
 .env
 *.local
+.gitignore
+*.pubxml.user
+*.AssemblyInfo.cs
+*.AssemblyInfoInputs.cache
+*.csproj.AssemblyReference.cache
+*.pdb
+*.sourcelink.json
+*.dswa.cache.json
+*.dll

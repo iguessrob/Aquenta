@@ -11,6 +11,9 @@ namespace AquentaAPI.Controllers
     {
         UserServices userServices = new UserServices();
         ConcessionerServices concessionerServices = new ConcessionerServices();
+        TokenService tokenService = new TokenService();
+        EmailService emailService = new EmailService();
+        AquentaLibrary.Repositories.UserRepository userRepository = new AquentaLibrary.Repositories.UserRepository();
 
         public class LoginRequest
         {
@@ -117,6 +120,64 @@ namespace AquentaAPI.Controllers
         public bool DeleteUser(int id)
         {
             return userServices.Delete(id);
+        }
+
+        public class ForgotPasswordRequest
+        {
+            public string Identifier { get; set; } = string.Empty;
+            public string? FrontendBaseUrl { get; set; }
+        }
+
+        [HttpPost("forgot-password")]
+        public async Task<ActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.Identifier))
+                return BadRequest("Identifier is required.");
+
+            var user = userRepository.GetUserByEmailOrAccount(request.Identifier);
+            if (user == null)
+            {
+                // For security, don't reveal if user exists, but here we can be helpful or silent
+                // For this task, we'll return 200 regardless to prevent enumeration
+                return Ok("If an account exists with that identifier, a reset link has been sent.");
+            }
+
+            var token = tokenService.GenerateResetToken(user.UserId);
+            
+            // Get user's email from concessioner record
+            var concessioner = concessionerServices.GetAll().FirstOrDefault(c => c.UserId == user.UserId);
+            string userEmail = concessioner?.EmailAddress ?? "";
+
+            // Use provided frontend base URL or default to current
+            string baseUrl = request.FrontendBaseUrl ?? "http://localhost:5500"; 
+            string resetLink = $"{baseUrl}/reset-password.html?token={token}";
+
+            await emailService.SendPasswordResetEmail(userEmail, resetLink);
+
+            return Ok("If an account exists with that identifier, a reset link has been sent.");
+        }
+
+        public class ResetPasswordRequest
+        {
+            public string Token { get; set; } = string.Empty;
+            public string NewPassword { get; set; } = string.Empty;
+        }
+
+        [HttpPost("reset-password")]
+        public ActionResult ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.Token) || string.IsNullOrWhiteSpace(request.NewPassword))
+                return BadRequest("Token and new password are required.");
+
+            var (userId, isValid) = tokenService.ValidateToken(request.Token);
+            if (!isValid)
+                return BadRequest("Invalid or expired reset token.");
+
+            var success = userRepository.UpdatePassword(userId, request.NewPassword);
+            if (!success)
+                return StatusCode(500, "Failed to update password.");
+
+            return Ok("Password has been reset successfully.");
         }
     }
 }

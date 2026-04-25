@@ -144,4 +144,81 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
+
+    // Forgot Password Modal Logic
+    const forgotModalOverlay = document.getElementById('forgotModalOverlay');
+    const forgotPasswordLink = document.querySelector('.forgot-password');
+    const closeForgotModal = document.getElementById('closeForgotModal');
+    const forgotPasswordForm = document.getElementById('forgotPasswordForm');
+    const modalMessage = document.getElementById('modalMessage');
+    const forgotSubmitBtn = document.getElementById('forgotSubmitBtn');
+
+    if (forgotPasswordLink) {
+        forgotPasswordLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            forgotModalOverlay.classList.add('active');
+            modalMessage.style.display = 'none';
+            forgotPasswordForm.reset();
+        });
+    }
+
+    if (closeForgotModal) {
+        closeForgotModal.addEventListener('click', function() {
+            forgotModalOverlay.classList.remove('active');
+        });
+    }
+
+    // Close modal when clicking outside
+    forgotModalOverlay.addEventListener('click', function(e) {
+        if (e.target === forgotModalOverlay) {
+            forgotModalOverlay.classList.remove('active');
+        }
+    });
+
+    if (forgotPasswordForm) {
+        forgotPasswordForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const identifier = document.getElementById('forgotIdentifier').value.trim();
+            if (!identifier) return;
+
+            const originalBtnText = forgotSubmitBtn.textContent;
+            forgotSubmitBtn.disabled = true;
+            forgotSubmitBtn.textContent = 'Sending...';
+            modalMessage.style.display = 'none';
+
+            try {
+                // Determine current base URL for the reset link
+                const currentUrl = window.location.href;
+                const frontendBaseUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
+
+                const response = await fetch(`${window.AQUENTA_API_BASE_URL}/User/forgot-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ identifier, frontendBaseUrl })
+                });
+
+                if (response.ok) {
+                    modalMessage.textContent = 'Check your email for the reset link.';
+                    modalMessage.className = 'modal-message success';
+                    forgotPasswordForm.reset();
+                    
+                    // Optionally close modal after some time
+                    setTimeout(() => {
+                        // forgotModalOverlay.classList.remove('active');
+                    }, 5000);
+                } else {
+                    modalMessage.textContent = 'Failed to send reset link. Please try again.';
+                    modalMessage.className = 'modal-message error';
+                }
+            } catch (error) {
+                console.error('Forgot password error:', error);
+                modalMessage.textContent = 'Network error. Please try again later.';
+                modalMessage.className = 'modal-message error';
+            } finally {
+                forgotSubmitBtn.disabled = false;
+                forgotSubmitBtn.textContent = originalBtnText;
+            }
+        });
+    }
 });
