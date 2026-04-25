@@ -614,6 +614,9 @@ html, body {
   .topbar > div { padding: 12px; }
   .page-title { font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .user-details { display: none; } 
+  .user-info { gap: 0; }
+  .user-profile { padding: 0; }
+  .chevron-down { display: none; }
   .welcome-banner { padding: 20px; border-radius: 12px; }
   .stats-grid { grid-template-columns: 1fr; }
   
