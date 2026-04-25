@@ -4,6 +4,10 @@
   const menuBtn = document.getElementById('menuBtn');
   const closeSidebarBtn = document.getElementById('closeSidebar');
   const tableBody = document.getElementById('consumptionTableBody');
+  const reportPrevYearBtn = document.getElementById('reportPrevYear');
+  const reportNextYearBtn = document.getElementById('reportNextYear');
+  const reportCurrentYearEl = document.getElementById('reportCurrentYear');
+  const reportSectionTitle = document.querySelector('.report-section-title');
 
   const MONTH_NAMES = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -12,6 +16,7 @@
   const MOTHER_FIRST_NAME = 'MOTHER METER';
   const MOTHER_ACCOUNT_NUMBER = 'ACC-MOTHER-0001';
   const MOTHER_METER_NUMBER = 'MTR-MOTHER-0001';
+  let selectedYear = new Date().getFullYear();
 
   function getApi() {
     if (!window.AquentaApiClient) {
@@ -125,8 +130,15 @@
   async function loadConsumptionReport() {
     try {
       const api = getApi();
-      const currentYear = new Date().getFullYear();
-      const monthlyReport = await getMonthlyWaterLossData(api, currentYear);
+      const monthlyReport = await getMonthlyWaterLossData(api, selectedYear);
+
+      if (reportCurrentYearEl) {
+        reportCurrentYearEl.textContent = String(selectedYear);
+      }
+
+      if (reportSectionTitle) {
+        reportSectionTitle.textContent = `Total Consumption - ${selectedYear}`;
+      }
 
       if (!tableBody) return;
       tableBody.innerHTML = '';
@@ -152,7 +164,7 @@
       const totalRow = document.createElement('tr');
       totalRow.className = 'total-row';
       totalRow.innerHTML = `
-        <td>TOTAL ANNUAL</td>
+        <td>TOTAL ${selectedYear}</td>
         <td class="text-right">${annualConcessioners.toLocaleString()}</td>
         <td class="text-right">${annualWaterLoss.toLocaleString()}</td>
       `;
@@ -168,6 +180,20 @@
 
   async function init() {
     bindSidebar();
+    if (reportPrevYearBtn) {
+      reportPrevYearBtn.addEventListener('click', async () => {
+        selectedYear--;
+        await loadConsumptionReport();
+      });
+    }
+
+    if (reportNextYearBtn) {
+      reportNextYearBtn.addEventListener('click', async () => {
+        selectedYear++;
+        await loadConsumptionReport();
+      });
+    }
+
     await loadConsumptionReport();
   }
 

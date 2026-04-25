@@ -95,6 +95,50 @@
       display: flex;
       flex-direction: column;
       align-items: flex-start;
+      gap: 10px;
+    }
+
+    .report-year-selector {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 10px;
+      border: 1px solid #dbe3ee;
+      border-radius: 999px;
+      background: #f8fbff;
+    }
+
+    .report-year-text {
+      min-width: 64px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .report-year-btn {
+      width: 32px;
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #cfd8e3;
+      border-radius: 50%;
+      background: #ffffff;
+      color: #1f5fae;
+      cursor: pointer;
+      transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+    }
+
+    .report-year-btn:hover {
+      background: #edf4ff;
+      border-color: #9eb8d8;
+      color: #174b8a;
+    }
+
+    .report-year-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
 
     .print-report-btn {
@@ -316,6 +360,19 @@
         <div class="report-header-section">
           <div class="report-header-left">
             <h2 class="report-main-title">Monthly Consumption Summary</h2>
+            <div class="report-year-selector" aria-label="Select report year">
+              <button id="reportPrevYear" class="report-year-btn" type="button" aria-label="Previous year">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+              </button>
+              <span id="reportCurrentYear" class="report-year-text">--</span>
+              <button id="reportNextYear" class="report-year-btn" type="button" aria-label="Next year">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </button>
+            </div>
           </div>
           <button class="print-report-btn" onclick="window.print()">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
