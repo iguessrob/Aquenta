@@ -450,7 +450,7 @@ body {
 
 .invoice-table {
   width: 100%;
-  min-width: 1830px;
+  min-width: 1880px;
   border-collapse: collapse;
   table-layout: fixed;
   background: #ffffff;
@@ -526,7 +526,7 @@ body {
 .invoice-table th:nth-child(14),
 .invoice-table td:nth-child(14) { width: 96px; font-weight: 700; }
 .invoice-table th:nth-child(15),
-.invoice-table td:nth-child(15) { width: 110px; }
+.invoice-table td:nth-child(15) { width: 170px; white-space: nowrap; }
 
 .invoice-row-print-btn {
   display: inline-flex;
