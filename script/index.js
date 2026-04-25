@@ -54,7 +54,8 @@ function updateCharCount() {
 }
 
 function isValidEmail(email) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
 }
 
 function validateContactForm(data) {
@@ -66,6 +67,8 @@ function validateContactForm(data) {
 
     if (!data.contactNumber || !data.contactNumber.trim()) {
         fieldErrors.contactNumber = 'Contact Number is required.';
+    } else if (data.contactNumber.trim().length !== 11) {
+        fieldErrors.contactNumber = 'Contact Number must be exactly 11 digits.';
     }
 
     if (!data.email || !isValidEmail(data.email.trim())) {

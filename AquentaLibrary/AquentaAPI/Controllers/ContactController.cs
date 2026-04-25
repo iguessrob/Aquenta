@@ -8,6 +8,10 @@ namespace AquentaAPI.Controllers
     [ApiController]
     public class ContactController : Controller
     {
+        // Rate limiting: IP Address -> Last Submission Time
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, DateTime> _rateLimits = 
+            new System.Collections.Concurrent.ConcurrentDictionary<string, DateTime>();
+        
         private readonly ContactSubmissionServices _contactSubmissionServices = new ContactSubmissionServices();
         private readonly EmailService _emailService;
 
@@ -19,6 +23,17 @@ namespace AquentaAPI.Controllers
         [HttpPost]
         public async Task<ActionResult> SubmitContact([FromBody] ContactSubmissionModel submission)
         {
+            // Rate Limiting Check (1 per 5 minutes per IP)
+            string clientIp = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+            if (_rateLimits.TryGetValue(clientIp, out DateTime lastSubmission))
+            {
+                if (DateTime.Now < lastSubmission.AddMinutes(5))
+                {
+                    var waitTime = Math.Ceiling((lastSubmission.AddMinutes(5) - DateTime.Now).TotalMinutes);
+                    return StatusCode(429, $"Too many requests. Please wait {waitTime} minute(s) before submitting another inquiry.");
+                }
+            }
+
             if (submission == null)
             {
                 return BadRequest("Submission payload is required.");
@@ -32,6 +47,11 @@ namespace AquentaAPI.Controllers
             if (string.IsNullOrWhiteSpace(submission.ContactNumber))
             {
                 return BadRequest("Contact Number is required.");
+            }
+
+            if (submission.ContactNumber.Trim().Length != 11)
+            {
+                return BadRequest("Contact Number must be exactly 11 digits.");
             }
 
             if (string.IsNullOrWhiteSpace(submission.Email) || !IsValidEmail(submission.Email))
@@ -67,6 +87,9 @@ namespace AquentaAPI.Controllers
                 submission.Subject,
                 submission.Message
             );
+
+            // Update rate limit time
+            _rateLimits[clientIp] = DateTime.Now;
 
             return Ok(new { message = "Inquiry submitted successfully." });
         }
