@@ -17,6 +17,24 @@ let monthlyData = MONTH_NAMES.map((month) => ({
   collection: 0,
   balance: 0,
 }));
+let availableDashboardYears = [];
+
+function hasDashboardYear(year) {
+  return availableDashboardYears.includes(year);
+}
+
+function updateDashboardYearNavigation() {
+  if (!prevYearBtn || !nextYearBtn) return;
+
+  if (!availableDashboardYears.length) {
+    prevYearBtn.disabled = true;
+    nextYearBtn.disabled = true;
+    return;
+  }
+
+  prevYearBtn.disabled = !hasDashboardYear(currentYear - 1);
+  nextYearBtn.disabled = !hasDashboardYear(currentYear + 1);
+}
 
 function ensureLoggedIn() {
   const loggedIn = localStorage.getItem('aquentaLoggedIn') === 'true';
@@ -389,6 +407,23 @@ async function loadDashboardData() {
     periodList.map((period) => [toNumber(period.periodId ?? period.PeriodID ?? period.PeriodId), period])
   );
 
+  const yearSet = new Set();
+  billingList.forEach((item) => {
+    const billDate = resolveBillingDate(item, periodById);
+    if (!billDate || Number.isNaN(billDate.getTime())) return;
+    yearSet.add(billDate.getFullYear());
+  });
+
+  availableDashboardYears = [...yearSet].sort((a, b) => a - b);
+  if (availableDashboardYears.length && !hasDashboardYear(currentYear)) {
+    currentYear = availableDashboardYears[availableDashboardYears.length - 1];
+    if (yearDisplay) {
+      yearDisplay.textContent = String(currentYear);
+    }
+  }
+
+  updateDashboardYearNavigation();
+
   let latestBillingDate = null;
   billingList.forEach((item) => {
     const billDate = resolveBillingDate(item, periodById);
@@ -586,22 +621,32 @@ mobileOverlay.addEventListener('click', closeSidebarFunc);
 
 
 // Year navigation
-prevYearBtn.addEventListener('click', () => {
-  currentYear--;
-  yearDisplay.textContent = currentYear;
-  loadDashboardData().catch(error => {
-    console.error('Failed to refresh dashboard data:', error);
+if (prevYearBtn) {
+  prevYearBtn.addEventListener('click', () => {
+    const targetYear = currentYear - 1;
+    if (!hasDashboardYear(targetYear)) return;
+
+    currentYear = targetYear;
+    yearDisplay.textContent = currentYear;
+    loadDashboardData().catch(error => {
+      console.error('Failed to refresh dashboard data:', error);
+    });
   });
-});
+}
 
 
-nextYearBtn.addEventListener('click', () => {
-  currentYear++;
-  yearDisplay.textContent = currentYear;
-  loadDashboardData().catch(error => {
-    console.error('Failed to refresh dashboard data:', error);
+if (nextYearBtn) {
+  nextYearBtn.addEventListener('click', () => {
+    const targetYear = currentYear + 1;
+    if (!hasDashboardYear(targetYear)) return;
+
+    currentYear = targetYear;
+    yearDisplay.textContent = currentYear;
+    loadDashboardData().catch(error => {
+      console.error('Failed to refresh dashboard data:', error);
+    });
   });
-});
+}
 
 
 // Calculate total annual

@@ -17,6 +17,40 @@
   const MOTHER_ACCOUNT_PREFIX = 'ACC-MOTHER';
   const MOTHER_METER_PREFIX = 'MTR-MOTHER';
   let selectedYear = new Date().getFullYear();
+  let availableYears = [];
+
+  function extractYear(item) {
+    const createdAtRaw = item.createdAt ?? item.CreatedAt;
+    const createdAt = createdAtRaw ? new Date(createdAtRaw) : null;
+    if (!createdAt || Number.isNaN(createdAt.getTime())) return null;
+    return createdAt.getFullYear();
+  }
+
+  function computeAvailableYears(rows) {
+    const years = new Set();
+    (rows || []).forEach((item) => {
+      const year = extractYear(item);
+      if (year !== null) years.add(year);
+    });
+    return [...years].sort((a, b) => a - b);
+  }
+
+  function hasAvailableYear(year) {
+    return availableYears.includes(year);
+  }
+
+  function updateYearNavigationState() {
+    if (!reportPrevYearBtn || !reportNextYearBtn) return;
+
+    if (!availableYears.length) {
+      reportPrevYearBtn.disabled = true;
+      reportNextYearBtn.disabled = true;
+      return;
+    }
+
+    reportPrevYearBtn.disabled = !hasAvailableYear(selectedYear - 1);
+    reportNextYearBtn.disabled = !hasAvailableYear(selectedYear + 1);
+  }
 
   function getApi() {
     if (!window.AquentaApiClient) {
@@ -133,15 +167,19 @@
   }
 
   async function getMonthlyWaterLossData(api, year) {
-    try {
-      // The specific consumption-water-loss endpoint does not return member/non-member data.
-      // We use the billing-summary endpoint which contains the necessary membership details to aggregate.
-      const billingRows = await api.get('/report/billing-summary');
-      return aggregateFromBillingSummary(billingRows, year);
-    } catch (error) {
-      console.error('Failed to aggregate report data from billing summary:', error);
-      throw error;
+    // The specific consumption-water-loss endpoint does not return member/non-member data.
+    // We use the billing-summary endpoint which contains the necessary membership details to aggregate.
+    const billingRows = await api.get('/report/billing-summary');
+    const rows = Array.isArray(billingRows) ? billingRows : [];
+
+    availableYears = computeAvailableYears(rows);
+    if (availableYears.length && !hasAvailableYear(selectedYear)) {
+      selectedYear = availableYears[availableYears.length - 1];
     }
+
+    updateYearNavigationState();
+
+    return aggregateFromBillingSummary(rows, selectedYear);
   }
 
   async function loadConsumptionReport() {
@@ -204,6 +242,7 @@
 
     } catch (error) {
       console.error('Failed to load consumption report:', error);
+      updateYearNavigationState();
       if (tableBody) {
         tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">Error loading data.</td></tr>';
       }
@@ -216,14 +255,20 @@
     bindSidebar();
     if (reportPrevYearBtn) {
       reportPrevYearBtn.addEventListener('click', async () => {
-        selectedYear--;
+        const targetYear = selectedYear - 1;
+        if (!hasAvailableYear(targetYear)) return;
+
+        selectedYear = targetYear;
         await loadConsumptionReport();
       });
     }
 
     if (reportNextYearBtn) {
       reportNextYearBtn.addEventListener('click', async () => {
-        selectedYear++;
+        const targetYear = selectedYear + 1;
+        if (!hasAvailableYear(targetYear)) return;
+
+        selectedYear = targetYear;
         await loadConsumptionReport();
       });
     }
