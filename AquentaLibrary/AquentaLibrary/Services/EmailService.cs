@@ -160,7 +160,7 @@ namespace AquentaLibrary.Services
                         </div>
                         <p>For security reasons, we recommend that you log in and change this password immediately in your profile settings.</p>
                         <div style='text-align: center; margin: 30px 0;'>
-                            <a href='https://aquenta-coop.com/auth' style='background-color: #136A4D; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;'>Log In Now</a>
+                            <a href='https://www.aquenta-coop.com/auth' style='background-color: #136A4D; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;'>Log In Now</a>
                         </div>
                         <hr style='border: 0; border-top: 1px solid #eee; margin: 20px 0;' />
                         <p style='font-size: 12px; color: #999;'>&copy; 2026 AQUENTA Water Services</p>

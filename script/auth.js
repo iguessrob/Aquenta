@@ -193,6 +193,8 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             forgotModalOverlay.classList.add('active');
             modalMessage.style.display = 'none';
+            modalMessage.innerHTML = '';
+            forgotPasswordForm.style.display = 'flex';
             forgotPasswordForm.reset();
         });
     }
@@ -224,8 +226,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
             try {
                 // Determine current base URL for the reset link
-                const currentUrl = window.location.href;
-                const frontendBaseUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
+                let currentUrl = window.location.href;
+                let frontendBaseUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
+                
+                // Ensure 'www.' is present for the production domain to satisfy user requirement
+                if (frontendBaseUrl.includes('aquenta-coop.com') && !frontendBaseUrl.includes('://www.')) {
+                    frontendBaseUrl = frontendBaseUrl.replace('://', '://www.');
+                }
 
                 const response = await fetch(`${window.AQUENTA_API_BASE_URL}/User/forgot-password`, {
                     method: 'POST',
@@ -234,14 +241,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
 
                 if (response.ok) {
-                    modalMessage.textContent = 'Check your email for the reset link.';
+                    modalMessage.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <span>Reset link sent! Please check your email.</span>
+                        </div>
+                    `;
                     modalMessage.className = 'modal-message success';
-                    forgotPasswordForm.reset();
+                    forgotPasswordForm.style.display = 'none'; // Hide form on success
                     
-                    // Optionally close modal after some time
-                    setTimeout(() => {
-                        // forgotModalOverlay.classList.remove('active');
-                    }, 5000);
+                    // Add a button to close the modal
+                    const closeBtn = document.createElement('button');
+                    closeBtn.textContent = 'Close';
+                    closeBtn.className = 'login-button';
+                    closeBtn.style.marginTop = '1rem';
+                    closeBtn.onclick = () => forgotModalOverlay.classList.remove('active');
+                    modalMessage.appendChild(closeBtn);
                 } else {
                     modalMessage.textContent = 'Failed to send reset link. Please try again.';
                     modalMessage.className = 'modal-message error';
