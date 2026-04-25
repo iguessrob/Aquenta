@@ -352,8 +352,6 @@ namespace AquentaLibrary.Repositories
             var parameters = new DynamicParameters();
             parameters.Add("@Year", year, DbType.Int32);
             parameters.Add("@MotherFirstName", "MOTHER METER", DbType.String);
-            parameters.Add("@MotherAccountNumber", "ACC-MOTHER-0001", DbType.String);
-            parameters.Add("@MotherMeterNumber", "MTR-MOTHER-0001", DbType.String);
 
             return dbConnection.Query<dynamic>(
                 "SP_GetMonthlyMotherMeterWaterLossReport",
