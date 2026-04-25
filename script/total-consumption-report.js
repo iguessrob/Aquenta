@@ -221,7 +221,7 @@
       }
 
       if (reportSectionTitle) {
-        reportSectionTitle.textContent = `Total Consumption - ${selectedYear}`;
+        reportSectionTitle.textContent = 'Total Consumption';
       }
 
       if (!tableBody) return;
