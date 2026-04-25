@@ -424,12 +424,12 @@ namespace AquentaLibrary.Repositories
                 SELECT TOP 1
                     p.PeriodID AS LatestPeriodID,
                     p.PeriodStart AS LatestPeriodStart,
-                    p.PeriodEnd AS LatestPeriodEnd,
-                    YEAR(p.PeriodEnd) AS LatestYear,
-                    MONTH(p.PeriodEnd) AS LatestMonthIndex
+                    COALESCE(p.PeriodEnd, p.PeriodStart) AS LatestPeriodEnd,
+                    YEAR(COALESCE(p.PeriodEnd, p.PeriodStart)) AS LatestYear,
+                    MONTH(COALESCE(p.PeriodEnd, p.PeriodStart)) AS LatestMonthIndex
                 FROM tbl_Billing b
                 INNER JOIN tbl_Period p ON b.PeriodID = p.PeriodID
-                ORDER BY p.PeriodEnd DESC, b.CreatedAt DESC;");
+                ORDER BY COALESCE(p.PeriodEnd, p.PeriodStart) DESC, b.CreatedAt DESC;");
         }
 
         /// <summary>

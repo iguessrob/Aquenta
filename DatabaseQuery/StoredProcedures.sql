@@ -1446,7 +1446,7 @@ BEGIN
 	ConsumptionByMonth AS
 	(
 		SELECT
-			MONTH(p.PeriodEnd) AS MonthIndex,
+			MONTH(COALESCE(p.PeriodEnd, p.PeriodStart)) AS MonthIndex,
 			SUM(CASE
 					WHEN UPPER(LTRIM(RTRIM(ISNULL(u.FirstName, '')))) = UPPER(@MotherFirstName)
 					  OR UPPER(LTRIM(RTRIM(c.AccountNumber))) = UPPER(@MotherAccountNumber)
@@ -1465,8 +1465,8 @@ BEGIN
 		INNER JOIN tbl_Concessioner c ON c.ConcessionerID = b.ConcessionerID
 		INNER JOIN tbl_User u ON u.UserID = c.UserID
 		INNER JOIN tbl_Period p ON p.PeriodID = b.PeriodID
-		WHERE YEAR(p.PeriodEnd) = @Year
-		GROUP BY MONTH(p.PeriodEnd)
+		WHERE YEAR(COALESCE(p.PeriodEnd, p.PeriodStart)) = @Year
+		GROUP BY MONTH(COALESCE(p.PeriodEnd, p.PeriodStart))
 	)
 	SELECT
 		m.MonthIndex,
