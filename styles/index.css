@@ -164,6 +164,7 @@ nav a:hover {
 .mobile-nav .login-btn {
     display: flex;
     align-items: center;
+    color: rgba(21, 46, 116, 0.95);
     justify-content: center;
     width: 100%;
     margin-top: 0.5rem;

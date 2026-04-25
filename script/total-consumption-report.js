@@ -19,11 +19,38 @@
   let selectedYear = new Date().getFullYear();
   let availableYears = [];
 
-  function extractYear(item) {
+  function resolveBillingSummaryDate(item) {
+    const periodEndRaw = item.periodEnd ?? item.PeriodEnd;
+    if (periodEndRaw) {
+      const periodEnd = new Date(periodEndRaw);
+      if (!Number.isNaN(periodEnd.getTime())) return periodEnd;
+    }
+
+    const periodStartRaw = item.periodStart ?? item.PeriodStart;
+    if (periodStartRaw) {
+      const periodStart = new Date(periodStartRaw);
+      if (!Number.isNaN(periodStart.getTime())) return periodStart;
+    }
+
+    const billDateRaw = item.billDate ?? item.BillDate;
+    if (billDateRaw) {
+      const billDate = new Date(billDateRaw);
+      if (!Number.isNaN(billDate.getTime())) return billDate;
+    }
+
     const createdAtRaw = item.createdAt ?? item.CreatedAt;
-    const createdAt = createdAtRaw ? new Date(createdAtRaw) : null;
-    if (!createdAt || Number.isNaN(createdAt.getTime())) return null;
-    return createdAt.getFullYear();
+    if (createdAtRaw) {
+      const createdAt = new Date(createdAtRaw);
+      if (!Number.isNaN(createdAt.getTime())) return createdAt;
+    }
+
+    return null;
+  }
+
+  function extractYear(item) {
+    const resolvedDate = resolveBillingSummaryDate(item);
+    if (!resolvedDate) return null;
+    return resolvedDate.getFullYear();
   }
 
   function computeAvailableYears(rows) {
@@ -133,12 +160,11 @@
     const monthlyReport = createEmptyMonthlyReport();
 
     (rows || []).forEach(item => {
-      const createdAtRaw = item.createdAt ?? item.CreatedAt;
-      const createdAt = createdAtRaw ? new Date(createdAtRaw) : null;
-      if (!createdAt || Number.isNaN(createdAt.getTime())) return;
-      if (createdAt.getFullYear() !== targetYear) return;
+      const billDate = resolveBillingSummaryDate(item);
+      if (!billDate) return;
+      if (billDate.getFullYear() !== targetYear) return;
 
-      const monthIndex = createdAt.getMonth();
+      const monthIndex = billDate.getMonth();
       if (monthIndex < 0 || monthIndex > 11) return;
 
       const consumption = Number(item.consumption ?? item.Consumption ?? 0);

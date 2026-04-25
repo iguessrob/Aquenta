@@ -597,6 +597,8 @@ const closeModal = document.getElementById('closeModal');
 const cancelExport = document.getElementById('cancelExport');
 const downloadPNG = document.getElementById('downloadPNG');
 
+updateDashboardYearNavigation();
+
 if (yearDisplay) {
   yearDisplay.textContent = String(currentYear);
 }
