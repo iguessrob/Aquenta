@@ -48,25 +48,25 @@
 
     if (cardTotalConsumption) {
       cardTotalConsumption.addEventListener('click', () => {
-        window.location.href = 'total-consumption-report.html';
+        window.location.href = 'total-consumption-report';
       });
     }
 
     if (cardArrearSummary) {
       cardArrearSummary.addEventListener('click', () => {
-        window.location.href = 'arrear-summary.html';
+        window.location.href = 'arrear-summary';
       });
     }
 
     if (cardAgingReceivables) {
       cardAgingReceivables.addEventListener('click', () => {
-        window.location.href = 'aging-receivables.html';
+        window.location.href = 'aging-receivables';
       });
     }
 
     if (cardDisconnectionList) {
       cardDisconnectionList.addEventListener('click', () => {
-        window.location.href = 'disconnection-list.html';
+        window.location.href = 'disconnection-list';
       });
     }
   }

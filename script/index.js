@@ -233,7 +233,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const getStartedBtn = document.querySelector('.hero-btn');
     if (getStartedBtn) {
         getStartedBtn.addEventListener('click', function() {
-            window.location.href = 'auth.html';
+            window.location.href = 'auth';
         });
     }
 });

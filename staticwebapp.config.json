@@ -1,0 +1,14 @@
+{
+  "trailingSlash": "auto",
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": ["/assets/**", "/*.css", "/*.js", "/*.png", "/*.jpg", "/*.svg"]
+  },
+  "routes": [
+    {
+      "route": "/index.html",
+      "redirect": "/",
+      "statusCode": 301
+    }
+  ]
+}

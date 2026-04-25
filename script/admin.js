@@ -22,14 +22,14 @@ function ensureLoggedIn() {
   const loggedIn = localStorage.getItem('aquentaLoggedIn') === 'true';
   const userRaw = localStorage.getItem('aquentaUser');
   if (!loggedIn || !userRaw) {
-    window.location.href = 'auth.html';
+    window.location.href = 'auth';
     return null;
   }
 
   try {
     return JSON.parse(userRaw);
   } catch (error) {
-    window.location.href = 'auth.html';
+    window.location.href = 'auth';
     return null;
   }
 }
@@ -1140,7 +1140,7 @@ if (currentUser) {
   const waterDistributionViewMore = document.getElementById('waterDistributionViewMore');
   if (waterDistributionViewMore) {
     waterDistributionViewMore.addEventListener('click', () => {
-      window.location.href = 'total-consumption-report.html';
+      window.location.href = 'total-consumption-report';
     });
   }
 }

@@ -48,9 +48,9 @@ document.addEventListener('DOMContentLoaded', function() {
     function resolveDashboardPath(user) {
         const role = String(user.userRole || user.UserRole || user.role || user.Role || '').trim();
         if (/admin/i.test(role)) {
-            return 'admin-dashboard.html';
+            return 'admin-dashboard';
         }
-        return 'concessioner/dashboard.html';
+        return 'concessioner/dashboard';
     }
 
     function showLoadingOverlay() {
@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Home button navigation
     if (homeButton) {
         homeButton.addEventListener('click', function() {
-            window.location.href = 'index.html';
+            window.location.href = 'index';
         });
     }
 

@@ -66,7 +66,7 @@
   }
 
   function redirectToAuth() {
-    window.location.replace('../auth.html');
+    window.location.replace('../auth');
   }
 
   // Export global functions for use in HTML/other scripts

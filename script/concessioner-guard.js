@@ -3,7 +3,7 @@
     var userStr = localStorage.getItem('aquentaUser');
 
     if (loggedIn !== 'true' || !userStr) {
-        window.location.href = '../auth.html';
+        window.location.href = '../auth';
         return;
     }
 
@@ -11,11 +11,11 @@
         var user = JSON.parse(userStr);
         var role = String(user.userRole || user.UserRole || user.role || user.Role || '').trim();
         if (!/concessioner/i.test(role)) {
-            window.location.href = '../auth.html';
+            window.location.href = '../auth';
             return;
         }
     } catch (e) {
-        window.location.href = '../auth.html';
+        window.location.href = '../auth';
     }
 })();
 
@@ -33,8 +33,8 @@ function conGuardLogout() {
     sessionStorage.clear();
     
     // Prevent back-navigation via history manipulation
-    window.location.href = '../auth.html';
-    window.history.replaceState({ isLoggedOut: true }, '', '../auth.html');
+    window.location.href = '../auth';
+    window.history.replaceState({ isLoggedOut: true }, '', '../auth');
 }
 
 // Side-bar Toggle & Top-bar Initialization for all Concessioner pages

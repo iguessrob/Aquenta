@@ -119,8 +119,8 @@
         sessionStorage.clear();
         
         // Prevent back-navigation via history manipulation
-        window.location.href = '/auth.html';
-        window.history.replaceState({ isLoggedOut: true }, '', '/auth.html');
+        window.location.href = '/auth';
+        window.history.replaceState({ isLoggedOut: true }, '', '/auth');
       });
     }
   }
