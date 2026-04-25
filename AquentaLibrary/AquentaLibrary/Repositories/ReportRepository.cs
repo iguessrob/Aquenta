@@ -82,9 +82,23 @@ namespace AquentaLibrary.Repositories
         public decimal GetLatestMonthPendingCollections()
         {
             using var dbConnection = CreateConnection();
-            var result = dbConnection.QuerySingleOrDefault<decimal?>(
-                "SP_GetLatestMonthPendingCollections",
-                commandType: CommandType.StoredProcedure);
+            var result = dbConnection.QuerySingleOrDefault<decimal?>(@"
+                SELECT ISNULL(SUM(b.BillAmount + ISNULL(b.Penalty, 0) - ISNULL(p.TotalAmountPaid, 0)), 0)
+                FROM tbl_Billing b
+                INNER JOIN tbl_Concessioner c ON c.ConcessionerID = b.ConcessionerID
+                INNER JOIN tbl_User u ON u.UserID = c.UserID
+                LEFT JOIN (
+                    SELECT BillingID, SUM(AmountPaid) AS TotalAmountPaid
+                    FROM tbl_Payment
+                    GROUP BY BillingID
+                ) p ON p.BillingID = b.BillingID
+                WHERE b.PeriodID = (
+                    SELECT TOP 1 b2.PeriodID
+                    FROM tbl_Billing b2
+                    INNER JOIN tbl_Period pe ON pe.PeriodID = b2.PeriodID
+                    ORDER BY pe.PeriodEnd DESC, b2.CreatedAt DESC
+                )
+                AND UPPER(LTRIM(RTRIM(ISNULL(u.FirstName, '')))) <> 'MOTHER METER';");
 
             return result ?? 0;
         }
