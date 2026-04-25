@@ -169,15 +169,12 @@ async function handleSubmit(event) {
         email: (rawData.email || '').trim(),
         subject: (rawData.subject || '').trim(),
         message: (rawData.message || '').trim(),
-        submittedAt: new System.DateTime().toISOString(), // Mocking local time if needed or let backend handle
+        submittedAt: new Date().toISOString(),
         status: 'Pending'
     };
 
     // Correct payload for backend (matching ContactSubmissionModel)
-    const backendPayload = {
-        ...payload,
-        submittedAt: new Date().toISOString()
-    };
+    const backendPayload = { ...payload };
 
     const fieldErrors = validateContactForm(payload);
     if (Object.keys(fieldErrors).length > 0) {
