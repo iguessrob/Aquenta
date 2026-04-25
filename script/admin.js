@@ -75,14 +75,12 @@ async function safeGetActiveMembersCount() {
     return 0;
   }
 }
-
 function resolveBillingDate(item, periodById) {
   const periodId = toNumber(item.periodId ?? item.PeriodID ?? item.PeriodId);
   if (periodId > 0 && periodById.has(periodId)) {
     const period = periodById.get(periodId);
     const periodEndRaw = period.periodEnd ?? period.PeriodEnd;
     if (periodEndRaw) {
-      const periodEnd = new Date(periodEndRaw);
       if (!Number.isNaN(periodEnd.getTime()) && periodEnd.getFullYear() > 1900) {
         return periodEnd;
       }
@@ -91,6 +89,12 @@ function resolveBillingDate(item, periodById) {
     const periodStartRaw = period.periodStart ?? period.PeriodStart;
     if (periodStartRaw) {
       const periodStart = new Date(periodStartRaw);
+
+    const concessionerConsumptionForCard = toNumber(
+      latestMonthWaterData?.concessionerConsumption ??
+      latestMonthWaterData?.ConcessionerConsumption ??
+      0
+    );
       if (!Number.isNaN(periodStart.getTime()) && periodStart.getFullYear() > 1900) {
         return periodStart;
       }
@@ -352,7 +356,7 @@ async function loadDashboardData() {
 
   const waterConsumedElement = document.querySelector('.summary-card:nth-of-type(3) .card-value');
   if (waterConsumedElement) {
-    waterConsumedElement.textContent = `${toNumber(latestMonthWaterConsumed).toLocaleString()} m³`;
+    waterConsumedElement.textContent = `${concessionerConsumptionForCard.toLocaleString()} m³`;
   }
 
   const totalAnnualElement = document.getElementById('totalAnnual');
