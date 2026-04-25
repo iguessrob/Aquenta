@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -98,45 +98,52 @@
       gap: 10px;
     }
 
-    .report-year-selector {
-      display: inline-flex;
+    .report-table-header {
+      display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 10px;
-      padding: 6px 10px;
-      border: 1px solid #dbe3ee;
-      border-radius: 999px;
-      background: #f8fbff;
+      gap: 12px;
+      margin-bottom: 20px;
     }
 
-    .report-year-text {
-      min-width: 64px;
+    .year-selector {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background-color: #f9fafb;
+      border-radius: 8px;
+      padding: 8px 12px;
+      border: 1px solid #e5e7eb;
+      flex: 0 0 auto;
+      white-space: nowrap;
+    }
+
+    .year-text {
+      min-width: 60px;
       text-align: center;
       font-size: 14px;
       font-weight: 600;
       color: #111827;
     }
 
-    .report-year-btn {
-      width: 32px;
-      height: 32px;
-      display: inline-flex;
+    .year-btn {
+      background: none;
+      border: none;
+      padding: 4px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
       align-items: center;
       justify-content: center;
-      border: 1px solid #cfd8e3;
-      border-radius: 50%;
-      background: #ffffff;
-      color: #1f5fae;
-      cursor: pointer;
-      transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+      color: #4b5563;
+      transition: background-color 0.2s;
     }
 
-    .report-year-btn:hover {
-      background: #edf4ff;
-      border-color: #9eb8d8;
-      color: #174b8a;
+    .year-btn:hover {
+      background-color: #e5e7eb;
     }
 
-    .report-year-btn:disabled {
+    .year-btn:disabled {
       opacity: 0.5;
       cursor: not-allowed;
     }
@@ -173,7 +180,7 @@
       font-size: 22px;
       font-weight: 600;
       color: #111827;
-      margin-bottom: 20px;
+      margin: 0;
     }
 
     .consumption-table {
@@ -227,6 +234,13 @@
       .report-table-container {
         border: none;
         box-shadow: none;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .report-table-header {
+        flex-direction: column;
+        align-items: flex-start;
       }
     }
   </style>
@@ -362,19 +376,6 @@
         <div class="report-header-section">
           <div class="report-header-left">
             <h2 class="report-main-title">Monthly Consumption Summary</h2>
-            <div class="report-year-selector" aria-label="Select report year">
-              <button id="reportPrevYear" class="report-year-btn" type="button" aria-label="Previous year">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="15 18 9 12 15 6"></polyline>
-                </svg>
-              </button>
-              <span id="reportCurrentYear" class="report-year-text">--</span>
-              <button id="reportNextYear" class="report-year-btn" type="button" aria-label="Next year">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="9 18 15 12 9 6"></polyline>
-                </svg>
-              </button>
-            </div>
           </div>
           <button class="print-report-btn" onclick="window.print()">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -391,7 +392,22 @@
             <div class="loading-spinner"></div>
             <p class="loading-text">Loading consumption data...</p>
           </div>
-          <h3 class="report-section-title">Total Consumption</h3>
+          <div class="report-table-header">
+            <h3 class="report-section-title">Total Consumption</h3>
+            <div class="year-selector" aria-label="Select report year">
+              <button id="reportPrevYear" class="year-btn" type="button" aria-label="Previous year">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+              </button>
+              <span id="reportCurrentYear" class="year-text">--</span>
+              <button id="reportNextYear" class="year-btn" type="button" aria-label="Next year">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </button>
+            </div>
+          </div>
           <table class="consumption-table">
             <thead>
               <tr>
