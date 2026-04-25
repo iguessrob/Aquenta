@@ -17,7 +17,7 @@ namespace AquentaAPI.Controllers
         }
 
         [HttpPost]
-        public ActionResult SubmitContact([FromBody] ContactSubmissionModel submission)
+        public async Task<ActionResult> SubmitContact([FromBody] ContactSubmissionModel submission)
         {
             if (submission == null)
             {
