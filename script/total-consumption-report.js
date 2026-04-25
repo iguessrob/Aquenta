@@ -179,7 +179,8 @@
           <td>${name}</td>
           <td class="text-right">${monthData.motherMeterConsumption.toLocaleString()}</td>
           <td class="text-right">${monthData.concessionerConsumption.toLocaleString()}</td>
-          <td class="text-right">${monthData.memberConsumption.toLocaleString()} / ${monthData.nonMemberConsumption.toLocaleString()}</td>
+          <td class="text-right">${monthData.memberConsumption.toLocaleString()}</td>
+          <td class="text-right">${monthData.nonMemberConsumption.toLocaleString()}</td>
           <td class="text-right">${monthData.waterLoss.toLocaleString()}</td>
         `;
         tableBody.appendChild(row);
@@ -192,7 +193,8 @@
         <td>TOTAL ${selectedYear}</td>
         <td class="text-right">${annualMother.toLocaleString()}</td>
         <td class="text-right">${annualConcessioners.toLocaleString()}</td>
-        <td class="text-right">${annualMembers.toLocaleString()} / ${annualNonMembers.toLocaleString()}</td>
+        <td class="text-right">${annualMembers.toLocaleString()}</td>
+        <td class="text-right">${annualNonMembers.toLocaleString()}</td>
         <td class="text-right">${annualWaterLoss.toLocaleString()}</td>
       `;
       tableBody.appendChild(totalRow);
