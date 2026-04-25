@@ -116,6 +116,21 @@ function resolveBillingDate(item, periodById) {
   return null;
 }
 
+function isMotherMeterRecord(item) {
+  const firstName = String(item.firstName ?? item.FirstName ?? '').trim().toUpperCase();
+  const fullName = String(item.fullName ?? item.FullName ?? '').trim().toUpperCase();
+  const accountNumber = String(item.accountNumber ?? item.AccountNumber ?? '').trim().toUpperCase();
+  const meterNumber = String(item.meterNumber ?? item.MeterNumber ?? '').trim().toUpperCase();
+
+  return (
+    firstName === 'MOTHER METER' ||
+    fullName === 'MOTHER METER' ||
+    fullName.startsWith('MOTHER METER ') ||
+    accountNumber === 'ACC-MOTHER-0001' ||
+    meterNumber === 'MTR-MOTHER-0001'
+  );
+}
+
 function buildFallbackDashboardMetrics(billings, payments, periods, selectedYear) {
   const billingList = Array.isArray(billings) ? billings : [];
   const paymentList = Array.isArray(payments) ? payments : [];
@@ -132,6 +147,7 @@ function buildFallbackDashboardMetrics(billings, payments, periods, selectedYear
   }));
 
   const billingIdToBucket = new Map();
+  const billingIdIsMotherMeter = new Map();
   const bucketByYearMonth = new Map();
 
   if (billingList.length === 0) {
@@ -173,15 +189,24 @@ function buildFallbackDashboardMetrics(billings, payments, periods, selectedYear
         monthIndex,
         receivable: 0,
         collection: 0,
+        concessionerReceivable: 0,
+        concessionerCollection: 0,
       });
     }
 
     const bucket = bucketByYearMonth.get(bucketKey);
-    bucket.receivable += toNumber(item.billAmount ?? item.BillAmount) + toNumber(item.penalty ?? item.Penalty);
+    const isMotherMeter = isMotherMeterRecord(item);
+    const billAmount = toNumber(item.billAmount ?? item.BillAmount) + toNumber(item.penalty ?? item.Penalty);
+
+    bucket.receivable += billAmount;
+    if (!isMotherMeter) {
+      bucket.concessionerReceivable += billAmount;
+    }
 
     const billingId = toNumber(item.billingId ?? item.BillingID ?? item.BillingId);
     if (billingId > 0) {
       billingIdToBucket.set(billingId, bucketKey);
+      billingIdIsMotherMeter.set(billingId, isMotherMeter);
     }
   });
 
@@ -193,7 +218,12 @@ function buildFallbackDashboardMetrics(billings, payments, periods, selectedYear
     const bucket = bucketByYearMonth.get(bucketKey);
     if (!bucket) return;
 
-    bucket.collection += toNumber(item.amountPaid ?? item.AmountPaid);
+    const amountPaid = toNumber(item.amountPaid ?? item.AmountPaid);
+    bucket.collection += amountPaid;
+
+    if (!billingIdIsMotherMeter.get(billingId)) {
+      bucket.concessionerCollection += amountPaid;
+    }
   });
 
   bucketByYearMonth.forEach((bucket) => {
@@ -207,7 +237,12 @@ function buildFallbackDashboardMetrics(billings, payments, periods, selectedYear
   const latestYear = latestDate.getFullYear();
   const latestMonthIndex = latestDate.getMonth();
   const latestBucketKey = `${latestYear}-${latestMonthIndex}`;
-  const latestBucket = bucketByYearMonth.get(latestBucketKey) || { receivable: 0, collection: 0 };
+  const latestBucket = bucketByYearMonth.get(latestBucketKey) || {
+    receivable: 0,
+    collection: 0,
+    concessionerReceivable: 0,
+    concessionerCollection: 0,
+  };
 
   const totalMonthlyAccountReceivable = latestBucket.receivable;
   const totalMonthlyCollection = latestBucket.collection;
@@ -224,7 +259,7 @@ function buildFallbackDashboardMetrics(billings, payments, periods, selectedYear
     latestMonthIndex,
     totalMonthlyAccountReceivable,
     totalMonthlyCollection,
-    latestMonthPendingCollections: totalMonthlyAccountReceivable - totalMonthlyCollection,
+    latestMonthPendingCollections: latestBucket.concessionerReceivable - latestBucket.concessionerCollection,
     totalAnnualAccountReceivable,
     monthlyDataForSelectedYear,
     totalAnnualAccountReceivableForSelectedYear,
