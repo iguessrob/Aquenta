@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AquentaLibrary")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f40e5c21c88949b3786e39b018f6aac5de16c1b8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8422ade14b07b2ca98c960fe2af8578cf6f60fd1")]
 [assembly: System.Reflection.AssemblyProductAttribute("AquentaLibrary")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AquentaLibrary")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

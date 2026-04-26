@@ -54,10 +54,14 @@ namespace AquentaLibrary.Repositories
         public IEnumerable<TariffsModel> GetActiveTariffRates()
         {
             return dbConnection.Query<TariffsModel>(@"
-                SELECT r.RateID, r.CategoryID, r.TariffVersionID, r.CubicMeter, r.Amount 
-                FROM tbl_TariffRate r
-                INNER JOIN tbl_TariffVersion v ON r.TariffVersionID = v.TariffVersionID
-                WHERE v.IsActive = 1",
+                SELECT RateID, CategoryID, TariffVersionID, CubicMeter, Amount 
+                FROM tbl_TariffRate 
+                WHERE TariffVersionID = (
+                    SELECT TOP 1 TariffVersionID 
+                    FROM tbl_TariffVersion 
+                    WHERE IsActive = 1 
+                    ORDER BY CreatedAt DESC, TariffVersionID DESC
+                )",
                 commandType: CommandType.Text);
         }
 

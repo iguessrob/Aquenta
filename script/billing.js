@@ -1370,12 +1370,13 @@ async function loadBilling() {
 
   const api = getApi();
   try {
-    const [billing, concessioners, users, periods, tariffs] = await Promise.all([
+    const [billing, concessioners, users, periods, tariffs, activeVersionResult] = await Promise.all([
       api.get('/Billing'),
       api.get('/Concessioner/active'),
       api.get('/User'),
       api.get('/Period'),
       api.get('/Tariffs/active'),
+      api.get('/TariffVersion/active'),
     ]);
 
     let districts = [];
@@ -1392,6 +1393,12 @@ async function loadBilling() {
     periodCache = Array.isArray(periods) ? periods : [];
     tariffsCache = Array.isArray(tariffs) ? tariffs : [];
     districtCache = Array.isArray(districts) ? districts : [];
+
+    const versionNameEl = document.getElementById('activeVersionName');
+    if (versionNameEl && activeVersionResult) {
+      versionNameEl.textContent = activeVersionResult.versionName || activeVersionResult.VersionName || 'Active';
+    }
+
     currentBillingPage = 1;
 
     populateDistrictFilter();
