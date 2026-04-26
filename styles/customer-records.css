@@ -881,13 +881,7 @@ body[data-page="view-customer"] .profile-toolbar {
 
 
 /* Transactions Table Specifics */
-.transaction-table thead {
-  background-color: #3b82f6 !important; /* Blue header as per image */
-}
-
 .transaction-table thead th {
-  color: #ffffff !important;
-  font-weight: 700;
   text-transform: uppercase;
 }
 

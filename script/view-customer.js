@@ -41,7 +41,9 @@
   function formatDate(val) {
     if (!val) return '--';
     const d = new Date(val);
-    return isNaN(d.getTime()) ? '--' : d.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+    // Handle invalid dates or default "0001-01-01" (Year 1) dates
+    if (isNaN(d.getTime()) || d.getFullYear() <= 1) return '--';
+    return d.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
   }
 
   async function loadHistory() {
