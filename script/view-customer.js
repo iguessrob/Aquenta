@@ -93,6 +93,9 @@
     }).sort((a, b) => b.billingId - a.billingId);
 
     filteredPayments = paymentCache.filter(pay => {
+      const amount = toNumber(pick(pay, ['amountPaid', 'AmountPaid'], 0));
+      if (amount <= 0) return false; // Hide 0 or negative "phantom" payments
+
       const dateText = formatDate(pick(pay, ['datePaid', 'DatePaid'])).toLowerCase();
       return !pTerm || dateText.includes(pTerm);
     }).sort((a, b) => new Date(pick(b, ['datePaid', 'DatePaid'])) - new Date(pick(a, ['datePaid', 'DatePaid'])));
