@@ -32,6 +32,18 @@
       headers: {
         'Content-Type': 'application/json',
         ...(options && options.headers ? options.headers : {}),
+        ...(() => {
+          const userJson = localStorage.getItem('aquentaUser');
+          if (userJson) {
+            try {
+              const user = JSON.parse(userJson);
+              if (user.token) {
+                return { 'Authorization': `Bearer ${user.token}` };
+              }
+            } catch (e) { /* ignore */ }
+          }
+          return {};
+        })()
       },
       ...options,
     });

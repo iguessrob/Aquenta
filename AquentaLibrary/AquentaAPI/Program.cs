@@ -68,6 +68,54 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = string.Empty;
 });
 
+// 3. JWT AUTHENTICATION MIDDLEWARE
+app.Use(async (context, next) =>
+{
+    var path = context.Request.Path.Value?.ToLower() ?? "";
+    
+    // Define public endpoints that don't need a token
+    var publicPaths = new[] { 
+        "/api/user/login", 
+        "/api/user/forgot-password", 
+        "/api/user/reset-password",
+        "/api/contact",
+        "/health",
+        "/swagger"
+    };
+
+    if (publicPaths.Any(p => path.Contains(p)))
+    {
+        await next();
+        return;
+    }
+
+    // Check for Authorization header
+    var authHeader = context.Request.Headers["Authorization"].ToString();
+    if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
+    {
+        context.Response.StatusCode = 401;
+        await context.Response.WriteAsync("Unauthorized: No token provided.");
+        return;
+    }
+
+    var token = authHeader.Substring("Bearer ".Length).Trim();
+    var tokenService = new TokenService();
+    var (userId, role, isValid) = tokenService.ValidateToken(token);
+
+    if (!isValid)
+    {
+        context.Response.StatusCode = 401;
+        await context.Response.WriteAsync("Unauthorized: Invalid or expired token.");
+        return;
+    }
+
+    // Add user info to context for controllers to use if needed
+    context.Items["UserId"] = userId;
+    context.Items["UserRole"] = role;
+
+    await next();
+});
+
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();

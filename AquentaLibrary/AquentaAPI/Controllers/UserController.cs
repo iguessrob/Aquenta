@@ -35,6 +35,7 @@ namespace AquentaAPI.Controllers
             public string UserRole { get; set; } = string.Empty;
             public int? ConcessionerId { get; set; }
             public string? AccountNumber { get; set; }
+            public string Token { get; set; } = string.Empty;
         }
 
         [HttpPost("login")]
@@ -87,7 +88,8 @@ namespace AquentaAPI.Controllers
                 LastName = user.LastName ?? string.Empty,
                 UserRole = user.UserRole ?? string.Empty,
                 ConcessionerId = concessioner?.ConcessionerId,
-                AccountNumber = concessioner?.AccountNumber
+                AccountNumber = concessioner?.AccountNumber,
+                Token = tokenService.GenerateSessionToken(user.UserId, user.UserRole ?? string.Empty)
             });
         }
 
@@ -177,7 +179,7 @@ namespace AquentaAPI.Controllers
             if (string.IsNullOrWhiteSpace(request.Token))
                 return BadRequest("Token is required.");
 
-            var (userId, isValid) = tokenService.ValidateToken(request.Token);
+            var (userId, role, isValid) = tokenService.ValidateToken(request.Token);
             if (!isValid)
                 return BadRequest("Invalid or expired reset token.");
 

@@ -13,28 +13,47 @@ namespace AquentaLibrary.Services
         public string GenerateResetToken(int userId, int expiryMinutes = 60)
         {
             var expiry = DateTime.UtcNow.AddMinutes(expiryMinutes);
-            var payload = $"{userId}|{expiry:O}";
+            var payload = $"RESET|{userId}|{expiry:O}";
             return Encrypt(payload);
         }
 
-        public (int UserId, bool IsValid) ValidateToken(string token)
+        public string GenerateSessionToken(int userId, string role, int expiryHours = 24)
+        {
+            var expiry = DateTime.UtcNow.AddHours(expiryHours);
+            var payload = $"SESSION|{userId}|{role}|{expiry:O}";
+            return Encrypt(payload);
+        }
+
+        public (int UserId, string Role, bool IsValid) ValidateToken(string token)
         {
             try
             {
                 var decrypted = Decrypt(token);
                 var parts = decrypted.Split('|');
-                if (parts.Length != 2) return (0, false);
+                
+                if (parts[0] == "RESET")
+                {
+                    if (parts.Length != 3) return (0, string.Empty, false);
+                    var userId = int.Parse(parts[1]);
+                    var expiry = DateTime.Parse(parts[2]);
+                    if (expiry < DateTime.UtcNow) return (0, string.Empty, false);
+                    return (userId, string.Empty, true);
+                }
+                else if (parts[0] == "SESSION")
+                {
+                    if (parts.Length != 4) return (0, string.Empty, false);
+                    var userId = int.Parse(parts[1]);
+                    var role = parts[2];
+                    var expiry = DateTime.Parse(parts[3]);
+                    if (expiry < DateTime.UtcNow) return (0, string.Empty, false);
+                    return (userId, role, true);
+                }
 
-                var userId = int.Parse(parts[0]);
-                var expiry = DateTime.Parse(parts[1]);
-
-                if (expiry < DateTime.UtcNow) return (0, false);
-
-                return (userId, true);
+                return (0, string.Empty, false);
             }
             catch
             {
-                return (0, false);
+                return (0, string.Empty, false);
             }
         }
 
