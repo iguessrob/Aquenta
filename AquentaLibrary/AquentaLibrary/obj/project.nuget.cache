@@ -1,11 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "iNWP1PYZ67s=",
+  "dgSpecHash": "O9nwqLrdGQU=",
   "success": true,
   "projectFilePath": "C:\\Users\\mabil\\Desktop\\aquentatest\\AquentaLibrary\\AquentaLibrary\\AquentaLibrary.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\mabil\\.nuget\\packages\\azure.core\\1.50.0\\azure.core.1.50.0.nupkg.sha512",
     "C:\\Users\\mabil\\.nuget\\packages\\azure.identity\\1.17.1\\azure.identity.1.17.1.nupkg.sha512",
+    "C:\\Users\\mabil\\.nuget\\packages\\bcrypt.net-next\\4.1.0\\bcrypt.net-next.4.1.0.nupkg.sha512",
     "C:\\Users\\mabil\\.nuget\\packages\\dapper\\2.1.66\\dapper.2.1.66.nupkg.sha512",
     "C:\\Users\\mabil\\.nuget\\packages\\dapper.sqlbuilder\\2.1.66\\dapper.sqlbuilder.2.1.66.nupkg.sha512",
     "C:\\Users\\mabil\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",

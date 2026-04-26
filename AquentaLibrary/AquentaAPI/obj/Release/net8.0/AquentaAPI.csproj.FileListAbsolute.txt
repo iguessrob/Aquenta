@@ -162,3 +162,4 @@ C:\Users\mabil\Desktop\aquentatest\AquentaLibrary\AquentaAPI\obj\Release\net8.0\
 C:\Users\mabil\Desktop\aquentatest\AquentaLibrary\AquentaAPI\obj\Release\net8.0\AquentaAPI.genruntimeconfig.cache
 C:\Users\mabil\Desktop\aquentatest\AquentaLibrary\AquentaAPI\obj\Release\net8.0\ref\AquentaAPI.dll
 C:\Users\mabil\Desktop\aquentatest\AquentaLibrary\AquentaAPI\bin\Release\net8.0\dotnet-tools.json
+C:\Users\mabil\Desktop\aquentatest\AquentaLibrary\AquentaAPI\bin\Release\net8.0\BCrypt.Net-Next.dll

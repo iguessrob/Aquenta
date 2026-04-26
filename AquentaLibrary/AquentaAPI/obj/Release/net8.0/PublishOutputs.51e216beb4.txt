@@ -7,6 +7,7 @@ C:\Users\mabil\Desktop\aquentatest\AquentaLibrary\AquentaAPI\obj\Release\net8.0\
 C:\Users\mabil\Desktop\aquentatest\AquentaLibrary\AquentaAPI\obj\Release\net8.0\PubTmp\Out\AquentaAPI.pdb
 C:\Users\mabil\Desktop\aquentatest\AquentaLibrary\AquentaAPI\obj\Release\net8.0\PubTmp\Out\Azure.Core.dll
 C:\Users\mabil\Desktop\aquentatest\AquentaLibrary\AquentaAPI\obj\Release\net8.0\PubTmp\Out\Azure.Identity.dll
+C:\Users\mabil\Desktop\aquentatest\AquentaLibrary\AquentaAPI\obj\Release\net8.0\PubTmp\Out\BCrypt.Net-Next.dll
 C:\Users\mabil\Desktop\aquentatest\AquentaLibrary\AquentaAPI\obj\Release\net8.0\PubTmp\Out\Dapper.dll
 C:\Users\mabil\Desktop\aquentatest\AquentaLibrary\AquentaAPI\obj\Release\net8.0\PubTmp\Out\Dapper.SqlBuilder.dll
 C:\Users\mabil\Desktop\aquentatest\AquentaLibrary\AquentaAPI\obj\Release\net8.0\PubTmp\Out\Microsoft.Bcl.AsyncInterfaces.dll

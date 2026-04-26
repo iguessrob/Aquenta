@@ -6,6 +6,7 @@
 *.suo
 *.userosscache
 *.sln.docstates
+*.futdcache.v2
 
 ## OS ignore
 Thumbs.db
@@ -23,3 +24,4 @@ Thumbs.db
 *.sourcelink.json
 *.dswa.cache.json
 *.dll
+

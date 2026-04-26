@@ -644,3 +644,4 @@ C:\Users\mabil\Desktop\aquentatest\AquentaLibrary\AquentaAPI\obj\Debug\net8.0\re
 C:\Users\mabil\Desktop\aquentatest\AquentaLibrary\AquentaAPI\obj\Debug\net8.0\AquentaAPI.pdb
 C:\Users\mabil\Desktop\aquentatest\AquentaLibrary\AquentaAPI\obj\Debug\net8.0\AquentaAPI.genruntimeconfig.cache
 C:\Users\mabil\Desktop\aquentatest\AquentaLibrary\AquentaAPI\obj\Debug\net8.0\ref\AquentaAPI.dll
+C:\Users\mabil\Desktop\aquentatest\AquentaLibrary\AquentaAPI\bin\Debug\net8.0\BCrypt.Net-Next.dll

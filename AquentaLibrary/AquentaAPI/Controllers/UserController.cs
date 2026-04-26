@@ -68,7 +68,7 @@ namespace AquentaAPI.Controllers
             var user = candidateUsers.FirstOrDefault(u =>
             {
                 return !string.IsNullOrWhiteSpace(u.Pass)
-                    && string.Equals(u.Pass.Trim(), inputPassword, System.StringComparison.Ordinal);
+                    && BCrypt.Net.BCrypt.EnhancedVerify(inputPassword, u.Pass);
             });
 
             if (user == null)

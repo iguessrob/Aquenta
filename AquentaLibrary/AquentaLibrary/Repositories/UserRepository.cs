@@ -149,9 +149,10 @@ namespace AquentaLibrary.Repositories
 
         public bool UpdatePassword(int userId, string newPassword)
         {
+            string hashedPassword = BCrypt.Net.BCrypt.EnhancedHashPassword(newPassword);
             string query = "UPDATE tbl_User SET Pass = @Password WHERE UserId = @UserId";
             using var connection = CreateConnection();
-            int affected = connection.Execute(query, new { UserId = userId, Password = newPassword });
+            int affected = connection.Execute(query, new { UserId = userId, Password = hashedPassword });
             return affected == 1;
         }
     }
