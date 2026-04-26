@@ -11,15 +11,19 @@ namespace AquentaAPI.Controllers
         BillingServices billingServices = new BillingServices();
 
         [HttpPost]
-        public bool AddBilling(BillingModel billing)
+        public ActionResult<bool> AddBilling(BillingModel billing)
         {
-            return billingServices.Add(billing);
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            return Ok(billingServices.Add(billing));
         }
 
         [HttpPut]
-        public bool UpdateBilling(BillingModel billing)
+        public ActionResult<bool> UpdateBilling(BillingModel billing)
         {
-            return billingServices.Update(billing);
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            return Ok(billingServices.Update(billing));
         }
 
         [HttpGet]
@@ -36,9 +40,11 @@ namespace AquentaAPI.Controllers
         }
 
         [HttpDelete]
-        public bool DeleteBilling(int id)
+        public ActionResult<bool> DeleteBilling(int id)
         {
-            return billingServices.Delete(id);
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            return Ok(billingServices.Delete(id));
         }
 
         [HttpGet("concessioner/{concessionerId}")]

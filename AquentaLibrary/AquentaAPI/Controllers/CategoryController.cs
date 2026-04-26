@@ -1,4 +1,4 @@
-﻿using AquentaLibrary.Models;
+using AquentaLibrary.Models;
 using AquentaLibrary.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,15 +11,19 @@ namespace AquentaAPI.Controllers
         CategoryServices categoryServices = new CategoryServices();
 
         [HttpPost]
-        public bool AddCategory(CategoryModel category)
+        public ActionResult<bool> AddCategory(CategoryModel category)
         {
-            return categoryServices.Add(category);
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            return Ok(categoryServices.Add(category));
         }
 
         [HttpPut]
-        public bool UpdateCategory(CategoryModel category)
+        public ActionResult<bool> UpdateCategory(CategoryModel category)
         {
-            return categoryServices.Update(category);
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            return Ok(categoryServices.Update(category));
         }
 
         [HttpGet]
@@ -36,9 +40,11 @@ namespace AquentaAPI.Controllers
         }
 
         [HttpDelete]
-        public bool DeleteCategory(int id)
+        public ActionResult<bool> DeleteCategory(int id)
         {
-            return categoryServices.Delete(id);
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            return Ok(categoryServices.Delete(id));
         }
     }
 }

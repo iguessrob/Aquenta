@@ -18,8 +18,11 @@ namespace AquentaAPI.Controllers
         /// GET: /api/report/dashboard
         /// </summary>
         [HttpGet("dashboard")]
-        public ActionResult<dynamic> GetDashboardSummary()
+        public ActionResult GetDashboardSummary()
         {
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
             try
             {
                 var summary = _reportServices.GetDashboardSummary();
@@ -90,8 +93,11 @@ namespace AquentaAPI.Controllers
         /// GET: /api/report/pending-collections
         /// </summary>
         [HttpGet("pending-collections")]
-        public ActionResult<decimal> GetPendingCollections()
+        public ActionResult GetPendingCollections()
         {
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
             try
             {
                 var pending = _reportServices.GetPendingCollections();
@@ -424,8 +430,11 @@ namespace AquentaAPI.Controllers
         /// GET: /api/report/delinquent-customers
         /// </summary>
         [HttpGet("delinquent-customers")]
-        public ActionResult<IEnumerable<dynamic>> GetDelinquentCustomersReport()
+        public ActionResult GetDelinquentCustomersReport()
         {
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
             try
             {
                 var delinquent = _reportServices.GetDelinquentCustomersReport();

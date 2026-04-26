@@ -1,4 +1,4 @@
-﻿using AquentaLibrary.Models;
+using AquentaLibrary.Models;
 using AquentaLibrary.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,15 +11,19 @@ namespace AquentaAPI.Controllers
         DistrictServices districtServices = new DistrictServices();
 
         [HttpPost]
-        public bool AddDistrict(DistrictModel district)
+        public ActionResult<bool> AddDistrict(DistrictModel district)
         {
-            return districtServices.Add(district);
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            return Ok(districtServices.Add(district));
         }
 
         [HttpPut]
-        public bool UpdateDistrict(DistrictModel district)
+        public ActionResult<bool> UpdateDistrict(DistrictModel district)
         {
-            return districtServices.Update(district);
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            return Ok(districtServices.Update(district));
         }
 
         [HttpGet]
@@ -36,9 +40,11 @@ namespace AquentaAPI.Controllers
         }
 
         [HttpDelete]
-        public bool DeleteDistrict(int id)
+        public ActionResult<bool> DeleteDistrict(int id)
         {
-            return districtServices.Delete(id);
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            return Ok(districtServices.Delete(id));
         }
     }
 }

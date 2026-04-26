@@ -20,22 +20,31 @@ namespace AquentaAPI.Controllers
         }
 
         [HttpPost]
-        public bool AddConcessioner(ConcessionerModel concessioner)
+        public ActionResult<bool> AddConcessioner(ConcessionerModel concessioner)
         {
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
             NormalizeOptionalFields(concessioner);
-            return concessionerServices.Add(concessioner);
+            return Ok(concessionerServices.Add(concessioner));
         }
 
         [HttpPut]
-        public bool UpdateConcessioner(ConcessionerModel concessioner)
+        public ActionResult<bool> UpdateConcessioner(ConcessionerModel concessioner)
         {
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
             NormalizeOptionalFields(concessioner);
-            return concessionerServices.Update(concessioner);
+            return Ok(concessionerServices.Update(concessioner));
         }
 
         [HttpGet]
         public ActionResult GetAllConcessioners()
         {
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
             var user = concessionerServices.GetAll();
             return Ok(user);
         }
@@ -54,9 +63,12 @@ namespace AquentaAPI.Controllers
         }
 
         [HttpDelete]
-        public bool DeleteConcessioner(int id)
+        public ActionResult<bool> DeleteConcessioner(int id)
         {
-            return concessionerServices.Delete(id);
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
+            return Ok(concessionerServices.Delete(id));
         }
 
         [HttpGet("active/count")]

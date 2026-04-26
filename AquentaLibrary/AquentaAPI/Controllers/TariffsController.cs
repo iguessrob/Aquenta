@@ -13,6 +13,9 @@ namespace AquentaAPI.Controllers
         [HttpPost]
         public ActionResult<bool> AddTariffs([FromBody] TariffsModel tariffs)
         {
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
             if (tariffs == null) return BadRequest("Tariff data is required.");
             var result = tariffsServices.Add(tariffs);
             return Ok(result);
@@ -21,6 +24,9 @@ namespace AquentaAPI.Controllers
         [HttpPut]
         public ActionResult<bool> UpdateTariffs([FromBody] TariffsModel tariffs)
         {
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
             if (tariffs == null) return BadRequest("Tariff data is required.");
             var result = tariffsServices.Update(tariffs);
             return Ok(result);
@@ -54,9 +60,12 @@ namespace AquentaAPI.Controllers
         }
 
         [HttpDelete]
-        public bool DeleteTariffs(int id)
+        public ActionResult<bool> DeleteTariffs(int id)
         {
-            return tariffsServices.Delete(id);
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
+            return Ok(tariffsServices.Delete(id));
         }
     }
 }

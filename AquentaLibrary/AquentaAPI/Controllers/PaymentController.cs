@@ -11,15 +11,19 @@ namespace AquentaAPI.Controllers
         PaymentServices paymentServices = new PaymentServices();
 
         [HttpPost]
-        public bool AddPayment(PaymentModel payment)
+        public ActionResult<bool> AddPayment(PaymentModel payment)
         {
-            return paymentServices.Add(payment);
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            return Ok(paymentServices.Add(payment));
         }
 
         [HttpPut]
-        public bool UpdatePayment(PaymentModel payment )
+        public ActionResult<bool> UpdatePayment(PaymentModel payment )
         {
-            return paymentServices.Update(payment);
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            return Ok(paymentServices.Update(payment));
         }
 
         [HttpGet]
@@ -36,9 +40,11 @@ namespace AquentaAPI.Controllers
         }
 
         [HttpDelete]
-        public bool DeletePayment(int id)
+        public ActionResult<bool> DeletePayment(int id)
         {
-            return paymentServices.Delete(id);
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            return Ok(paymentServices.Delete(id));
         }
 
         [HttpGet("concessioner/{concessionerId}")]
@@ -51,6 +57,9 @@ namespace AquentaAPI.Controllers
         [HttpPost("distribute")]
         public ActionResult DistributePayment([FromBody] DistributePaymentRequest request)
         {
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
             try
             {
                 var result = paymentServices.DistributePayment(
@@ -68,6 +77,9 @@ namespace AquentaAPI.Controllers
         [HttpPost("reverse-distribution")]
         public ActionResult ReverseDistribution([FromBody] ReverseDistributionRequest request)
         {
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
             try
             {
                 var result = paymentServices.ReverseDistribution(request.ConcessionerID);

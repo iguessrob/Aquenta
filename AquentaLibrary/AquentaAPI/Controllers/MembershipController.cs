@@ -1,4 +1,4 @@
-﻿using AquentaLibrary.Models;
+using AquentaLibrary.Models;
 using AquentaLibrary.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,15 +11,19 @@ namespace AquentaAPI.Controllers
         MembershipServices membershipServices = new MembershipServices();
 
         [HttpPost]
-        public bool AddMembership(MembershipModel membership)
+        public ActionResult<bool> AddMembership(MembershipModel membership)
         {
-            return membershipServices.Add(membership);
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            return Ok(membershipServices.Add(membership));
         }
 
         [HttpPut]
-        public bool UpdateMembership(MembershipModel membership)
+        public ActionResult<bool> UpdateMembership(MembershipModel membership)
         {
-            return membershipServices.Update(membership);
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            return Ok(membershipServices.Update(membership));
         }
 
         [HttpGet]
@@ -36,9 +40,11 @@ namespace AquentaAPI.Controllers
         }
 
         [HttpDelete]
-        public bool DeleteMembership(int id)
+        public ActionResult<bool> DeleteMembership(int id)
         {
-            return membershipServices.Delete(id);
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            return Ok(membershipServices.Delete(id));
         }
     }
 }

@@ -118,6 +118,9 @@ namespace AquentaAPI.Controllers
         [HttpPost]
         public ActionResult<bool> AddUser([FromBody] UserModel user)
         {
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
             if (user == null) return BadRequest("User data is required.");
             var result = userServices.Add(user);
             return Ok(result);
@@ -126,6 +129,9 @@ namespace AquentaAPI.Controllers
         [HttpPut]
         public ActionResult<bool> UpdateUser([FromBody] UserModel user)
         {
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
             if (user == null) return BadRequest("User data is required.");
             var result = userServices.Update(user);
             return Ok(result);
@@ -135,6 +141,9 @@ namespace AquentaAPI.Controllers
         [HttpGet]
         public ActionResult GetAllUser()
         {
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
             var user = userServices.GetAll();
             return Ok(user);
         }
@@ -146,9 +155,13 @@ namespace AquentaAPI.Controllers
         }
 
         [HttpDelete]
-        public bool DeleteUser(int id)
+        public ActionResult<bool> DeleteUser(int id)
         {
-            return userServices.Delete(id);
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
+            var result = userServices.Delete(id);
+            return Ok(result);
         }
 
         public class ForgotPasswordRequest

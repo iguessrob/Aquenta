@@ -13,6 +13,9 @@ namespace AquentaAPI.Controllers
         [HttpPost("create-current")]
         public ActionResult<int> CreateTariffVersionFromCurrent([FromBody] TariffVersionModel request)
         {
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
             if (request == null || string.IsNullOrWhiteSpace(request.VersionName))
             {
                 return BadRequest("Version name is required.");
@@ -25,6 +28,9 @@ namespace AquentaAPI.Controllers
         [HttpPut("rename/{id}")]
         public ActionResult<bool> UpdateTariffVersionName(int id, [FromQuery] string newName)
         {
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
             if (string.IsNullOrWhiteSpace(newName)) return BadRequest("New name is required.");
             var result = tariffVersionServices.UpdateName(id, newName);
             return Ok(result);
@@ -51,14 +57,20 @@ namespace AquentaAPI.Controllers
         }
 
         [HttpDelete("{id}")]
-        public bool DeleteTariffVersion(int id)
+        public ActionResult<bool> DeleteTariffVersion(int id)
         {
-            return tariffVersionServices.Delete(id);
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
+            return Ok(tariffVersionServices.Delete(id));
         }
 
         [HttpPost("set-active/{id}")]
         public ActionResult<bool> SetActive(int id)
         {
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
             var result = tariffVersionServices.SetActive(id);
             return Ok(result);
         }

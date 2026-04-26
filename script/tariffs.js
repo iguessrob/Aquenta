@@ -355,10 +355,10 @@ function setupDeleteVersionModal() {
       closeModal('deleteVersionModal');
       selectedTariffVersionId = null;
       await loadTariffVersions();
-      showNotification('Tariff preset deleted successfully.', 'success');
+      showNotification('Tariff version deleted successfully.', 'success');
     } catch (error) {
       console.error(error);
-      showNotification(error.message || 'Failed to delete preset.', 'error');
+      showNotification(error.message || 'Failed to delete version.', 'error');
     }
   });
 }
@@ -390,7 +390,7 @@ function setupCreateVersionModal() {
 
       const newVersionId = Number(response);
       await loadTariffVersions(newVersionId || null);
-      showNotification('New tariff preset created and set as current.', 'success');
+      showNotification('New tariff version created and set as current.', 'success');
     } catch (error) {
       console.error(error);
       showNotification(error.message || 'Failed to create tariff version.', 'error');
@@ -429,7 +429,7 @@ function setupEditVersionModal() {
 
       closeModal('editVersionModal');
       await loadTariffVersions(id);
-      showNotification('Preset name updated successfully.', 'success');
+      showNotification('Version name updated successfully.', 'success');
     } catch (error) {
       console.error(error);
       showNotification(error.message || 'Failed to update version name.', 'error');

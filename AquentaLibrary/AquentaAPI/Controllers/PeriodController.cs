@@ -1,4 +1,4 @@
-﻿using AquentaLibrary.Models;
+using AquentaLibrary.Models;
 using AquentaLibrary.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,15 +11,19 @@ namespace AquentaAPI.Controllers
         PeriodServices periodServices = new PeriodServices();
 
         [HttpPost]
-        public bool AddPeriod(PeriodModel period)
+        public ActionResult<bool> AddPeriod(PeriodModel period)
         {
-            return periodServices.Add(period);
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            return Ok(periodServices.Add(period));
         }
 
         [HttpPut]
-        public bool UpdatePeriod(PeriodModel period)
+        public ActionResult<bool> UpdatePeriod(PeriodModel period)
         {
-            return periodServices.Update(period);
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            return Ok(periodServices.Update(period));
         }
 
         [HttpGet]
@@ -36,9 +40,11 @@ namespace AquentaAPI.Controllers
         }
 
         [HttpDelete]
-        public bool DeletePeriod(int id)
+        public ActionResult<bool> DeletePeriod(int id)
         {
-            return periodServices.Delete(id);
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            return Ok(periodServices.Delete(id));
         }
     }
 }

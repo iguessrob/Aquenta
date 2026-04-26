@@ -43,6 +43,13 @@ BEGIN
     INSERT INTO tbl_TariffVersion (VersionName, IsActive)
     VALUES ('Version 1.0', 1);
 END
+ELSE
+BEGIN
+    -- Fix the name if it was created as 'Version 1.0 (Initial)' in a previous run
+    UPDATE tbl_TariffVersion 
+    SET VersionName = 'Version 1.0' 
+    WHERE VersionName = 'Version 1.0 (Initial)';
+END
 GO
 
 -- 3. Restore TariffVersionID in tbl_TariffRate
