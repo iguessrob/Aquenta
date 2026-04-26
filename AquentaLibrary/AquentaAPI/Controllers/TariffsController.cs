@@ -40,10 +40,10 @@ namespace AquentaAPI.Controllers
             return Ok(tariffs);
         }
 
-        [HttpGet("by-version/{tariffVersionId}")]
-        public ActionResult GetTariffsByVersionId(int tariffVersionId)
+        [HttpGet("by-version/{versionName}")]
+        public ActionResult GetTariffsByVersionName(string versionName)
         {
-            var tariffs = tariffsServices.GetByVersionId(tariffVersionId);
+            var tariffs = tariffsServices.GetByVersionName(versionName);
             return Ok(tariffs);
         }
 

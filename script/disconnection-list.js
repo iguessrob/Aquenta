@@ -96,11 +96,11 @@
     rows.forEach((c) => {
       const row = document.createElement('tr');
       row.innerHTML = `
-        <td>${getValue(c, ['accountNumber', 'AccountNumber'], '')}</td>
-        <td>${getValue(c, ['fullName', 'FullName'], '')}</td>
-        <td>${getValue(c, ['lastReading', 'LastReading'], '0')}</td>
-        <td>${formatMonthLabel(getMonthCount(c))}</td>
-        <td>${formatCurrency(getValue(c, ['totalDebt', 'TotalDebt']))}</td>
+        <td>${escapeHtml(getValue(c, ['accountNumber', 'AccountNumber'], ''))}</td>
+        <td>${escapeHtml(getValue(c, ['fullName', 'FullName'], ''))}</td>
+        <td>${escapeHtml(getValue(c, ['lastReading', 'LastReading'], '0'))}</td>
+        <td>${escapeHtml(formatMonthLabel(getMonthCount(c)))}</td>
+        <td>${escapeHtml(formatCurrency(getValue(c, ['totalDebt', 'TotalDebt'])))}</td>
       `;
       disconnectionTableBody.appendChild(row);
     });

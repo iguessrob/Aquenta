@@ -93,7 +93,7 @@ function updateDashboardStats(billings, concessioner) {
     const accountNum = concessioner.accountNumber || concessioner.AccountNumber || '--';
     const statusEl = document.getElementById('statStatus');
     if (statusEl) {
-      statusEl.innerHTML = `<span class="badge badge-${status.toLowerCase()}">${status}</span>`;
+      statusEl.innerHTML = `<span class="badge badge-${escapeHtml(status.toLowerCase())}">${escapeHtml(status)}</span>`;
     }
     const accountNumEl = document.getElementById('statAccountNum');
     if (accountNumEl) accountNumEl.textContent = 'Account #: ' + accountNum;
@@ -116,7 +116,7 @@ function updateDashboardStats(billings, concessioner) {
     const billStatusEl = document.getElementById('statBillStatus');
     if (billStatusEl) {
       const statusText = billStatus.charAt(0).toUpperCase() + billStatus.slice(1);
-      billStatusEl.innerHTML = `<span class="badge badge-${billStatus}">${statusText}</span>`;
+      billStatusEl.innerHTML = `<span class="badge badge-${escapeHtml(billStatus)}">${escapeHtml(statusText)}</span>`;
     }
 
     // Update Water Consumed card
@@ -308,14 +308,14 @@ function renderRecentBills(bills) {
     }
 
     html += `<tr>
-      <td>${periodStr}</td>
-      <td>${prev}</td>
-      <td>${curr}</td>
-      <td>${consumption} m³</td>
-      <td>${conGuardFormatCurrency(amount)}</td>
-      <td>${conGuardFormatCurrency(penalty)}</td>
-      <td style="font-weight:600;">${conGuardFormatCurrency(total)}</td>
-      <td><span class="badge ${badgeClass}">${status}</span></td>
+      <td>${escapeHtml(periodStr)}</td>
+      <td>${escapeHtml(prev)}</td>
+      <td>${escapeHtml(curr)}</td>
+      <td>${escapeHtml(consumption)} m³</td>
+      <td>${escapeHtml(conGuardFormatCurrency(amount))}</td>
+      <td>${escapeHtml(penalty)}</td>
+      <td style="font-weight:600;">${escapeHtml(conGuardFormatCurrency(total))}</td>
+      <td><span class="badge ${escapeHtml(badgeClass)}">${escapeHtml(status)}</span></td>
     </tr>`;
   });
 

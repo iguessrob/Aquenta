@@ -19,22 +19,22 @@ namespace AquentaAPI.Controllers
         }
 
         [HttpPost("create-current")]
-        public ActionResult<int> CreateTariffVersionFromCurrent([FromBody] TariffVersionModel request)
+        public ActionResult<string> CreateTariffVersionFromCurrent([FromBody] TariffVersionModel request)
         {
             if (request == null || string.IsNullOrWhiteSpace(request.VersionName))
             {
                 return BadRequest("Version name is required.");
             }
 
-            var newId = tariffVersionServices.CreateFromCurrentAndSetActive(request.VersionName.Trim());
-            return Ok(newId);
+            var newName = tariffVersionServices.CreateFromCurrentAndSetActive(request.VersionName.Trim());
+            return Ok(newName);
         }
 
-        [HttpPut]
-        public ActionResult<bool> UpdateTariffVersion([FromBody] TariffVersionModel tariffVersion)
+        [HttpPut("rename")]
+        public ActionResult<bool> UpdateTariffVersionName([FromQuery] string oldName, [FromQuery] string newName)
         {
-            if (tariffVersion == null) return BadRequest("Tariff version data is required.");
-            var result = tariffVersionServices.Update(tariffVersion);
+            if (string.IsNullOrWhiteSpace(oldName) || string.IsNullOrWhiteSpace(newName)) return BadRequest("Both names are required.");
+            var result = tariffVersionServices.UpdateName(oldName, newName);
             return Ok(result);
         }
 
@@ -52,16 +52,16 @@ namespace AquentaAPI.Controllers
             return Ok(version);
         }
 
-        [HttpGet("{id}")]
-        public TariffVersionModel GetTariffVersionById(int id)
+        [HttpGet("{name}")]
+        public TariffVersionModel GetTariffVersionByName(string name)
         {
-            return tariffVersionServices.GetbyId(id);
+            return tariffVersionServices.GetByName(name);
         }
 
-        [HttpDelete("{id}")]
-        public bool DeleteTariffVersion(int id)
+        [HttpDelete("{name}")]
+        public bool DeleteTariffVersion(string name)
         {
-            return tariffVersionServices.Delete(id);
+            return tariffVersionServices.Delete(name);
         }
     }
 }

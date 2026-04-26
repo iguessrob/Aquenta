@@ -365,11 +365,11 @@
         const statusLabel = customer.connectionStatus || 'Active';
 
         tr.innerHTML = `
-          <td>${customer.accountNumber || ''}</td>
-          <td>${customer.fullName || ''}</td>
-          <td>${customer.district || ''}</td>
-          <td>${customer.rateClassification || ''}</td>
-          <td><span class="status-pill ${statusClass}">${statusLabel}</span></td>
+          <td>${escapeHtml(customer.accountNumber || '')}</td>
+          <td>${escapeHtml(customer.fullName || '')}</td>
+          <td>${escapeHtml(customer.district || '')}</td>
+          <td>${escapeHtml(customer.rateClassification || '')}</td>
+          <td><span class="status-pill ${escapeHtml(statusClass)}">${escapeHtml(statusLabel)}</span></td>
           <td class="action-cell">
             <div class="cr-action">
               <a href="view-customer.html?id=${encodeURIComponent(customer.concessionerId)}" class="cr-icon-btn view-btn" aria-label="View concessioner">

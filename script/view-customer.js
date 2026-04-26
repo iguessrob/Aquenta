@@ -165,14 +165,14 @@
       const total = amount + penalty;
 
       tr.innerHTML = `
-        <td>${periodLabel}</td>
-        <td>${pick(bill, ['currentReading', 'CurrentReading'], 0)}</td>
-        <td>${Math.max(0, pick(bill, ['currentReading', 'CurrentReading'], 0) - pick(bill, ['prevReading', 'PrevReading'], 0))}</td>
-        <td>${formatPeso(amount)}</td>
-        <td>${formatPeso(penalty)}</td>
-        <td>${formatPeso(total)}</td>
-        <td><span class="status-pill status-${status === 'paid' ? 'active' : 'disconnected'}">${status.toUpperCase()}</span></td>
-        <td>${formatDate(pick(period, ['periodEnd', 'PeriodEnd']))}</td>
+        <td>${escapeHtml(periodLabel)}</td>
+        <td>${escapeHtml(pick(bill, ['currentReading', 'CurrentReading'], 0))}</td>
+        <td>${escapeHtml(Math.max(0, pick(bill, ['currentReading', 'CurrentReading'], 0) - pick(bill, ['prevReading', 'PrevReading'], 0)))}</td>
+        <td>${escapeHtml(formatPeso(amount))}</td>
+        <td>${escapeHtml(formatPeso(penalty))}</td>
+        <td>${escapeHtml(formatPeso(total))}</td>
+        <td><span class="status-pill status-${escapeHtml(status === 'paid' ? 'active' : 'disconnected')}">${escapeHtml(status.toUpperCase())}</span></td>
+        <td>${escapeHtml(formatDate(pick(period, ['periodEnd', 'PeriodEnd'])))}</td>
         <td></td>
       `;
       billingTableBody.appendChild(tr);
@@ -197,12 +197,12 @@
 
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td>${formatDate(pick(pay, ['datePaid', 'DatePaid']))}</td>
-        <td>${periodLabel}</td>
-        <td>${formatPeso(pick(pay, ['amountPaid', 'AmountPaid'], 0))}</td>
-        <td>Cash</td>
-        <td>--</td>
-        <td>Admin</td>
+        <td>${escapeHtml(formatDate(pick(pay, ['datePaid', 'DatePaid'])))}</td>
+        <td>${escapeHtml(formatPeso(pick(pay, ['amountPaid', 'AmountPaid'], 0)))}</td>
+        <td>${escapeHtml(periodLabel)}</td>
+        <td>${escapeHtml(formatPeso(pick(pay, ['billAmount', 'BillAmount'], 0)))}</td>
+        <td>${escapeHtml(formatPeso(pick(pay, ['penalty', 'Penalty'], 0)))}</td>
+        <td></td>
       `;
       paymentTableBody.appendChild(tr);
     });
@@ -259,14 +259,14 @@
 
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td>${periodLabel}</td>
-        <td>${present}</td>
-        <td>${previous}</td>
-        <td>${consumption}</td>
-        <td>${formatPeso(totalBill)}</td>
-        <td>${formatPeso(collection)}</td>
-        <td>${datePaid}</td>
-        <td>${formatPeso(balance)}</td>
+        <td>${escapeHtml(periodLabel)}</td>
+        <td>${escapeHtml(present)}</td>
+        <td>${escapeHtml(previous)}</td>
+        <td>${escapeHtml(consumption)}</td>
+        <td>${escapeHtml(formatPeso(totalBill))}</td>
+        <td>${escapeHtml(formatPeso(collection))}</td>
+        <td>${escapeHtml(datePaid)}</td>
+        <td>${escapeHtml(formatPeso(balance))}</td>
       `;
       transactionTableBody.appendChild(tr);
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -17,8 +17,11 @@ namespace AquentaLibrary.Models
         [Column("CategoryId")]
         public int CategoryId { get; set; }
 
-        [Column("TariffVersionID")]
-        public int TariffVersionId { get; set; }
+        [Column("VersionName")]
+        public string VersionName { get; set; }
+
+        [Column("IsActive")]
+        public bool IsActive { get; set; }
 
         [Column("CubicMeter")]
         public decimal CubicMeter { get; set; }

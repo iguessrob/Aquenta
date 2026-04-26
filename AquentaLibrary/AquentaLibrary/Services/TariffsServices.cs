@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -45,14 +45,14 @@ namespace AquentaLibrary.Services
             return tariffsRepo.DeleteTariffs(id);
         }
 
-        public IEnumerable<TariffsModel> GetByVersionId(int tariffVersionId)
+        public IEnumerable<TariffsModel> GetByVersionName(string versionName)
         {
-            return tariffsRepo.GetTariffsByVersionId(tariffVersionId);
+            return tariffsRepo.GetTariffsByVersionName(versionName);
         }
 
         private void EnsureTariffVersion(TariffsModel tariff)
         {
-            if (tariff == null || tariff.TariffVersionId > 0)
+            if (tariff == null || !string.IsNullOrEmpty(tariff.VersionName))
             {
                 return;
             }
@@ -63,7 +63,8 @@ namespace AquentaLibrary.Services
                 throw new InvalidOperationException("No active tariff version is available.");
             }
 
-            tariff.TariffVersionId = activeVersion.TariffVersionId;
+            tariff.VersionName = activeVersion.VersionName;
+            tariff.IsActive = activeVersion.IsActive;
         }
     }
 }

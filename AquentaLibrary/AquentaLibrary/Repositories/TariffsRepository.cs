@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -60,15 +60,15 @@ namespace AquentaLibrary.Repositories
         }
 
         /// <summary>
-        /// Get tariffs by version ID using SP_GetTariffRateByTariffVersionId
+        /// Get tariffs by version name using SP_GetTariffRateByVersionName
         /// </summary>
-        public IEnumerable<TariffsModel> GetTariffsByVersionId(int tariffVersionId)
+        public IEnumerable<TariffsModel> GetTariffsByVersionName(string versionName)
         {
             var parameters = new DynamicParameters();
-            parameters.Add("@TariffVersionID", tariffVersionId, DbType.Int32);
+            parameters.Add("@VersionName", versionName, DbType.String);
 
             return dbConnection.Query<TariffsModel>(
-                "SP_GetTariffRateByTariffVersionId",
+                "SP_GetTariffRateByVersionName",
                 parameters,
                 commandType: CommandType.StoredProcedure);
         }
@@ -80,7 +80,8 @@ namespace AquentaLibrary.Repositories
         {
             var parameters = new DynamicParameters();
             parameters.Add("@CategoryId", tariff.CategoryId, DbType.Int32);
-            parameters.Add("@TariffVersionID", tariff.TariffVersionId, DbType.Int32);
+            parameters.Add("@VersionName", tariff.VersionName, DbType.String);
+            parameters.Add("@IsActive", tariff.IsActive, DbType.Boolean);
             parameters.Add("@CubicMeter", tariff.CubicMeter, DbType.Decimal);
             parameters.Add("@Amount", tariff.Amount, DbType.Decimal);
 
@@ -98,7 +99,8 @@ namespace AquentaLibrary.Repositories
             var parameters = new DynamicParameters();
                 parameters.Add("@RateId", tariff.RateId, DbType.Int32);
                 parameters.Add("@CategoryId", tariff.CategoryId, DbType.Int32);
-            parameters.Add("@TariffVersionID", tariff.TariffVersionId, DbType.Int32);
+            parameters.Add("@VersionName", tariff.VersionName, DbType.String);
+            parameters.Add("@IsActive", tariff.IsActive, DbType.Boolean);
             parameters.Add("@CubicMeter", tariff.CubicMeter, DbType.Decimal);
             parameters.Add("@Amount", tariff.Amount, DbType.Decimal);
 

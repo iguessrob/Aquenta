@@ -15,15 +15,15 @@ namespace AquentaLibrary.Repositories
                 commandType: CommandType.StoredProcedure);
         }
 
-        public TariffVersionModel GetTariffVersionById(int id)
+        public TariffVersionModel GetTariffVersionByName(string versionName)
         {
             var parameters = new DynamicParameters();
-            parameters.Add("@TariffVersionID", id, DbType.Int32);
+            parameters.Add("@VersionName", versionName, DbType.String);
 
             return dbConnection.QueryFirstOrDefault<TariffVersionModel>(
-                "SP_GetTariffVersionById",
+                "SELECT DISTINCT VersionName, IsActive FROM tbl_TariffRate WHERE VersionName = @VersionName",
                 parameters,
-                commandType: CommandType.StoredProcedure);
+                commandType: CommandType.Text);
         }
 
         public TariffVersionModel GetActiveTariffVersion()
@@ -33,46 +33,41 @@ namespace AquentaLibrary.Repositories
                 commandType: CommandType.StoredProcedure);
         }
 
-        public int InsertTariffVersion(TariffVersionModel tariffVersion)
+        public string InsertTariffVersion(TariffVersionModel tariffVersion)
         {
-            var parameters = new DynamicParameters();
-            parameters.Add("@VersionName", tariffVersion.VersionName, DbType.String);
-            parameters.Add("@IsActive", tariffVersion.IsActive, DbType.Boolean);
-
-            return dbConnection.QuerySingle<int>(
-                "SP_InsertTariffVersion",
-                parameters,
-                commandType: CommandType.StoredProcedure);
+            // Note: In single table mode, inserting a version means creating a new preset with rates.
+            // This is usually handled via SP_CreateTariffVersionFromCurrent.
+            // If we just want to track a name, we'd need at least one rate row.
+            return tariffVersion.VersionName;
         }
 
-            public int CreateFromCurrentAndSetActive(string versionName)
+            public string CreateFromCurrentAndSetActive(string versionName)
             {
                 var parameters = new DynamicParameters();
-                parameters.Add("@VersionName", versionName, DbType.String);
+                parameters.Add("@NewVersionName", versionName, DbType.String);
 
-                return dbConnection.QuerySingle<int>(
+                return dbConnection.QuerySingle<string>(
                 "SP_CreateTariffVersionFromCurrent",
                 parameters,
                 commandType: CommandType.StoredProcedure);
             }
 
-        public int UpdateTariffVersionSP(TariffVersionModel tariffVersion)
+        public int UpdateTariffVersionName(string oldName, string newName)
         {
             var parameters = new DynamicParameters();
-            parameters.Add("@TariffVersionID", tariffVersion.TariffVersionId, DbType.Int32);
-            parameters.Add("@VersionName", tariffVersion.VersionName, DbType.String);
-            parameters.Add("@IsActive", tariffVersion.IsActive, DbType.Boolean);
+            parameters.Add("@OldName", oldName, DbType.String);
+            parameters.Add("@NewName", newName, DbType.String);
 
             return dbConnection.Execute(
-                "SP_UpdateTariffVersion",
+                "SP_UpdateTariffVersionName",
                 parameters,
                 commandType: CommandType.StoredProcedure);
         }
 
-        public int DeleteTariffVersionSP(int id)
+        public int DeleteTariffVersionSP(string versionName)
         {
             var parameters = new DynamicParameters();
-            parameters.Add("@TariffVersionID", id, DbType.Int32);
+            parameters.Add("@VersionName", versionName, DbType.String);
 
             return dbConnection.Execute(
                 "SP_DeleteTariffVersion",
