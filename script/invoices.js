@@ -23,13 +23,6 @@ function escapeHtml(value) {
     .replace(/'/g, '&#39;');
 }
 
-function showNotification(message, type = 'error') {
-  if (window.showNotification) {
-    window.showNotification(message, type);
-  } else {
-    alert(message);
-  }
-}
 
 function getApi() {
   if (!window.AquentaApiClient) {
@@ -174,7 +167,7 @@ function openPrintWindow(title, bodyMarkup) {
 
   const doc = frame.contentWindow?.document;
   if (!doc || !frame.contentWindow) {
-    showNotification('Unable to prepare print preview.', 'error');
+    window.showNotification('Unable to prepare print preview.', 'error');
     return;
   }
 
@@ -340,7 +333,7 @@ function openPrintWindow(title, bodyMarkup) {
       frame.contentWindow.focus();
       frame.contentWindow.print();
     } catch (error) {
-      showNotification('Unable to open print dialog.', 'error');
+      window.showNotification('Unable to open print dialog.', 'error');
     }
   };
 
@@ -436,7 +429,7 @@ function buildStatementMarkup(row) {
 function printAllInvoices() {
   const rows = getPrintRowsSource();
   if (!rows.length) {
-    showNotification('No invoices to print for the current filter.', 'error');
+    window.showNotification('No invoices to print for the current filter.', 'error');
     return;
   }
 
@@ -448,7 +441,7 @@ function printSingleInvoice(rowIndex) {
   const rows = getPrintRowsSource();
   const row = rows[rowIndex];
   if (!row) {
-    showNotification('Invoice row not found for printing.', 'error');
+    window.showNotification('Invoice row not found for printing.', 'error');
     return;
   }
 
@@ -836,11 +829,11 @@ function setupPaginationActions() {
         });
 
         editModal.style.display = 'none';
-        showNotification('Invoice updated successfully.', 'success');
+        window.showNotification('Invoice updated successfully.', 'success');
         await loadData();
       } catch (error) {
         console.error(error);
-        showNotification(error.message || 'Failed to update invoice.', 'error');
+        window.showNotification(error.message || 'Failed to update invoice.', 'error');
       }
     });
   }
@@ -886,6 +879,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadData();
   } catch (error) {
     console.error(error);
-    showNotification('Failed to load invoice data from API.', 'error');
+    window.showNotification('Failed to load invoice data from API.', 'error');
   }
 });

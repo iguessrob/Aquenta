@@ -330,7 +330,7 @@
   if (confirmResetBtn) {
     confirmResetBtn.addEventListener('click', () => {
       // In a real app, this would call an API endpoint to reset the password
-      alert('Password has been successfully reset. The concessioner will be notified.');
+      window.showNotification('Password reset confirmed.', 'success');
       closeResetModal();
     });
   }

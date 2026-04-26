@@ -193,10 +193,7 @@
       applyFilters();
 
     } catch (error) {
-      console.error('Failed to load disconnection list:', error);
-      if (disconnectionTableBody) {
-        disconnectionTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">Error loading data.</td></tr>';
-      }
+      window.showNotification('Failed to load delinquent customers list.', 'error');
     } finally {
       if (loadingOverlay) loadingOverlay.classList.remove('active');
     }

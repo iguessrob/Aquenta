@@ -721,18 +721,10 @@
                 pass: newPassword
               });
 
-              if (window.showNotification) {
-                window.showNotification('Password has been reset to the default: ' + newPassword, 'success');
-              } else {
-                window.alert('Password has been reset to the default: ' + newPassword);
-              }
+              window.showNotification('Password has been reset to the default: ' + newPassword, 'success');
             } catch (error) {
               console.error('Reset password failed:', error);
-              if (window.showNotification) {
-                window.showNotification('Failed to reset password: ' + (error.message || 'Unknown error'), 'error');
-              } else {
-                window.alert('Failed to reset password: ' + (error.message || 'Unknown error'));
-              }
+              window.showNotification('Failed to reset password: ' + (error.message || 'Unknown error'), 'error');
             }
           }
         });
@@ -755,11 +747,7 @@
               const api = getApi();
               await api.delete(`/Concessioner?id=${customer.concessionerId}`);
               
-              if (window.showNotification) {
-                window.showNotification('Concessioner has been successfully deleted.', 'success');
-              } else {
-                window.alert('Concessioner has been successfully deleted.');
-              }
+              window.showNotification('Concessioner has been successfully deleted.', 'success');
               
               // Redirect to list after a short delay
               setTimeout(() => {
@@ -767,11 +755,7 @@
               }, 1500);
             } catch (error) {
               console.error('Delete concessioner failed:', error);
-              if (window.showNotification) {
-                window.showNotification('Failed to delete concessioner: ' + (error.message || 'Unknown error'), 'error');
-              } else {
-                window.alert('Failed to delete concessioner: ' + (error.message || 'Unknown error'));
-              }
+              window.showNotification('Failed to delete concessioner: ' + (error.message || 'Unknown error'), 'error');
             }
           }
         });

@@ -332,7 +332,7 @@
       if (customerTableBody) {
         customerTableBody.innerHTML = '<tr><td colspan="6" class="cr-empty">Failed to load customer records from API.</td></tr>';
       }
-      window.alert('Failed to load customer records from API. Make sure the backend is running on localhost:5024.');
+      window.showNotification('Failed to load customer records from API. Make sure the backend is running on localhost:5024.', 'error');
     } finally {
       if (loadingOverlay) loadingOverlay.classList.remove('active');
     }
