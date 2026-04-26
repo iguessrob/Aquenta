@@ -563,14 +563,17 @@ function buildNormalizedRows() {
       : 0;
 
     const hasReading = present > 0;
-    const amount = selectedBilling ? toNumber(pick(selectedBilling, ['billAmount', 'BillAmount'], 0), 0) : 0;
+    const catId = toNumber(pick(concessioner, ['categoryId', 'CategoryId'], 0), 0);
+    const amount = (selectedBilling && selectedBilling.billStatus === 'Paid') 
+      ? toNumber(pick(selectedBilling, ['billAmount', 'BillAmount'], 0), 0) 
+      : (hasReading ? getTariffAmount(catId, Math.max(0, present - previous)) : 0);
 
     return {
       rowKey: concessionerId,
       billingId: selectedBilling ? toNumber(pick(selectedBilling, ['billingId', 'BillingId', 'billingID', 'BillingID'], 0), 0) : 0,
       concessionerId,
       userId,
-      categoryId: toNumber(pick(concessioner, ['categoryId', 'CategoryId'], 0), 0),
+      categoryId: catId,
       periodId: selectedPeriodId,
       districtId: toNumber(pick(concessioner, ['districtId', 'DistrictId', 'districtID', 'DistrictID'], 0), 0),
       accountOrder: toNumber(pick(concessioner, ['accountOrder', 'AccountOrder'], 0), 0),
@@ -622,7 +625,7 @@ function renderBillingRows(rows) {
     const initialValidation = validatePresentReading(item, displayValue);
     const hasReading = initialValidation.hasValue && initialValidation.isValid;
     const previewConsumption = hasReading ? Math.max(0, toNumber(displayValue, 0) - item.previous) : 0;
-    const previewAmount = (item.hasExistingBilling && !item.isEditing)
+    const previewAmount = (item.hasExistingBilling && !item.isEditing && item.billStatus === 'Paid')
       ? item.amount
       : (hasReading ? getTariffAmount(item.categoryId, previewConsumption) : 0);
     const account = escapeHtml(item.accountNumber || `#${item.concessionerId}`);
