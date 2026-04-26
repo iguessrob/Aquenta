@@ -249,6 +249,7 @@ function setupVersionControls() {
   const select = document.getElementById('tariffVersionSelect');
   const openCreateBtn = document.getElementById('openCreateVersionBtn');
   const editBtn = document.getElementById('editVersionBtn');
+  const deleteBtn = document.getElementById('deleteVersionBtn');
 
   if (select) {
     select.addEventListener('change', async (event) => {
@@ -261,7 +262,10 @@ function setupVersionControls() {
   if (openCreateBtn) {
     openCreateBtn.addEventListener('click', () => {
       const input = document.getElementById('createVersionNameInput');
-      if (input) input.value = '';
+      if (input) {
+        input.value = '';
+        input.placeholder = 'e.g., Version 2.0';
+      }
       openModal('createVersionModal');
     });
   }
@@ -279,6 +283,56 @@ function setupVersionControls() {
       openModal('editVersionModal');
     });
   }
+
+  if (deleteBtn) {
+    deleteBtn.addEventListener('click', () => {
+      const selected = getSelectedVersion();
+      if (!selected) {
+        showNotification('Please select a version first.', 'info');
+        return;
+      }
+
+      if (Boolean(selected.isActive ?? selected.IsActive)) {
+        showNotification('You cannot delete the active version.', 'error');
+        return;
+      }
+
+      const nameDisplay = document.getElementById('deleteVersionNameDisplay');
+      if (nameDisplay) nameDisplay.textContent = String(selected.versionName ?? selected.VersionName ?? '');
+      openModal('deleteVersionModal');
+    });
+  }
+}
+
+function setupDeleteVersionModal() {
+  const overlay = document.getElementById('deleteVersionOverlay');
+  const closeBtn = document.getElementById('deleteVersionCloseBtn');
+  const cancelBtn = document.getElementById('deleteVersionCancelBtn');
+  const confirmBtn = document.getElementById('confirmDeleteVersionBtn');
+
+  if (overlay) overlay.addEventListener('click', () => closeModal('deleteVersionModal'));
+  if (closeBtn) closeBtn.addEventListener('click', () => closeModal('deleteVersionModal'));
+  if (cancelBtn) cancelBtn.addEventListener('click', () => closeModal('deleteVersionModal'));
+
+  if (!confirmBtn) return;
+  confirmBtn.addEventListener('click', async () => {
+    const selected = getSelectedVersion();
+    if (!selected) return;
+
+    try {
+      const api = getApi();
+      const name = String(selected.versionName ?? selected.VersionName);
+      await api.delete(`/TariffVersion/${encodeURIComponent(name)}`);
+
+      closeModal('deleteVersionModal');
+      selectedTariffVersionName = null; // Reset selection
+      await loadTariffVersions();
+      showNotification('Tariff preset deleted successfully.', 'success');
+    } catch (error) {
+      console.error(error);
+      showNotification(error.message || 'Failed to delete preset.', 'error');
+    }
+  });
 }
 
 function setupCreateVersionModal() {
@@ -520,6 +574,7 @@ function setupDeleteRateModal() {
 document.addEventListener('DOMContentLoaded', async () => {
   setupSidebar();
   setupVersionControls();
+  setupDeleteVersionModal();
   setupCreateVersionModal();
   setupEditVersionModal();
   setupAddRateModal();
