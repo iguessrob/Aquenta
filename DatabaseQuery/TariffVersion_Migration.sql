@@ -279,3 +279,25 @@ BEGIN
     SELECT @@ROWCOUNT AS RowsAffected;
 END
 GO
+-- Set Active Tariff Version
+CREATE OR ALTER PROCEDURE SP_SetActiveTariffVersion
+    @VersionName NVARCHAR(100)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRANSACTION;
+    BEGIN TRY
+        -- 1. Set all to inactive
+        UPDATE tbl_TariffRate SET IsActive = 0;
+        
+        -- 2. Set the target to active
+        UPDATE tbl_TariffRate SET IsActive = 1 WHERE VersionName = @VersionName;
+        
+        COMMIT;
+    END TRY
+    BEGIN CATCH
+        ROLLBACK;
+        THROW;
+    END CATCH
+END
+GO

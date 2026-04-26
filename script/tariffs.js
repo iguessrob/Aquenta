@@ -117,6 +117,11 @@ function setVersionBadge(version) {
   const isActive = Boolean(version && (version.isActive ?? version.IsActive));
   badge.style.display = isActive ? 'inline-flex' : 'none';
   badge.textContent = isActive ? 'CURRENT VERSION' : 'INACTIVE VERSION';
+
+  const setActiveBtn = document.getElementById('setActiveVersionBtn');
+  if (setActiveBtn) {
+    setActiveBtn.style.display = isActive ? 'none' : 'inline-flex';
+  }
 }
 
 function renderVersionSelect() {
@@ -250,6 +255,7 @@ function setupVersionControls() {
   const openCreateBtn = document.getElementById('openCreateVersionBtn');
   const editBtn = document.getElementById('editVersionBtn');
   const deleteBtn = document.getElementById('deleteVersionBtn');
+  const setActiveBtn = document.getElementById('setActiveVersionBtn');
 
   if (select) {
     select.addEventListener('change', async (event) => {
@@ -300,6 +306,30 @@ function setupVersionControls() {
       const nameDisplay = document.getElementById('deleteVersionNameDisplay');
       if (nameDisplay) nameDisplay.textContent = String(selected.versionName ?? selected.VersionName ?? '');
       openModal('deleteVersionModal');
+    });
+  }
+
+  if (setActiveBtn) {
+    setActiveBtn.addEventListener('click', async () => {
+      const selected = getSelectedVersion();
+      if (!selected) return;
+
+      if (Boolean(selected.isActive ?? selected.IsActive)) {
+        showNotification('This version is already active.', 'info');
+        return;
+      }
+
+      try {
+        const api = getApi();
+        const name = String(selected.versionName ?? selected.VersionName);
+        await api.post(`/TariffVersion/set-active/${encodeURIComponent(name)}`);
+
+        await loadTariffVersions(name);
+        showNotification(`'${name}' is now the active tariff version.`, 'success');
+      } catch (error) {
+        console.error(error);
+        showNotification(error.message || 'Failed to set active version.', 'error');
+      }
     });
   }
 }

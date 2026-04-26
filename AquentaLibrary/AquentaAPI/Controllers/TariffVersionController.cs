@@ -63,5 +63,13 @@ namespace AquentaAPI.Controllers
         {
             return tariffVersionServices.Delete(name);
         }
+
+        [HttpPost("set-active/{name}")]
+        public ActionResult<bool> SetActive(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return BadRequest("Name is required.");
+            var result = tariffVersionServices.SetActive(name);
+            return Ok(result);
+        }
     }
 }

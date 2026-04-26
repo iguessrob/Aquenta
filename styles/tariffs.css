@@ -447,6 +447,12 @@ body {
   color: #64748b;
 }
 
+.active-v-btn:hover {
+  background: #f0fdf4;
+  color: #16a34a;
+  border-color: #bbf7d0;
+}
+
 .edit-v-btn:hover {
   background: #f1f5f9;
   color: #2563eb;

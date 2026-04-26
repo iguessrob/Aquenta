@@ -42,5 +42,10 @@ namespace AquentaLibrary.Services
         {
             return tariffVersionRepo.DeleteTariffVersionSP(versionName) > 0;
         }
+
+        public bool SetActive(string versionName)
+        {
+            return tariffVersionRepo.SetActive(versionName) > 0;
+        }
     }
 }

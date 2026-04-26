@@ -74,5 +74,16 @@ namespace AquentaLibrary.Repositories
                 parameters,
                 commandType: CommandType.StoredProcedure);
         }
+
+        public int SetActive(string versionName)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@VersionName", versionName, DbType.String);
+
+            return dbConnection.Execute(
+                "SP_SetActiveTariffVersion",
+                parameters,
+                commandType: CommandType.StoredProcedure);
+        }
     }
 }
