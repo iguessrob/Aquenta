@@ -19,6 +19,13 @@ function getApi() {
   return window.AquentaApiClient;
 }
 
+function showNotification(message, type = 'info') {
+  if (window.showNotification) {
+    window.showNotification(message, type);
+  } else {
+    alert(message);
+  }
+}
 
 function toNumber(val, fallback = 0) {
   const n = Number(val);
@@ -254,7 +261,7 @@ function setupVersionControls() {
     editBtn.addEventListener('click', () => {
       const selected = getSelectedVersion();
       if (!selected) {
-        window.showNotification('Please select a version first.', 'info');
+        showNotification('Please select a version first.', 'info');
         return;
       }
 
@@ -268,12 +275,12 @@ function setupVersionControls() {
     deleteBtn.addEventListener('click', () => {
       const selected = getSelectedVersion();
       if (!selected) {
-        window.showNotification('Please select a version first.', 'info');
+        showNotification('Please select a version first.', 'info');
         return;
       }
 
       if (Boolean(selected.isActive ?? selected.IsActive)) {
-        window.showNotification('You cannot delete the active version.', 'error');
+        showNotification('You cannot delete the active version.', 'error');
         return;
       }
 
@@ -289,7 +296,7 @@ function setupVersionControls() {
       if (!selected) return;
 
       if (Boolean(selected.isActive ?? selected.IsActive)) {
-        window.showNotification('This version is already active.', 'info');
+        showNotification('This version is already active.', 'info');
         return;
       }
 
@@ -299,10 +306,10 @@ function setupVersionControls() {
         await api.post(`/TariffVersion/set-active/${id}`);
 
         await loadTariffVersions(id);
-        window.showNotification(`Preset is now the active tariff version.`, 'success');
+        showNotification(`Preset is now the active tariff version.`, 'success');
       } catch (error) {
         console.error(error);
-        window.showNotification(error.message || 'Failed to set active version.', 'error');
+        showNotification(error.message || 'Failed to set active version.', 'error');
       }
     });
   }
@@ -331,10 +338,10 @@ function setupDeleteVersionModal() {
       closeModal('deleteVersionModal');
       selectedTariffVersionId = null;
       await loadTariffVersions();
-      window.showNotification('Tariff version deleted successfully.', 'success');
+      showNotification('Tariff version deleted successfully.', 'success');
     } catch (error) {
       console.error(error);
-      window.showNotification(error.message || 'Failed to delete version.', 'error');
+      showNotification(error.message || 'Failed to delete version.', 'error');
     }
   });
 }
@@ -366,10 +373,10 @@ function setupCreateVersionModal() {
 
       const newVersionId = Number(response);
       await loadTariffVersions(newVersionId || null);
-      window.showNotification('New tariff version created and set as current.', 'success');
+      showNotification('New tariff version created and set as current.', 'success');
     } catch (error) {
       console.error(error);
-      window.showNotification(error.message || 'Failed to create tariff version.', 'error');
+      showNotification(error.message || 'Failed to create tariff version.', 'error');
     }
   });
 }
@@ -390,7 +397,7 @@ function setupEditVersionModal() {
 
     const selected = getSelectedVersion();
     if (!selected) {
-      window.showNotification('No tariff version selected.', 'error');
+      showNotification('No tariff version selected.', 'error');
       return;
     }
 
@@ -405,10 +412,10 @@ function setupEditVersionModal() {
 
       closeModal('editVersionModal');
       await loadTariffVersions(id);
-      window.showNotification('Version name updated successfully.', 'success');
+      showNotification('Version name updated successfully.', 'success');
     } catch (error) {
       console.error(error);
-      window.showNotification(error.message || 'Failed to update version name.', 'error');
+      showNotification(error.message || 'Failed to update version name.', 'error');
     }
   });
 }
@@ -445,7 +452,7 @@ function setupAddRateModal() {
     const amount = Number(document.getElementById('amountInput')?.value || 0);
 
     if (!selectedTariffVersionId) {
-      window.showNotification('Please select a tariff preset.', 'error');
+      showNotification('Please select a tariff preset.', 'error');
       return;
     }
 
@@ -464,10 +471,10 @@ function setupAddRateModal() {
 
       closeAddModal();
       await loadTariffsByVersion();
-      window.showNotification('New rate added successfully.', 'success');
+      showNotification('New rate added successfully.', 'success');
     } catch (error) {
       console.error(error);
-      window.showNotification(error.message || 'Failed to add rate.', 'error');
+      showNotification(error.message || 'Failed to add rate.', 'error');
     }
   });
 }
@@ -518,10 +525,10 @@ function setupEditRateModal() {
 
       closeEditModal();
       await loadTariffsByVersion();
-      window.showNotification('Rate updated successfully.', 'success');
+      showNotification('Rate updated successfully.', 'success');
     } catch (error) {
       console.error(error);
-      window.showNotification(error.message || 'Failed to update rate.', 'error');
+      showNotification(error.message || 'Failed to update rate.', 'error');
     }
   });
 }
@@ -565,10 +572,10 @@ function setupDeleteRateModal() {
 
         closeDeleteModal();
         await loadTariffsByVersion();
-        window.showNotification('Rate deleted successfully.', 'success');
+        showNotification('Rate deleted successfully.', 'success');
       } catch (error) {
         console.error(error);
-        window.showNotification(error.message || 'Failed to delete rate.', 'error');
+        showNotification(error.message || 'Failed to delete rate.', 'error');
       }
     });
   }
@@ -588,6 +595,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadTariffVersions();
   } catch (error) {
     console.error(error);
-    window.showNotification('Failed to load tariff versions.', 'error');
+    showNotification('Failed to load tariff versions.', 'error');
   }
 });

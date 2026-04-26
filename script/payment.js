@@ -45,6 +45,13 @@ function getApi() {
   return window.AquentaApiClient;
 }
 
+function showNotification(message, type = 'error') {
+  if (window.showNotification) {
+    window.showNotification(message, type);
+  } else {
+    alert(message);
+  }
+}
 
 function formatPeso(value) {
   const num = toNumber(value);
@@ -594,7 +601,7 @@ async function savePaymentRow(billingId) {
   const draftValue = getPaymentRowDraftAmount(payment);
   const validation = validateAmountPaidInput(draftValue);
   if (!validation.isValid) {
-    window.showNotification(validation.message, 'error');
+    showNotification(validation.message, 'error');
     return;
   }
 
@@ -602,7 +609,7 @@ async function savePaymentRow(billingId) {
   const concessionerId = getConcessionerIdForPayment(payment);
 
   if (concessionerId <= 0) {
-    window.showNotification('Could not determine the concessioner for this payment.', 'error');
+    showNotification('Could not determine the concessioner for this payment.', 'error');
     return;
   }
 
@@ -618,12 +625,12 @@ async function savePaymentRow(billingId) {
 
     // Reload all data to reflect the distributed payments across multiple billings
     await loadData();
-    window.showNotification('Payment distributed successfully (arrears resolved first).', 'success');
+    showNotification('Payment distributed successfully (arrears resolved first).', 'success');
   } catch (error) {
     console.error(error);
     // Extract error message from API response
     const errorMsg = error?.response?.message || error?.message || 'Failed to distribute payment.';
-    window.showNotification(errorMsg, 'error');
+    showNotification(errorMsg, 'error');
   }
 }
 
@@ -669,7 +676,7 @@ function setupRowActions() {
 
       const concessionerId = getConcessionerIdForPayment(payment);
       if (concessionerId <= 0) {
-        window.showNotification('Could not determine the concessioner for this payment.', 'error');
+        showNotification('Could not determine the concessioner for this payment.', 'error');
         return;
       }
 
@@ -685,11 +692,11 @@ function setupRowActions() {
             concessionerID: concessionerId,
           });
           await loadData();
-          window.showNotification('Payment distribution reversed successfully.', 'success');
+          showNotification('Payment distribution reversed successfully.', 'success');
         } catch (error) {
           console.error(error);
           const errorMsg = error?.response?.message || error?.message || 'Failed to reverse distribution.';
-          window.showNotification(errorMsg, 'error');
+          showNotification(errorMsg, 'error');
         }
       })();
     }
@@ -753,7 +760,7 @@ function setupRowActions() {
     const validation = validateAmountPaidInput(payment.draftAmountPaid);
     if (!validation.isValid) {
       setPaymentAmountInputState(input, validation, true);
-      window.showNotification(validation.message, 'error');
+      showNotification(validation.message, 'error');
       return;
     }
 
@@ -835,6 +842,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadData();
   } catch (error) {
     console.error(error);
-    window.showNotification('Failed to load payment data from API.', 'error');
+    showNotification('Failed to load payment data from API.', 'error');
   }
 });

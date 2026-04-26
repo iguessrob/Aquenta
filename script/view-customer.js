@@ -93,9 +93,6 @@
     }).sort((a, b) => b.billingId - a.billingId);
 
     filteredPayments = paymentCache.filter(pay => {
-      const amount = toNumber(pick(pay, ['amountPaid', 'AmountPaid'], 0));
-      if (amount <= 0) return false; // Hide 0 or negative "phantom" payments
-
       const dateText = formatDate(pick(pay, ['datePaid', 'DatePaid'])).toLowerCase();
       return !pTerm || dateText.includes(pTerm);
     }).sort((a, b) => new Date(pick(b, ['datePaid', 'DatePaid'])) - new Date(pick(a, ['datePaid', 'DatePaid'])));
@@ -165,14 +162,14 @@
       const total = amount + penalty;
 
       tr.innerHTML = `
-        <td>${escapeHtml(periodLabel)}</td>
-        <td>${escapeHtml(pick(bill, ['currentReading', 'CurrentReading'], 0))}</td>
-        <td>${escapeHtml(Math.max(0, pick(bill, ['currentReading', 'CurrentReading'], 0) - pick(bill, ['prevReading', 'PrevReading'], 0)))}</td>
-        <td>${escapeHtml(formatPeso(amount))}</td>
-        <td>${escapeHtml(formatPeso(penalty))}</td>
-        <td>${escapeHtml(formatPeso(total))}</td>
-        <td><span class="status-pill status-${escapeHtml(status === 'paid' ? 'active' : 'disconnected')}">${escapeHtml(status.toUpperCase())}</span></td>
-        <td>${escapeHtml(formatDate(pick(period, ['periodEnd', 'PeriodEnd'])))}</td>
+        <td>${periodLabel}</td>
+        <td>${pick(bill, ['currentReading', 'CurrentReading'], 0)}</td>
+        <td>${Math.max(0, pick(bill, ['currentReading', 'CurrentReading'], 0) - pick(bill, ['prevReading', 'PrevReading'], 0))}</td>
+        <td>${formatPeso(amount)}</td>
+        <td>${formatPeso(penalty)}</td>
+        <td>${formatPeso(total)}</td>
+        <td><span class="status-pill status-${status === 'paid' ? 'active' : 'disconnected'}">${status.toUpperCase()}</span></td>
+        <td>${formatDate(pick(period, ['periodEnd', 'PeriodEnd']))}</td>
         <td></td>
       `;
       billingTableBody.appendChild(tr);
@@ -197,12 +194,12 @@
 
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td>${escapeHtml(formatDate(pick(pay, ['datePaid', 'DatePaid'])))}</td>
-        <td>${escapeHtml(formatPeso(pick(pay, ['amountPaid', 'AmountPaid'], 0)))}</td>
-        <td>${escapeHtml(periodLabel)}</td>
-        <td>${escapeHtml(formatPeso(pick(pay, ['billAmount', 'BillAmount'], 0)))}</td>
-        <td>${escapeHtml(formatPeso(pick(pay, ['penalty', 'Penalty'], 0)))}</td>
-        <td></td>
+        <td>${formatDate(pick(pay, ['datePaid', 'DatePaid']))}</td>
+        <td>${periodLabel}</td>
+        <td>${formatPeso(pick(pay, ['amountPaid', 'AmountPaid'], 0))}</td>
+        <td>Cash</td>
+        <td>--</td>
+        <td>Admin</td>
       `;
       paymentTableBody.appendChild(tr);
     });
@@ -259,14 +256,14 @@
 
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td>${escapeHtml(periodLabel)}</td>
-        <td>${escapeHtml(present)}</td>
-        <td>${escapeHtml(previous)}</td>
-        <td>${escapeHtml(consumption)}</td>
-        <td>${escapeHtml(formatPeso(totalBill))}</td>
-        <td>${escapeHtml(formatPeso(collection))}</td>
-        <td>${escapeHtml(datePaid)}</td>
-        <td>${escapeHtml(formatPeso(balance))}</td>
+        <td>${periodLabel}</td>
+        <td>${present}</td>
+        <td>${previous}</td>
+        <td>${consumption}</td>
+        <td>${formatPeso(totalBill)}</td>
+        <td>${formatPeso(collection)}</td>
+        <td>${datePaid}</td>
+        <td>${formatPeso(balance)}</td>
       `;
       transactionTableBody.appendChild(tr);
 
@@ -330,7 +327,7 @@
   if (confirmResetBtn) {
     confirmResetBtn.addEventListener('click', () => {
       // In a real app, this would call an API endpoint to reset the password
-      window.showNotification('Password reset confirmed.', 'success');
+      alert('Password has been successfully reset. The concessioner will be notified.');
       closeResetModal();
     });
   }

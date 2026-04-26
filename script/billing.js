@@ -15,6 +15,20 @@ const savingRows = new Set();
 
 const BILLING_PAGE_SIZE = 25;
 
+/**
+ * Show a notification message.
+ * @param {string} message - The message to display
+ * @param {string} type - 'success', 'error', or 'info'
+ * @param {number} duration - Duration in milliseconds (default: 4000)
+ */
+function showNotification(message, type = 'info') {
+  if (window.showNotification) {
+    window.showNotification(message, type);
+  } else {
+    console.warn('showNotification not found on window, falling back to alert');
+    alert(message);
+  }
+}
 
 function validatePresentReading(rowData, rawValue) {
   const raw = String(rawValue || '').trim();
@@ -244,7 +258,7 @@ async function saveReadingFromInput(input) {
   }
 
   if (!validation.isValid) {
-    window.showNotification(validation.message, 'error');
+    showNotification(validation.message, 'error');
     return;
   }
 
@@ -266,10 +280,10 @@ async function saveReadingFromInput(input) {
   try {
     await persistRowReading(rowData, validation.reading);
     await loadBilling();
-    window.showNotification('Reading saved successfully.', 'success', 2200);
+    showNotification('Reading saved successfully.', 'success', 2200);
   } catch (error) {
     console.error(error);
-    window.showNotification(error.message || 'Failed to save billing reading.', 'error');
+    showNotification(error.message || 'Failed to save billing reading.', 'error');
   } finally {
     savingRows.delete(rowKey);
   }
@@ -764,7 +778,7 @@ function setupTableRowActions() {
           reopenedInput.focus();
           reopenedInput.select();
         }
-        window.showNotification('Editing enabled for this saved billing row.', 'info');
+        showNotification('Editing enabled for this saved billing row.', 'info');
       }
       return;
     }
@@ -1337,7 +1351,7 @@ function setupPrintButton() {
 
       const doc = frame.contentWindow?.document;
       if (!doc || !frame.contentWindow) {
-        window.showNotification('Unable to open print preview.', 'error');
+        showNotification('Unable to open print preview.', 'error');
         return;
       }
 
@@ -1373,7 +1387,7 @@ async function loadBilling() {
       districts = await api.get('/District');
     } catch (error) {
       console.warn('Failed to load districts for billing filter:', error);
-      window.showNotification('District filter options could not be fully loaded.', 'info');
+      showNotification('District filter options could not be fully loaded.', 'info');
     }
 
     billingCache = Array.isArray(billing) ? billing : [];
@@ -1410,6 +1424,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadBilling();
   } catch (error) {
     console.error(error);
-    window.showNotification('Failed to load billing data from API.', 'error');
+    showNotification('Failed to load billing data from API.', 'error');
   }
 });
