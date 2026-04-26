@@ -48,6 +48,7 @@
 
   async function loadHistory() {
     try {
+      showLoading();
       const [billings, payments, periods] = await Promise.all([
         api.get('/Billing'),
         api.get('/Payment'),
@@ -124,6 +125,13 @@
       opt.textContent = year;
       transactionYearSelect.appendChild(opt);
     });
+  }
+
+  function showLoading() {
+    const loadingHtml = '<tr><td colspan="10" style="text-align:center; padding: 3rem;"><div class="loading-spinner"></div><div style="margin-top: 10px; color: #64748b; font-size: 14px;">Loading data...</div></td></tr>';
+    if (billingTableBody) billingTableBody.innerHTML = loadingHtml;
+    if (paymentTableBody) paymentTableBody.innerHTML = loadingHtml;
+    if (transactionTableBody) transactionTableBody.innerHTML = loadingHtml;
   }
 
   function renderTables() {
