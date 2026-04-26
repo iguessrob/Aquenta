@@ -225,7 +225,7 @@ a:focus-visible {
   padding: 0;
   background: transparent;
   box-shadow: none;
-  margin: 0.05rem 0 0.85rem;
+  margin: 0.9rem 0 0.85rem;
 }
 
 .cover-gap {
@@ -509,7 +509,7 @@ th {
   }
 
   .book {
-    margin-top: 1rem;
+    margin-top: 5rem;
     padding-inline: 0.65rem;
   }
 
@@ -658,7 +658,7 @@ th {
 
   .cover-logo-image {
     width: 0.42in;
-    margin: 0.05rem 0 0.7rem;
+    margin: 0.9rem 0 0.7rem;
   }
 
   .cover-gap {

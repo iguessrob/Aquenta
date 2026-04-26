@@ -1,0 +1,291 @@
+AQUEANTA ERD
+
+DDL
+
+Aquenta
+CREATE DATABASE AquentaDB
+
+
+- - tbl_District
+CREATE TABLE tbl_District (
+DistrictID INT IDENTITY(1,1) PRIMARY KEY,
+DistrictName NVARCHAR(50) NOT NULL
+)
+
+
+
+- - tbl_Membership
+CREATE TABLE tbl_Membership (
+MembershipID INT IDENTITY(1,1) PRIMARY KEY,
+MembershipName NVARCHAR(20) NOT NULL,
+DiscountRate DECIMAL(5,2) NOT NULL
+)
+
+
+
+- - tbl_Category
+CREATE TABLE tbl_Category (
+CategoryID INT IDENTITY (1,1) PRIMARY KEY,
+CategoryName NVARCHAR(20) NOT NULL
+)
+
+
+
+- - tbl_TariffRate
+CREATE TABLE tbl_TariffRate
+(
+    RateID INT IDENTITY(1,1) PRIMARY KEY,
+    CategoryID INT NOT NULL,
+    TariffVersionID INT NOT NULL,
+    CubicMeter DECIMAL(5, 2) NOT NULL,
+    Amount DECIMAL(8,2) NOT NULL,
+    FOREIGN KEY (CategoryID) REFERENCES tbl_Category(CategoryID)
+    FOREIGN KEY (TariffVersionID) REFERENCES tbl_TariffVersion(TariffVersionID)
+);
+
+- - tbl_TariffVersion
+CREATE TABLE tbl_TariffVersion (
+    TariffVersionID INT IDENTITY(1,1) PRIMARY KEY,
+    VersionName NVARCHAR(100) NOT NULL, 
+    IsActive BIT DEFAULT 0,
+    CreatedAt DATETIME DEFAULT GETDATE()
+);
+
+
+
+- - tbl_User
+CREATE TABLE tbl_User (
+UserID INT IDENTITY(1,1) PRIMARY KEY,
+Username VARCHAR(50) NOT NULL,
+Pass VARCHAR(255) NOT NULL,
+FirstName VARCHAR(50) NOT NULL,
+LastName VARCHAR(50) NOT NULL,
+UserRole VARCHAR(50) NOT NULL,
+CreatedAt DATETIME NOT NULL DEFAULT GETDATE(),
+IsDeleted BIT NOT NULL DEFAULT 0
+);
+
+
+- - tbl_Concessioner
+CREATE TABLE tbl_Concessioner
+(
+    ConcessionerID INT IDENTITY(1,1) PRIMARY KEY,
+    UserID INT NOT NULL,
+    CategoryID INT NOT NULL,
+    MembershipID INT NOT NULL,
+    DistrictID INT NOT NULL,
+    AccountNumber NVARCHAR(20) NOT NULL,
+    AccountOrder INT NOT NULL,
+    MeterNumber NVARCHAR(30) NOT NULL,
+    Address NVARCHAR(255) NOT NULL,
+    ContactNumber NVARCHAR(15) NOT NULL,
+    EmailAddress NVARCHAR(50),
+    Status NVARCHAR(20) NOT NULL,
+    FOREIGN KEY (UserID) REFERENCES tbl_User(UserID),
+    FOREIGN KEY (CategoryID) REFERENCES tbl_Category(CategoryID),
+    FOREIGN KEY (MembershipID) REFERENCES tbl_Membership(MembershipID),
+    FOREIGN KEY (DistrictID) REFERENCES tbl_District(DistrictID)
+);
+
+
+- - tbl_Period
+CREATE TABLE tbl_Period
+(
+    PeriodID INT IDENTITY(1,1) PRIMARY KEY,
+    PeriodStart DATETIME NOT NULL,
+    PeriodEnd DATETIME NOT NULL,
+);
+
+
+- - tbl_Billing
+CREATE TABLE tbl_Billing
+(
+    BillingID INT IDENTITY(1,1) PRIMARY KEY,
+    ConcessionerID INT NOT NULL,
+    UserID INT NOT NULL,
+    PeriodID INT NOT NULL,
+    PrevReading INT NOT NULL,
+    CurrentReading INT NOT NULL,
+    BillAmount DECIMAL(10,2) NOT NULL,
+    Penalty DECIMAL(10,2) DEFAULT 0,
+    BillStatus NVARCHAR(50) NOT NULL DEFAULT 'Unpaid',
+    CreatedAt DATETIME NOT NULL DEFAULT GETDATE(),
+    FOREIGN KEY (ConcessionerID) REFERENCES tbl_Concessioner(ConcessionerID),
+    FOREIGN KEY (UserID) REFERENCES tbl_User(UserID),
+    FOREIGN KEY (PeriodID) REFERENCES tbl_Period(PeriodID)
+);
+
+
+
+tbl_Payment
+CREATE TABLE tbl_Payment 
+(
+    PaymentID INT IDENTITY(1,1) PRIMARY KEY,
+    BillingID INT NOT NULL,
+    AmountPaid DECIMAL(10,2) NOT NULL,
+    DatePaid DATETIME NOT NULL DEFAULT GETDATE(),
+    FOREIGN KEY (BillingID) REFERENCES tbl_Billing(BillingID)
+);
+DML
+
+tbl_District
+INSERT INTO tbl_District (DistrictName) 
+VALUES
+('Purok 1'),
+('Purok 2'),
+('Purok 3'),
+('Purok 4'),
+('Purok 5'),
+('Purok 6'),
+('Purok 7');
+
+
+tbl_Membership
+INSERT INTO tbl_Membership (MembershipName, DiscountRate) 
+VALUES
+('Member', 0.00),
+('Non-Member', 0.20),
+('Full Subsidy', 1.00);
+
+
+tbl_Category
+INSERT INTO tbl_Category (CategoryName) 
+VALUES
+('Residential'),
+('Commercial');
+
+
+tbl_TariffRate
+INSERT INTO tbl_TariffRate (CategoryID, CubicMeter, Amount) VALUES
+(1, 1, 0.00),
+(1, 2, 110.00),
+(1, 3, 110.00),
+(1, 4, 110.00),
+(1, 5, 110.00),
+(1, 6, 127.00),
+(1, 7, 144.00),
+(1, 8, 161.00),
+(1, 9, 178.00),
+(1, 10, 195.00),
+(1, 11, 213.00),
+(1, 12, 231.00),
+(1, 13, 249.00),
+(1, 14, 267.00),
+(1, 15, 285.00),
+(1, 16, 303.00),
+(1, 17, 321.00),
+(1, 18, 339.00),
+(1, 19, 357.00),
+(1, 20, 375.00),
+(2, 1, 0.00),
+(2, 2, 660.00),
+(2, 3, 660.00),
+(2, 4, 660.00),
+(2, 5, 660.00),
+(2, 6, 660.00),
+(2, 7, 660.00),
+(2, 8, 660.00),
+(2, 9, 660.00),
+(2, 10, 660.00),
+(2, 11, 660.00),
+(2, 12, 660.00),
+(2, 13, 660.00),
+(2, 14, 660.00),
+(2, 15, 660.00),
+(2, 16, 706.00),
+(2, 17, 752.00),
+(2, 18, 798.00),
+(2, 19, 844.00),
+(2, 20, 890.00);
+
+
+tbl_TariffVersion
+INSERT INTO tbl_TariffVersion (VersionName, IsActive)
+VALUES ('Version 1.0 (Dec 2025 - Feb2026)', 1);
+
+
+tbl_User
+INSERT INTO tbl_User (Username, Pass, FirstName, LastName, UserRole)
+VALUES
+('admin', 'admin', 'John', 'Doe', 'Admin'),
+('admin02', 'admin456', 'Maria', 'Lopez', 'Admin'),
+('Carlos01', 'Carlos123', 'Carlos', 'Reyes', 'Concessioner'),
+('Angela02', 'Angela456', 'Angela', 'Santos', 'Concessioner'),
+('Mark01', 'mark123', 'Mark', 'Villanueva', 'Concessioner'),
+('Liza02', 'liza456', 'Liza', 'Fernandez', 'Concessioner'),
+('Pedro01', 'Pedro123', 'Pedro', 'Garcia', 'Concessioner'),
+('Ana02', 'Ana456', 'Ana', 'Torres', 'Concessioner'),
+('Luis03', 'Luis789', 'Luis', 'Mendoza', 'Concessioner'),
+('Victorlang', 'victor123', 'Victor', 'Cruz', 'Admin');
+
+
+
+tbl_Concessioner
+INSERT INTO dbo.tbl_Concessioner
+(UserID, CategoryID, MembershipID, DistrictID, AccountNumber, AccountOrder, MeterNumber, Address, ContactNumber, EmailAddress, Status)
+VALUES
+(3, 1, 1, 1, 'ACC-1001', 1, 'MTR-001', '123 North St.', '09123456789', 'carlos@email.com', 'Disconnected'), 
+(4, 2, 2, 2, 'ACC-1002', 1, 'MTR-002', '456 South St.', '09987654321', 'angela@email.com', 'Active'), 
+(5, 1, 3, 3, 'ACC-1003', 1, 'MTR-003', '789 East St.', '09112233445', 'mark@email.com', 'Inactive'),
+(6, 2, 1, 1, 'ACC-1004', 2, 'MTR-004', '321 West St.', '09223344556', 'liza@email.com', 'Active'),
+(7, 1, 2, 2, 'ACC-1005', 2, 'MTR-005', '654 Central St.', '09334455667', 'pedro@email.com', 'Active'),
+(8, 2, 3, 3, 'ACC-1006', 2, 'MTR-006', '987 Lake St.', '09445566778', 'ana@email.com', 'Active'),
+(9, 1, 1, 1, 'ACC-1007', 3, 'MTR-007', '135 Hill St.', '09556677889', 'luis@email.com', 'Delinquent');
+
+
+tbl_Period
+INSERT INTO tbl_Period (PeriodStart, PeriodEnd)
+VALUES
+('2026-01-01', '2026-01-31'),
+('2026-02-01', '2026-02-28'),
+('2026-03-01', '2026-03-31');
+
+
+tbl_Billing
+INSERT INTO tbl_Billing 
+(ConcessionerID, UserID, PeriodID, PrevReading, CurrentReading, BillAmount, Penalty, BillStatus, CreatedAt)
+VALUES
+(3, 1, 2, 176, 200, 240.00, 0.00, 'Paid', '2026-02-02 08:10:00'),
+(4, 1, 2, 332, 368, 360.00, 200.00, 'Paid', '2026-02-03 09:25:00'),
+(5, 1, 2, 428, 454, 260.00, 0.00, 'Overdue', '2026-02-04 11:40:00'),
+(6, 1, 2, 524, 550, 260.00, 0.00, 'Paid', '2026-02-05 13:00:00'),
+(7, 2, 2, 630, 660, 300.00, 0.00, 'Paid', '2026-02-06 14:20:00'),
+(2, 2, 3, 224, 248, 240.00, 0.00, 'Paid', '2026-03-01 08:30:00'),
+(3, 2, 3, 200, 222, 220.00, 0.00, 'Paid', '2026-03-02 09:10:00'),
+(4, 1, 3, 368, 396, 280.00, 0.00, 'Paid', '2026-03-03 10:15:00'),
+(5, 2, 3, 454, 486, 320.00, 200.00, 'Overdue', '2026-03-04 11:45:00'),
+(6, 2, 3, 550, 574, 240.00, 0.00, 'Unpaid', '2026-03-05 13:30:00'),
+(7, 2, 3, 660, 684, 240.00, 0.00, 'Unpaid', '2026-04-01 08:00:00'),
+(3, 1, 3, 222, 248, 260.00, 0.00, 'Unpaid', '2026-04-02 09:20:00'),
+(5, 1, 3, 486, 512, 260.00, 0.00, 'Unpaid', '2026-04-03 10:40:00'),
+(6, 1, 3, 574, 600, 260.00, 0.00, 'Unpaid', '2026-04-04 11:55:00'),
+(7, 1, 3, 684, 708, 240.00, 0.00, 'Unpaid', '2026-04-05 13:15:00');
+
+
+tbl_Payment
+INSERT INTO tbl_Payment
+(BillingID, AmountPaid, DatePaid)
+VALUES
+(11, 300.00, '2026-01-10 09:00:00'),
+(12, 240.00, '2026-01-11 10:15:00'),
+(13, 260.00, '2026-01-12 11:30:00'),
+(10, 330.00, '2026-01-13 13:20:00'), 
+(11, 260.00, '2026-02-07 08:45:00'),
+(12, 300.00, '2026-02-08 09:30:00'),
+(15, 100.00, '2026-02-20 10:00:00'),
+(15, 160.00, '2026-02-25 15:10:00'),
+(15, 150.00, '2026-03-25 11:00:00'),
+(15, 170.00, '2026-03-28 14:30:00'),
+(14, 240.00, '2026-03-05 09:10:00'),
+(10, 240.00, '2026-03-06 10:20:00');
+
+
+
+
+
+
+
+
+
+
+
