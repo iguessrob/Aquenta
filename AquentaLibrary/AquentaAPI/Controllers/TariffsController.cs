@@ -17,8 +17,20 @@ namespace AquentaAPI.Controllers
             if (role != "Admin") return Unauthorized("Administrative privileges required.");
 
             if (tariffs == null) return BadRequest("Tariff data is required.");
-            var result = tariffsServices.Add(tariffs);
-            return Ok(result);
+
+            try
+            {
+                var result = tariffsServices.Add(tariffs);
+                return Ok(result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Internal server error: " + ex.Message);
+            }
         }
 
         [HttpPut]
@@ -28,8 +40,20 @@ namespace AquentaAPI.Controllers
             if (role != "Admin") return Unauthorized("Administrative privileges required.");
 
             if (tariffs == null) return BadRequest("Tariff data is required.");
-            var result = tariffsServices.Update(tariffs);
-            return Ok(result);
+
+            try
+            {
+                var result = tariffsServices.Update(tariffs);
+                return Ok(result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Internal server error: " + ex.Message);
+            }
         }
 
         [HttpGet]

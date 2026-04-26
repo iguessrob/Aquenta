@@ -31,12 +31,32 @@ namespace AquentaLibrary.Services
         public bool Add(TariffsModel tariff)
         {
             EnsureTariffVersion(tariff);
+
+            // Prevent duplicate cubic meter entries in the same version/category
+            var isDuplicate = tariffsRepo.GetTariffsByVersionId(tariff.TariffVersionId)
+                .Any(t => t.CategoryId == tariff.CategoryId && t.CubicMeter == tariff.CubicMeter);
+
+            if (isDuplicate)
+            {
+                throw new InvalidOperationException($"A rate for {tariff.CubicMeter} cubic meters already exists in this category.");
+            }
+
             return tariffsRepo.AddTariffs(tariff);
         }
 
         public bool Update(TariffsModel tariff)
         {
             EnsureTariffVersion(tariff);
+
+            // Prevent duplicate cubic meter entries in the same version/category (excluding current record)
+            var isDuplicate = tariffsRepo.GetTariffsByVersionId(tariff.TariffVersionId)
+                .Any(t => t.CategoryId == tariff.CategoryId && t.CubicMeter == tariff.CubicMeter && t.RateId != tariff.RateId);
+
+            if (isDuplicate)
+            {
+                throw new InvalidOperationException($"A rate for {tariff.CubicMeter} cubic meters already exists in this category.");
+            }
+
             return tariffsRepo.UpdateTariffs(tariff);
         }
 

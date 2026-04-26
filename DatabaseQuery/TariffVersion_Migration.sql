@@ -82,6 +82,27 @@ BEGIN
 END
 GO
 
+-- 4. Add Unique Constraint to prevent duplicates (CategoryID + VersionID + CubicMeter)
+IF OBJECT_ID('dbo.UQ_TariffRate_Version', 'UQ') IS NOT NULL
+BEGIN
+    ALTER TABLE tbl_TariffRate DROP CONSTRAINT UQ_TariffRate_Version;
+END
+GO
+
+-- Clean up any existing duplicates before adding constraint
+-- Keeps the one with the lowest RateID
+DELETE t1 FROM tbl_TariffRate t1
+INNER JOIN tbl_TariffRate t2 ON 
+    t1.CategoryID = t2.CategoryID AND 
+    t1.TariffVersionID = t2.TariffVersionID AND 
+    t1.CubicMeter = t2.CubicMeter AND 
+    t1.RateID > t2.RateID;
+GO
+
+ALTER TABLE tbl_TariffRate ADD CONSTRAINT UQ_TariffRate_Version 
+UNIQUE (CategoryID, TariffVersionID, CubicMeter);
+GO
+
 -- ----------------------------------------------------------------------------
 -- STORED PROCEDURES (REFACTORED FOR MULTI-TABLE)
 -- ----------------------------------------------------------------------------
