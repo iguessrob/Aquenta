@@ -359,6 +359,191 @@ body {
   grid-column: 1 / -1;
 }
 
+.version-management-card {
+  grid-column: 1 / -1;
+  background: #f8fafc;
+  border-radius: 20px;
+  border: 1px solid #e5e7eb;
+  padding: 28px 34px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.version-controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.version-selector-group {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.version-selector-label-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.version-selector-label {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.version-clock-icon {
+  color: #1565c0;
+}
+
+.version-select-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.version-select {
+  min-width: 520px;
+  max-width: 100%;
+  height: 56px;
+  border-radius: 16px;
+  border: 3px solid #d0d7e2;
+  background: #fff;
+  color: #0f172a;
+  font-size: 22px;
+  font-weight: 600;
+  padding: 0 18px;
+}
+
+.version-select:focus {
+  outline: none;
+  border-color: #1f5fae;
+  box-shadow: 0 0 0 3px rgba(31, 95, 174, 0.14);
+}
+
+.edit-version-btn {
+  width: 54px;
+  height: 54px;
+  border-radius: 999px;
+  border: none;
+  color: #64748b;
+  background: #e5e7eb;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.edit-version-btn:hover {
+  background: #d1d5db;
+}
+
+.create-version-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-width: 280px;
+  height: 60px;
+  border-radius: 18px;
+  border: none;
+  background: linear-gradient(180deg, #1f5fae 0%, #1d3f8d 100%);
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.create-version-btn span {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.create-version-btn svg {
+  flex-shrink: 0;
+}
+
+.create-version-btn:hover {
+  background: linear-gradient(180deg, #1f67c3 0%, #23438f 100%);
+}
+
+.current-version-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: #bbf7d0;
+  color: #047857;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.current-version-chip::before {
+  content: '★';
+}
+
+.version-modal-content {
+  max-width: 760px;
+  border-radius: 18px;
+}
+
+.version-modal-header h2 {
+  font-size: 32px;
+  line-height: 1.1;
+}
+
+.version-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.version-modal-subtitle {
+  font-size: 16px;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.version-modal-form .form-group label {
+  font-size: 16px;
+}
+
+.version-modal-form .form-group input {
+  height: 56px;
+  font-size: 16px;
+  border: 2px solid #1f5fae;
+  border-radius: 12px;
+}
+
+.version-modal-note {
+  border-radius: 18px;
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+  color: #1e40af;
+  padding: 16px 18px;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.version-modal-footer {
+  padding-top: 20px;
+}
+
+.version-modal-footer .btn {
+  min-width: 210px;
+  height: 52px;
+  font-size: 16px;
+  border-radius: 12px;
+}
+
 /* Tariff Sections */
 .tariff-section {
   background-color: white;
@@ -558,6 +743,82 @@ body {
   .tariff-table tbody td {
     padding: 10px 12px;
   }
+
+  .version-management-card {
+    padding: 20px;
+  }
+
+  .version-controls-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .version-selector-group {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .version-select-wrap {
+    width: 100%;
+  }
+
+  .version-select {
+    min-width: 0;
+    width: 100%;
+    font-size: 18px;
+    height: 48px;
+    border-width: 2px;
+    border-radius: 12px;
+  }
+
+  .edit-version-btn {
+    width: 46px;
+    height: 46px;
+  }
+
+  .create-version-btn {
+    width: 100%;
+    min-width: 0;
+    height: 52px;
+    font-size: 18px;
+    border-radius: 12px;
+  }
+
+  .create-version-btn span {
+    font-size: 18px;
+  }
+
+  .version-modal-content {
+    max-width: 92vw;
+  }
+
+  .version-modal-header h2 {
+    font-size: 24px;
+  }
+
+  .version-modal-subtitle,
+  .version-modal-note {
+    font-size: 14px;
+  }
+
+  .version-modal-form .form-group label,
+  .version-modal-form .form-group input {
+    font-size: 16px;
+  }
+
+  .version-modal-form .form-group input {
+    height: 48px;
+    border-width: 2px;
+    border-radius: 10px;
+  }
+
+  .version-modal-footer .btn {
+    min-width: 0;
+    width: 100%;
+    height: 48px;
+    font-size: 15px;
+    border-radius: 12px;
+  }
 }
 
 /* Mobile Layout */
@@ -606,6 +867,19 @@ body {
   .tariff-table thead th,
   .tariff-table tbody td {
     padding: 8px 10px;
+  }
+
+  .version-selector-label {
+    font-size: 16px;
+  }
+
+  .current-version-chip {
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+
+  .create-version-btn span {
+    font-size: 16px;
   }
 
 }

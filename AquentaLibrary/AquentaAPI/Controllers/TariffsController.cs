@@ -8,9 +8,8 @@ namespace AquentaAPI.Controllers
     [ApiController]
     public class TariffsController : Controller
     {
-        TariffsServices tariffsServices = new TariffsServices();
+        private readonly TariffsServices tariffsServices = new TariffsServices();
 
-        
         [HttpPost]
         public ActionResult<bool> AddTariffs([FromBody] TariffsModel tariffs)
         {
@@ -31,6 +30,20 @@ namespace AquentaAPI.Controllers
         public ActionResult GetAllTariffs()
         {
             var tariffs = tariffsServices.GetAll();
+            return Ok(tariffs);
+        }
+
+        [HttpGet("by-category/{categoryId}")]
+        public ActionResult GetTariffsByCategoryId(int categoryId)
+        {
+            var tariffs = tariffsServices.GetByCategoryId(categoryId);
+            return Ok(tariffs);
+        }
+
+        [HttpGet("by-version/{tariffVersionId}")]
+        public ActionResult GetTariffsByVersionId(int tariffVersionId)
+        {
+            var tariffs = tariffsServices.GetByVersionId(tariffVersionId);
             return Ok(tariffs);
         }
 

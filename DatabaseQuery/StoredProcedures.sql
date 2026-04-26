@@ -220,27 +220,33 @@ GO
 -- ============================================================================
 
 -- Get All Tariff Rates
-CREATE PROCEDURE SP_GetAllTariffRate
+CREATE OR ALTER PROCEDURE SP_GetAllTariffRate
 AS
 BEGIN
+	SET NOCOUNT ON;
+
 	SELECT 
 		RateID,
 		CategoryID,
+		TariffVersionID,
 		CubicMeter,
 		Amount
 	FROM tbl_TariffRate
-	ORDER BY CategoryID, CubicMeter;
+	ORDER BY TariffVersionID, CategoryID, CubicMeter;
 END
 GO
 
 -- Get Tariff Rate By ID
-CREATE PROCEDURE SP_GetTariffRateById
+CREATE OR ALTER PROCEDURE SP_GetTariffRateById
 	@RateID INT
 AS
 BEGIN
+	SET NOCOUNT ON;
+
 	SELECT 
 		RateID,
 		CategoryID,
+		TariffVersionID,
 		CubicMeter,
 		Amount
 	FROM tbl_TariffRate
@@ -249,45 +255,74 @@ END
 GO
 
 -- Get Tariff Rates By Category ID
-CREATE PROCEDURE SP_GetTariffRateByCategoryId
+CREATE OR ALTER PROCEDURE SP_GetTariffRateByCategoryId
 	@CategoryID INT
 AS
 BEGIN
+	SET NOCOUNT ON;
+
 	SELECT 
 		RateID,
 		CategoryID,
+		TariffVersionID,
 		CubicMeter,
 		Amount
 	FROM tbl_TariffRate
 	WHERE CategoryID = @CategoryID
-	ORDER BY CubicMeter;
+	ORDER BY TariffVersionID, CubicMeter;
+END
+GO
+
+-- Get Tariff Rates By Version ID
+CREATE OR ALTER PROCEDURE SP_GetTariffRateByTariffVersionId
+	@TariffVersionID INT
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	SELECT 
+		RateID,
+		CategoryID,
+		TariffVersionID,
+		CubicMeter,
+		Amount
+	FROM tbl_TariffRate
+	WHERE TariffVersionID = @TariffVersionID
+	ORDER BY CategoryID, CubicMeter;
 END
 GO
 
 -- Insert Tariff Rate
-CREATE PROCEDURE SP_InsertTariffRate
+CREATE OR ALTER PROCEDURE SP_InsertTariffRate
 	@CategoryID INT,
+	@TariffVersionID INT,
 	@CubicMeter DECIMAL(5,2),
 	@Amount DECIMAL(8,2)
 AS
 BEGIN
-	INSERT INTO tbl_TariffRate (CategoryID, CubicMeter, Amount)
-	VALUES (@CategoryID, @CubicMeter, @Amount);
+	SET NOCOUNT ON;
+
+	INSERT INTO tbl_TariffRate (CategoryID, TariffVersionID, CubicMeter, Amount)
+	VALUES (@CategoryID, @TariffVersionID, @CubicMeter, @Amount);
 	
 	SELECT SCOPE_IDENTITY() AS RateID;
 END
 GO
 
 -- Update Tariff Rate
-CREATE PROCEDURE SP_UpdateTariffRate
+CREATE OR ALTER PROCEDURE SP_UpdateTariffRate
 	@RateID INT,
 	@CategoryID INT,
+	@TariffVersionID INT,
 	@CubicMeter DECIMAL(5,2),
 	@Amount DECIMAL(8,2)
 AS
 BEGIN
+	SET NOCOUNT ON;
+
 	UPDATE tbl_TariffRate
 	SET CategoryID = @CategoryID,
+		TariffVersionID = @TariffVersionID,
 		CubicMeter = @CubicMeter,
 		Amount = @Amount
 	WHERE RateID = @RateID;
@@ -297,13 +332,157 @@ END
 GO
 
 -- Delete Tariff Rate
-CREATE PROCEDURE SP_DeleteTariffRate
+CREATE OR ALTER PROCEDURE SP_DeleteTariffRate
 	@RateID INT
 AS
 BEGIN
+	SET NOCOUNT ON;
+
 	DELETE FROM tbl_TariffRate
 	WHERE RateID = @RateID;
 	
+	SELECT @@ROWCOUNT AS RowsAffected;
+END
+GO
+
+-- ============================================================================
+-- TBL_TARIFFVERSION STORED PROCEDURES
+-- ============================================================================
+
+-- Get All Tariff Versions
+CREATE OR ALTER PROCEDURE SP_GetAllTariffVersion
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	SELECT 
+		TariffVersionID,
+		VersionName,
+		IsActive,
+		CreatedAt
+	FROM tbl_TariffVersion
+	ORDER BY CreatedAt DESC, TariffVersionID DESC;
+END
+GO
+
+-- Get Tariff Version By ID
+CREATE OR ALTER PROCEDURE SP_GetTariffVersionById
+	@TariffVersionID INT
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	SELECT 
+		TariffVersionID,
+		VersionName,
+		IsActive,
+		CreatedAt
+	FROM tbl_TariffVersion
+	WHERE TariffVersionID = @TariffVersionID;
+END
+GO
+
+-- Get Active Tariff Version
+CREATE OR ALTER PROCEDURE SP_GetActiveTariffVersion
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	SELECT TOP 1
+		TariffVersionID,
+		VersionName,
+		IsActive,
+		CreatedAt
+	FROM tbl_TariffVersion
+	WHERE IsActive = 1
+	ORDER BY CreatedAt DESC, TariffVersionID DESC;
+END
+GO
+
+-- Insert Tariff Version
+CREATE OR ALTER PROCEDURE SP_InsertTariffVersion
+	@VersionName NVARCHAR(100),
+	@IsActive BIT
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	INSERT INTO tbl_TariffVersion (VersionName, IsActive)
+	VALUES (@VersionName, @IsActive);
+
+	SELECT SCOPE_IDENTITY() AS TariffVersionID;
+END
+GO
+
+-- Create Tariff Version From Current And Set Active
+CREATE OR ALTER PROCEDURE SP_CreateTariffVersionFromCurrent
+	@VersionName NVARCHAR(100)
+AS
+BEGIN
+	SET NOCOUNT ON;
+	SET XACT_ABORT ON;
+
+	DECLARE @CurrentTariffVersionID INT;
+	DECLARE @NewTariffVersionID INT;
+
+	BEGIN TRANSACTION;
+
+	SELECT TOP 1 @CurrentTariffVersionID = TariffVersionID
+	FROM tbl_TariffVersion
+	WHERE IsActive = 1
+	ORDER BY CreatedAt DESC, TariffVersionID DESC;
+
+	UPDATE tbl_TariffVersion
+	SET IsActive = 0
+	WHERE IsActive = 1;
+
+	INSERT INTO tbl_TariffVersion (VersionName, IsActive)
+	VALUES (@VersionName, 1);
+
+	SET @NewTariffVersionID = SCOPE_IDENTITY();
+
+	IF @CurrentTariffVersionID IS NOT NULL
+	BEGIN
+		INSERT INTO tbl_TariffRate (CategoryID, TariffVersionID, CubicMeter, Amount)
+		SELECT CategoryID, @NewTariffVersionID, CubicMeter, Amount
+		FROM tbl_TariffRate
+		WHERE TariffVersionID = @CurrentTariffVersionID;
+	END
+
+	COMMIT TRANSACTION;
+
+	SELECT @NewTariffVersionID AS TariffVersionID;
+END
+GO
+
+-- Update Tariff Version
+CREATE OR ALTER PROCEDURE SP_UpdateTariffVersion
+	@TariffVersionID INT,
+	@VersionName NVARCHAR(100),
+	@IsActive BIT
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	UPDATE tbl_TariffVersion
+	SET VersionName = @VersionName,
+		IsActive = @IsActive
+	WHERE TariffVersionID = @TariffVersionID;
+
+	SELECT @@ROWCOUNT AS RowsAffected;
+END
+GO
+
+-- Delete Tariff Version
+CREATE OR ALTER PROCEDURE SP_DeleteTariffVersion
+	@TariffVersionID INT
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	DELETE FROM tbl_TariffVersion
+	WHERE TariffVersionID = @TariffVersionID;
+
 	SELECT @@ROWCOUNT AS RowsAffected;
 END
 GO

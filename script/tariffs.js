@@ -5,67 +5,87 @@ const closeSidebar = document.getElementById('closeSidebar');
 
 let categoriesCache = [];
 let tariffsCache = [];
+let tariffVersionsCache = [];
+let selectedTariffVersionId = null;
+
 let selectedTariffForEdit = null;
 let selectedTariffForDelete = null;
 let currentTariffType = '';
-
-/**
- * Show a notification message
- * @param {string} message - The message to display
- * @param {string} type - 'success', 'error', or 'info'
- * @param {number} duration - Duration in milliseconds (default: 4000)
- */
-function showNotification(message, type = 'info', duration = 4000) {
-  const container = document.getElementById('notificationContainer');
-  
-  const notification = document.createElement('div');
-  notification.className = `notification ${type}`;
-  
-  // Create icon
-  let iconSvg = '';
-  if (type === 'success') {
-    iconSvg = `
-      <svg class="notification-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-        <polyline points="22 4 12 14.01 9 11.01"></polyline>
-      </svg>
-    `;
-  } else if (type === 'error') {
-    iconSvg = `
-      <svg class="notification-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="10"></circle>
-        <line x1="12" y1="8" x2="12" y2="12"></line>
-        <line x1="12" y1="16" x2="12.01" y2="16"></line>
-      </svg>
-    `;
-  } else {
-    iconSvg = `
-      <svg class="notification-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="10"></circle>
-        <line x1="12" y1="16" x2="12" y2="12"></line>
-        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-      </svg>
-    `;
-  }
-  
-  notification.innerHTML = `${iconSvg}<span class="notification-message">${message}</span>`;
-  
-  container.appendChild(notification);
-  
-  // Auto-remove notification
-  setTimeout(() => {
-    notification.classList.add('removing');
-    setTimeout(() => {
-      notification.remove();
-    }, 300);
-  }, duration);
-}
 
 function getApi() {
   if (!window.AquentaApiClient) {
     throw new Error('API client is not loaded. Please include script/api-client.js');
   }
   return window.AquentaApiClient;
+}
+
+function showNotification(message, type = 'info', duration = 4000) {
+  const container = document.getElementById('notificationContainer');
+  if (!container) return;
+
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+
+  let iconSvg = '';
+  if (type === 'success') {
+    iconSvg = '<svg class="notification-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>';
+  } else if (type === 'error') {
+    iconSvg = '<svg class="notification-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
+  } else {
+    iconSvg = '<svg class="notification-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>';
+  }
+
+  notification.innerHTML = `${iconSvg}<span class="notification-message">${message}</span>`;
+  container.appendChild(notification);
+
+  setTimeout(() => {
+    notification.classList.add('removing');
+    setTimeout(() => notification.remove(), 300);
+  }, duration);
+}
+
+function toNumber(val, fallback = 0) {
+  const n = Number(val);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function openSidebar() {
+  if (!sidebar || !mobileOverlay) return;
+  sidebar.classList.add('open');
+  mobileOverlay.classList.add('active');
+}
+
+function closeSidebarFunc() {
+  if (!sidebar || !mobileOverlay) return;
+  sidebar.classList.remove('open');
+  mobileOverlay.classList.remove('active');
+}
+
+function setupSidebar() {
+  if (menuBtn) menuBtn.addEventListener('click', openSidebar);
+  if (closeSidebar) closeSidebar.addEventListener('click', closeSidebarFunc);
+  if (mobileOverlay) mobileOverlay.addEventListener('click', closeSidebarFunc);
+
+  const navLinks = document.querySelectorAll('.nav-item');
+  navLinks.forEach((link) => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth <= 1024) closeSidebarFunc();
+    });
+  });
+
+  window.addEventListener('resize', () => {
+    if (window.innerWidth >= 1024) closeSidebarFunc();
+  });
+}
+
+function findCategoryByTitle(title) {
+  const normalized = String(title || '').trim().toLowerCase();
+  return categoriesCache.find((c) => {
+    const name = String(c.categoryName || c.CategoryName || '').trim().toLowerCase();
+    if (normalized.includes('residential')) return name === 'residential';
+    if (normalized.includes('commercial')) return name === 'commercial';
+    return name === normalized;
+  }) || null;
 }
 
 function createActionButtons(rateId) {
@@ -90,53 +110,93 @@ function createActionButtons(rateId) {
   `;
 }
 
-function openSidebar() {
-  sidebar.classList.add('open');
-  mobileOverlay.classList.add('active');
+function setVersionBadge(version) {
+  const badge = document.getElementById('currentVersionBadge');
+  if (!badge) return;
+
+  const isActive = Boolean(version && (version.isActive ?? version.IsActive));
+  badge.style.display = isActive ? 'inline-flex' : 'none';
+  badge.textContent = isActive ? 'CURRENT VERSION' : 'INACTIVE VERSION';
 }
 
-function closeSidebarFunc() {
-  sidebar.classList.remove('open');
-  mobileOverlay.classList.remove('active');
+function renderVersionSelect() {
+  const select = document.getElementById('tariffVersionSelect');
+  if (!select) return;
+
+  select.innerHTML = tariffVersionsCache.map((version) => {
+    const id = Number(version.tariffVersionId ?? version.TariffVersionId ?? 0);
+    const name = String(version.versionName ?? version.VersionName ?? `Version ${id}`);
+    const isActive = Boolean(version.isActive ?? version.IsActive);
+    const activeTag = isActive ? ' - Current Rates' : '';
+    return `<option value="${id}">${name}${activeTag}</option>`;
+  }).join('');
+
+  if (selectedTariffVersionId) {
+    select.value = String(selectedTariffVersionId);
+  }
+
+  const selected = getSelectedVersion();
+  setVersionBadge(selected);
 }
 
-menuBtn.addEventListener('click', openSidebar);
-closeSidebar.addEventListener('click', closeSidebarFunc);
-mobileOverlay.addEventListener('click', closeSidebarFunc);
-
-const navItems = document.querySelectorAll('.nav-item');
-navItems.forEach(item => {
-  item.addEventListener('click', function() {
-    navItems.forEach(nav => nav.classList.remove('active'));
-    this.classList.add('active');
-  });
-});
-
-function handleResponsiveMenu() {
-  if (window.innerWidth >= 1024) closeSidebarFunc();
-}
-window.addEventListener('resize', handleResponsiveMenu);
-
-const navLinks = document.querySelectorAll('.nav-item');
-navLinks.forEach(link => {
-  link.addEventListener('click', () => {
-    if (window.innerWidth <= 1024) closeSidebarFunc();
-  });
-});
-
-function findCategoryByTitle(title) {
-  const normalized = String(title || '').trim().toLowerCase();
-  return categoriesCache.find((c) => {
-    const name = String(c.categoryName || c.CategoryName || '').trim().toLowerCase();
-    if (normalized.includes('residential')) return name === 'residential';
-    if (normalized.includes('commercial')) return name === 'commercial';
-    return name === normalized;
-  }) || null;
+function getSelectedVersion() {
+  return tariffVersionsCache.find((v) => Number(v.tariffVersionId ?? v.TariffVersionId ?? 0) === Number(selectedTariffVersionId)) || null;
 }
 
-function toNumber(val, fallback = 0) {
-  const n = Number(val);
-  return Number.isFinite(n) ? n : fallback;
+async function loadTariffVersions(preferredVersionId = null) {
+  const api = getApi();
+  const versions = await api.get('/TariffVersion');
+  tariffVersionsCache = Array.isArray(versions) ? versions : [];
+
+  if (!tariffVersionsCache.length) {
+    selectedTariffVersionId = null;
+    renderVersionSelect();
+    tariffsCache = [];
+    renderTariffTables();
+    return;
+  }
+
+  const active = tariffVersionsCache.find((v) => Boolean(v.isActive ?? v.IsActive));
+
+  if (preferredVersionId && tariffVersionsCache.some((v) => Number(v.tariffVersionId ?? v.TariffVersionId ?? 0) === Number(preferredVersionId))) {
+    selectedTariffVersionId = Number(preferredVersionId);
+  } else if (!selectedTariffVersionId) {
+    selectedTariffVersionId = Number((active?.tariffVersionId ?? active?.TariffVersionId) || (tariffVersionsCache[0].tariffVersionId ?? tariffVersionsCache[0].TariffVersionId));
+  }
+
+  renderVersionSelect();
+  await loadTariffsByVersion();
+}
+
+function setTableLoading(isLoading) {
+  const resLoading = document.getElementById('residentialTableLoading');
+  const comLoading = document.getElementById('commercialTableLoading');
+
+  if (resLoading) resLoading.classList.toggle('active', isLoading);
+  if (comLoading) comLoading.classList.toggle('active', isLoading);
+}
+
+async function loadTariffsByVersion() {
+  if (!selectedTariffVersionId) {
+    tariffsCache = [];
+    renderTariffTables();
+    return;
+  }
+
+  setTableLoading(true);
+  try {
+    const api = getApi();
+    const [categories, tariffs] = await Promise.all([
+      api.get('/Category'),
+      api.get(`/Tariffs/by-version/${selectedTariffVersionId}`),
+    ]);
+
+    categoriesCache = Array.isArray(categories) ? categories : [];
+    tariffsCache = Array.isArray(tariffs) ? tariffs : [];
+    renderTariffTables();
+  } finally {
+    setTableLoading(false);
+  }
 }
 
 function renderTariffTables() {
@@ -172,67 +232,165 @@ function renderTariffTables() {
   });
 }
 
-async function loadTariffs() {
-  const resLoading = document.getElementById('residentialTableLoading');
-  const comLoading = document.getElementById('commercialTableLoading');
-  
-  if (resLoading) resLoading.classList.add('active');
-  if (comLoading) comLoading.classList.add('active');
+function openModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (modal) modal.classList.add('active');
+}
 
-  try {
-    const api = getApi();
-    const [categories, tariffs] = await Promise.all([
-      api.get('/Category'),
-      api.get('/Tariffs'),
-    ]);
+function closeModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (modal) modal.classList.remove('active');
+}
 
-    categoriesCache = Array.isArray(categories) ? categories : [];
-    tariffsCache = Array.isArray(tariffs) ? tariffs : [];
-    renderTariffTables();
-  } catch (error) {
-    console.error('Failed to load tariffs:', error);
-    throw error;
-  } finally {
-    if (resLoading) resLoading.classList.remove('active');
-    if (comLoading) comLoading.classList.remove('active');
+function setupVersionControls() {
+  const select = document.getElementById('tariffVersionSelect');
+  const openCreateBtn = document.getElementById('openCreateVersionBtn');
+  const editBtn = document.getElementById('editVersionBtn');
+
+  if (select) {
+    select.addEventListener('change', async (event) => {
+      selectedTariffVersionId = Number(event.target.value);
+      setVersionBadge(getSelectedVersion());
+      await loadTariffsByVersion();
+    });
+  }
+
+  if (openCreateBtn) {
+    openCreateBtn.addEventListener('click', () => {
+      const input = document.getElementById('createVersionNameInput');
+      if (input) input.value = '';
+      openModal('createVersionModal');
+    });
+  }
+
+  if (editBtn) {
+    editBtn.addEventListener('click', () => {
+      const selected = getSelectedVersion();
+      if (!selected) {
+        showNotification('Please select a version first.', 'info');
+        return;
+      }
+
+      const input = document.getElementById('editVersionNameInput');
+      if (input) input.value = String(selected.versionName ?? selected.VersionName ?? '');
+      openModal('editVersionModal');
+    });
   }
 }
 
-function setupAddRateButtons() {
+function setupCreateVersionModal() {
+  const overlay = document.getElementById('createVersionOverlay');
+  const closeBtn = document.getElementById('createVersionCloseBtn');
+  const cancelBtn = document.getElementById('createVersionCancelBtn');
+  const form = document.getElementById('createVersionForm');
+
+  if (overlay) overlay.addEventListener('click', () => closeModal('createVersionModal'));
+  if (closeBtn) closeBtn.addEventListener('click', () => closeModal('createVersionModal'));
+  if (cancelBtn) cancelBtn.addEventListener('click', () => closeModal('createVersionModal'));
+
+  if (!form) return;
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const input = document.getElementById('createVersionNameInput');
+    const versionName = String(input?.value || '').trim();
+    if (!versionName) return;
+
+    try {
+      const api = getApi();
+      const response = await api.post('/TariffVersion/create-current', {
+        versionName,
+      });
+
+      closeModal('createVersionModal');
+
+      const newVersionId = Number(response);
+      await loadTariffVersions(newVersionId || null);
+      showNotification('New tariff version created and set as current.', 'success');
+    } catch (error) {
+      console.error(error);
+      showNotification(error.message || 'Failed to create tariff version.', 'error');
+    }
+  });
+}
+
+function setupEditVersionModal() {
+  const overlay = document.getElementById('editVersionOverlay');
+  const closeBtn = document.getElementById('editVersionCloseBtn');
+  const cancelBtn = document.getElementById('editVersionCancelBtn');
+  const form = document.getElementById('editVersionForm');
+
+  if (overlay) overlay.addEventListener('click', () => closeModal('editVersionModal'));
+  if (closeBtn) closeBtn.addEventListener('click', () => closeModal('editVersionModal'));
+  if (cancelBtn) cancelBtn.addEventListener('click', () => closeModal('editVersionModal'));
+
+  if (!form) return;
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const selected = getSelectedVersion();
+    if (!selected) {
+      showNotification('No tariff version selected.', 'error');
+      return;
+    }
+
+    const input = document.getElementById('editVersionNameInput');
+    const versionName = String(input?.value || '').trim();
+    if (!versionName) return;
+
+    try {
+      const api = getApi();
+      await api.put('/TariffVersion', {
+        tariffVersionId: Number(selected.tariffVersionId ?? selected.TariffVersionId),
+        versionName,
+        isActive: Boolean(selected.isActive ?? selected.IsActive),
+        createdAt: selected.createdAt ?? selected.CreatedAt,
+      });
+
+      closeModal('editVersionModal');
+      await loadTariffVersions(selectedTariffVersionId);
+      showNotification('Version name updated successfully.', 'success');
+    } catch (error) {
+      console.error(error);
+      showNotification(error.message || 'Failed to update version name.', 'error');
+    }
+  });
+}
+
+function setupAddRateModal() {
   const addRateBtns = document.querySelectorAll('.add-rate-btn');
-  addRateBtns.forEach(btn => {
-    btn.addEventListener('click', function() {
-      const section = this.closest('.tariff-section');
-      currentTariffType = section.querySelector('.section-title').textContent;
-      document.getElementById('addRateModal').classList.add('active');
+  addRateBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const section = btn.closest('.tariff-section');
+      currentTariffType = section?.querySelector('.section-title')?.textContent || '';
+      openModal('addRateModal');
     });
   });
-}
 
-function closeAddRateModal() {
-  document.getElementById('addRateModal').classList.remove('active');
-  document.getElementById('addRateForm').reset();
-}
-
-function setupModalListeners() {
-  const modalOverlay = document.getElementById('modalOverlay');
-  const modalCloseBtn = document.getElementById('modalCloseBtn');
+  const overlay = document.getElementById('modalOverlay');
+  const closeBtn = document.getElementById('modalCloseBtn');
   const cancelBtn = document.getElementById('cancelBtn');
-  const addRateForm = document.getElementById('addRateForm');
+  const form = document.getElementById('addRateForm');
 
-  modalOverlay.addEventListener('click', closeAddRateModal);
-  modalCloseBtn.addEventListener('click', closeAddRateModal);
-  cancelBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    closeAddRateModal();
-  });
+  const closeAddModal = () => {
+    closeModal('addRateModal');
+    if (form) form.reset();
+  };
 
-  addRateForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const cubicMeter = document.getElementById('cubicMeterInput').value;
-    const amount = document.getElementById('amountInput').value;
+  if (overlay) overlay.addEventListener('click', closeAddModal);
+  if (closeBtn) closeBtn.addEventListener('click', closeAddModal);
+  if (cancelBtn) cancelBtn.addEventListener('click', closeAddModal);
 
-    if (!cubicMeter || !amount) return;
+  if (!form) return;
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const cubicMeter = Number(document.getElementById('cubicMeterInput')?.value || 0);
+    const amount = Number(document.getElementById('amountInput')?.value || 0);
+
+    if (!selectedTariffVersionId) {
+      showNotification('Please select a tariff version.', 'error');
+      return;
+    }
 
     try {
       const api = getApi();
@@ -242,12 +400,13 @@ function setupModalListeners() {
       await api.post('/Tariffs', {
         rateId: 0,
         categoryId: Number(category.categoryId ?? category.CategoryId),
-        cubicMeter: Number(cubicMeter),
-        amount: Number(amount),
+        tariffVersionId: Number(selectedTariffVersionId),
+        cubicMeter,
+        amount,
       });
 
-      closeAddRateModal();
-      await loadTariffs();
+      closeAddModal();
+      await loadTariffsByVersion();
       showNotification('New rate added successfully.', 'success');
     } catch (error) {
       console.error(error);
@@ -256,15 +415,20 @@ function setupModalListeners() {
   });
 }
 
-function closeEditRateModal() {
-  document.getElementById('editRateModal').classList.remove('active');
-  document.getElementById('editRateForm').reset();
-  selectedTariffForEdit = null;
-}
+function setupEditRateModal() {
+  const overlay = document.getElementById('editModalOverlay');
+  const closeBtn = document.getElementById('editModalCloseBtn');
+  const cancelBtn = document.getElementById('editCancelBtn');
+  const form = document.getElementById('editRateForm');
 
-function setupEditButtons() {
-  document.addEventListener('click', function(e) {
-    const btn = e.target.closest('.edit-btn');
+  const closeEditModal = () => {
+    closeModal('editRateModal');
+    if (form) form.reset();
+    selectedTariffForEdit = null;
+  };
+
+  document.addEventListener('click', (event) => {
+    const btn = event.target.closest('.edit-btn');
     if (!btn) return;
 
     const rateId = Number(btn.getAttribute('data-rate-id'));
@@ -273,41 +437,30 @@ function setupEditButtons() {
 
     document.getElementById('editCubicMeterInput').value = toNumber(selectedTariffForEdit.cubicMeter ?? selectedTariffForEdit.CubicMeter);
     document.getElementById('editAmountInput').value = toNumber(selectedTariffForEdit.amount ?? selectedTariffForEdit.Amount).toFixed(2);
-    document.getElementById('editRateModal').classList.add('active');
-  });
-}
-
-function setupEditModalListeners() {
-  const editModalOverlay = document.getElementById('editModalOverlay');
-  const editModalCloseBtn = document.getElementById('editModalCloseBtn');
-  const editCancelBtn = document.getElementById('editCancelBtn');
-  const editRateForm = document.getElementById('editRateForm');
-
-  editModalOverlay.addEventListener('click', closeEditRateModal);
-  editModalCloseBtn.addEventListener('click', closeEditRateModal);
-  editCancelBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    closeEditRateModal();
+    openModal('editRateModal');
   });
 
-  editRateForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
+  if (overlay) overlay.addEventListener('click', closeEditModal);
+  if (closeBtn) closeBtn.addEventListener('click', closeEditModal);
+  if (cancelBtn) cancelBtn.addEventListener('click', closeEditModal);
+
+  if (!form) return;
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
     if (!selectedTariffForEdit) return;
-
-    const cubicMeter = document.getElementById('editCubicMeterInput').value;
-    const amount = document.getElementById('editAmountInput').value;
 
     try {
       const api = getApi();
       await api.put('/Tariffs', {
         rateId: Number(selectedTariffForEdit.rateId ?? selectedTariffForEdit.RateId),
         categoryId: Number(selectedTariffForEdit.categoryId ?? selectedTariffForEdit.CategoryId),
-        cubicMeter: Number(cubicMeter),
-        amount: Number(amount),
+        tariffVersionId: Number(selectedTariffVersionId || selectedTariffForEdit.tariffVersionId || selectedTariffForEdit.TariffVersionId || 0),
+        cubicMeter: Number(document.getElementById('editCubicMeterInput').value),
+        amount: Number(document.getElementById('editAmountInput').value),
       });
 
-      closeEditRateModal();
-      await loadTariffs();
+      closeEditModal();
+      await loadTariffsByVersion();
       showNotification('Rate updated successfully.', 'success');
     } catch (error) {
       console.error(error);
@@ -316,65 +469,67 @@ function setupEditModalListeners() {
   });
 }
 
-function closeDeleteRateModal() {
-  document.getElementById('deleteRateModal').classList.remove('active');
-  selectedTariffForDelete = null;
-}
+function setupDeleteRateModal() {
+  const overlay = document.getElementById('deleteModalOverlay');
+  const closeBtn = document.getElementById('deleteModalCloseBtn');
+  const cancelBtn = document.getElementById('deleteCancelBtn');
+  const confirmBtn = document.getElementById('confirmDeleteBtn');
 
-function setupDeleteButtons() {
-  document.addEventListener('click', function(e) {
-    const btn = e.target.closest('.delete-btn');
+  const closeDeleteModal = () => {
+    closeModal('deleteRateModal');
+    selectedTariffForDelete = null;
+  };
+
+  document.addEventListener('click', (event) => {
+    const btn = event.target.closest('.delete-btn');
     if (!btn) return;
 
     const rateId = Number(btn.getAttribute('data-rate-id'));
     selectedTariffForDelete = tariffsCache.find((t) => Number(t.rateId ?? t.RateId ?? 0) === rateId) || null;
     if (!selectedTariffForDelete) return;
 
-    document.getElementById('deleteCubicMeterValue').textContent = toNumber(selectedTariffForDelete.cubicMeter ?? selectedTariffForDelete.CubicMeter).toString();
+    document.getElementById('deleteCubicMeterValue').textContent = String(toNumber(selectedTariffForDelete.cubicMeter ?? selectedTariffForDelete.CubicMeter));
     document.getElementById('deleteAmountValue').textContent = toNumber(selectedTariffForDelete.amount ?? selectedTariffForDelete.Amount).toFixed(2);
-    document.getElementById('deleteRateModal').classList.add('active');
+    openModal('deleteRateModal');
   });
-}
 
-function setupDeleteModalListeners() {
-  const deleteModalOverlay = document.getElementById('deleteModalOverlay');
-  const deleteModalCloseBtn = document.getElementById('deleteModalCloseBtn');
-  const deleteCancelBtn = document.getElementById('deleteCancelBtn');
-  const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+  if (overlay) overlay.addEventListener('click', closeDeleteModal);
+  if (closeBtn) closeBtn.addEventListener('click', closeDeleteModal);
+  if (cancelBtn) cancelBtn.addEventListener('click', closeDeleteModal);
 
-  deleteModalOverlay.addEventListener('click', closeDeleteRateModal);
-  deleteModalCloseBtn.addEventListener('click', closeDeleteRateModal);
-  deleteCancelBtn.addEventListener('click', closeDeleteRateModal);
+  if (confirmBtn) {
+    confirmBtn.addEventListener('click', async () => {
+      if (!selectedTariffForDelete) return;
 
-  confirmDeleteBtn.addEventListener('click', async () => {
-    if (!selectedTariffForDelete) return;
+      try {
+        const api = getApi();
+        const rateId = Number(selectedTariffForDelete.rateId ?? selectedTariffForDelete.RateId);
+        await api.delete(`/Tariffs?id=${rateId}`);
 
-    try {
-      const api = getApi();
-      const rateId = Number(selectedTariffForDelete.rateId ?? selectedTariffForDelete.RateId);
-      await api.delete(`/Tariffs?id=${rateId}`);
-      closeDeleteRateModal();
-      await loadTariffs();
-      showNotification('Rate deleted successfully.', 'success');
-    } catch (error) {
-      console.error(error);
-      showNotification(error.message || 'Failed to delete rate.', 'error');
-    }
-  });
+        closeDeleteModal();
+        await loadTariffsByVersion();
+        showNotification('Rate deleted successfully.', 'success');
+      } catch (error) {
+        console.error(error);
+        showNotification(error.message || 'Failed to delete rate.', 'error');
+      }
+    });
+  }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  setupSidebar();
+  setupVersionControls();
+  setupCreateVersionModal();
+  setupEditVersionModal();
+  setupAddRateModal();
+  setupEditRateModal();
+  setupDeleteRateModal();
+
   try {
-    await loadTariffs();
+    await loadTariffVersions();
   } catch (error) {
     console.error(error);
-    showNotification('Failed to load tariffs from API.', 'error');
+    showNotification('Failed to load tariff versions.', 'error');
   }
-
-  setupAddRateButtons();
-  setupModalListeners();
-  setupEditButtons();
-  setupEditModalListeners();
-  setupDeleteButtons();
-  setupDeleteModalListeners();
 });

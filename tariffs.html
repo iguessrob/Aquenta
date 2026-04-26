@@ -145,6 +145,40 @@
         <div class="tariff-container">
           <h2 class="tariff-title">Tariff Management</h2>
 
+          <section class="version-management-card">
+            <div class="version-controls-row">
+              <div class="version-selector-group">
+                <div class="version-selector-label-wrap">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="version-clock-icon">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                  </svg>
+                  <label for="tariffVersionSelect" class="version-selector-label">Tariff Version:</label>
+                </div>
+
+                <div class="version-select-wrap">
+                  <select id="tariffVersionSelect" class="version-select"></select>
+                  <button id="editVersionBtn" class="edit-version-btn" type="button" title="Edit version name" aria-label="Edit version name">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 20h9"></path>
+                      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <button id="openCreateVersionBtn" class="create-version-btn" type="button">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>Create New Version</span>
+              </button>
+            </div>
+
+            <div class="current-version-chip" id="currentVersionBadge">CURRENT VERSION</div>
+          </section>
+
           <!-- Residential Tariff Section -->
           <div class="tariff-section">
             <div class="section-header">
@@ -290,6 +324,68 @@
           <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete Rate</button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Create Version Modal -->
+  <div id="createVersionModal" class="modal">
+    <div class="modal-overlay" id="createVersionOverlay"></div>
+    <div class="modal-content version-modal-content">
+      <div class="modal-header version-modal-header">
+        <h2>Create New Version</h2>
+        <button class="modal-close" id="createVersionCloseBtn" type="button" aria-label="Close create version modal">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <form id="createVersionForm" class="modal-form version-modal-form" autocomplete="off">
+        <p class="version-modal-subtitle">Create a new version based on the current tariff rates. This allows you to maintain different rate structures.</p>
+
+        <div class="form-group">
+          <label for="createVersionNameInput">Version Name</label>
+          <input type="text" id="createVersionNameInput" placeholder="e.g., Version 2.0" required>
+        </div>
+
+        <div class="version-modal-note"><strong>Note:</strong> The new version will copy all current rates. You can modify them after creation.</div>
+
+        <div class="modal-footer version-modal-footer">
+          <button type="button" class="btn btn-cancel" id="createVersionCancelBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Version</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Version Modal -->
+  <div id="editVersionModal" class="modal">
+    <div class="modal-overlay" id="editVersionOverlay"></div>
+    <div class="modal-content version-modal-content">
+      <div class="modal-header version-modal-header">
+        <h2>Edit Version Info</h2>
+        <button class="modal-close" id="editVersionCloseBtn" type="button" aria-label="Close edit version modal">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <form id="editVersionForm" class="modal-form version-modal-form" autocomplete="off">
+        <p class="version-modal-subtitle">Update the version name for this tariff version.</p>
+
+        <div class="form-group">
+          <label for="editVersionNameInput">Version Name</label>
+          <input type="text" id="editVersionNameInput" required>
+        </div>
+
+        <div class="modal-footer version-modal-footer">
+          <button type="button" class="btn btn-cancel" id="editVersionCancelBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
     </div>
   </div>
 

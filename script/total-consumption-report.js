@@ -79,6 +79,14 @@
     reportNextYearBtn.disabled = !hasAvailableYear(selectedYear + 1);
   }
 
+  async function changeReportYear(direction) {
+    const targetYear = selectedYear + direction;
+    if (!hasAvailableYear(targetYear)) return;
+
+    selectedYear = targetYear;
+    await loadConsumptionReport();
+  }
+
   function getApi() {
     if (!window.AquentaApiClient) {
       throw new Error('API client is not loaded. Please include script/api-client.js');
@@ -221,7 +229,7 @@
       }
 
       if (reportSectionTitle) {
-        reportSectionTitle.textContent = 'Total Consumption';
+        reportSectionTitle.textContent = 'Monthly Consumption Summary';
       }
 
       if (!tableBody) return;
@@ -280,23 +288,11 @@
   async function init() {
     bindSidebar();
     if (reportPrevYearBtn) {
-      reportPrevYearBtn.addEventListener('click', async () => {
-        const targetYear = selectedYear - 1;
-        if (!hasAvailableYear(targetYear)) return;
-
-        selectedYear = targetYear;
-        await loadConsumptionReport();
-      });
+      reportPrevYearBtn.addEventListener('click', () => changeReportYear(-1));
     }
 
     if (reportNextYearBtn) {
-      reportNextYearBtn.addEventListener('click', async () => {
-        const targetYear = selectedYear + 1;
-        if (!hasAvailableYear(targetYear)) return;
-
-        selectedYear = targetYear;
-        await loadConsumptionReport();
-      });
+      reportNextYearBtn.addEventListener('click', () => changeReportYear(1));
     }
 
     await loadConsumptionReport();

@@ -17,6 +17,9 @@ namespace AquentaLibrary.Models
         [Column("CategoryId")]
         public int CategoryId { get; set; }
 
+        [Column("TariffVersionID")]
+        public int TariffVersionId { get; set; }
+
         [Column("CubicMeter")]
         public decimal CubicMeter { get; set; }
 

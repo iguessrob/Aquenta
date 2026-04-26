@@ -60,12 +60,27 @@ namespace AquentaLibrary.Repositories
         }
 
         /// <summary>
+        /// Get tariffs by version ID using SP_GetTariffRateByTariffVersionId
+        /// </summary>
+        public IEnumerable<TariffsModel> GetTariffsByVersionId(int tariffVersionId)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@TariffVersionID", tariffVersionId, DbType.Int32);
+
+            return dbConnection.Query<TariffsModel>(
+                "SP_GetTariffRateByTariffVersionId",
+                parameters,
+                commandType: CommandType.StoredProcedure);
+        }
+
+        /// <summary>
         /// Insert tariff using SP_InsertTariffRate
         /// </summary>
         public int InsertTariffs(TariffsModel tariff)
         {
             var parameters = new DynamicParameters();
             parameters.Add("@CategoryId", tariff.CategoryId, DbType.Int32);
+            parameters.Add("@TariffVersionID", tariff.TariffVersionId, DbType.Int32);
             parameters.Add("@CubicMeter", tariff.CubicMeter, DbType.Decimal);
             parameters.Add("@Amount", tariff.Amount, DbType.Decimal);
 
@@ -83,6 +98,7 @@ namespace AquentaLibrary.Repositories
             var parameters = new DynamicParameters();
                 parameters.Add("@RateId", tariff.RateId, DbType.Int32);
                 parameters.Add("@CategoryId", tariff.CategoryId, DbType.Int32);
+            parameters.Add("@TariffVersionID", tariff.TariffVersionId, DbType.Int32);
             parameters.Add("@CubicMeter", tariff.CubicMeter, DbType.Decimal);
             parameters.Add("@Amount", tariff.Amount, DbType.Decimal);
 
