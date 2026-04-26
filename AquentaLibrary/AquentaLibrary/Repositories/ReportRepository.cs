@@ -38,8 +38,7 @@ namespace AquentaLibrary.Repositories
             parameters.Add("@Status", status, DbType.String);
 
             return dbConnection.QuerySingle<int>(
-                "SP_ShowTotalActiveConcessioners",
-                parameters,
+                "SP_TotalNumberOfRegisteredConcessioners",
                 commandType: CommandType.StoredProcedure);
         }
 
@@ -54,8 +53,7 @@ namespace AquentaLibrary.Repositories
             parameters.Add("@EndDate", endDate, DbType.DateTime);
 
             return dbConnection.QuerySingle<int>(
-                "SP_GetMonthlyWaterConsumption",
-                parameters,
+                "SP_GetTotalConsumptionCurrentMonth",
                 commandType: CommandType.StoredProcedure);
         }
 
@@ -177,7 +175,7 @@ namespace AquentaLibrary.Repositories
         {
             using var dbConnection = CreateConnection();
             return dbConnection.QuerySingleOrDefault<dynamic>(
-                "SP_GetUnpaidBillsSummary",
+                "SP_GetArrearSummaryReport",
                 commandType: CommandType.StoredProcedure);
         }
 
@@ -188,7 +186,7 @@ namespace AquentaLibrary.Repositories
         {
             using var dbConnection = CreateConnection();
             return dbConnection.QuerySingleOrDefault<dynamic>(
-                "SP_GetOverdueBillsSummary",
+                "SP_GetArrearSummaryReport",
                 commandType: CommandType.StoredProcedure);
         }
 
@@ -229,6 +227,19 @@ namespace AquentaLibrary.Repositories
         {
             using var dbConnection = CreateConnection();
             return dbConnection.Query<dynamic>(
+                "SP_GetArrearSummaryReport",
+                commandType: CommandType.StoredProcedure);
+        }
+
+        // ==================== NEW REFACTORED REPORTS (V3) ====================
+
+        /// <summary>
+        /// Get total overdue amount and count using SP_GetTotalOverdueAmount
+        /// </summary>
+        public dynamic GetTotalOverdueAmount()
+        {
+            using var dbConnection = CreateConnection();
+            return dbConnection.QuerySingleOrDefault<dynamic>(
                 "SP_GetArrearSummaryReport",
                 commandType: CommandType.StoredProcedure);
         }
@@ -498,15 +509,19 @@ namespace AquentaLibrary.Repositories
                     }
                 }
 
+                var dashboard = dbConnection.QuerySingleOrDefault<dynamic>(
+                    "SP_GetDashboardSummary",
+                    commandType: CommandType.StoredProcedure);
+
                 return new
                 {
-                    TotalActiveConcessioners = totalActive,
-                    TotalConcessioners = totalConcessioners,
-                    WaterConsumedThisMonth = waterConsumed,
-                    UnpaidBillsCount = unpaidSummary?.UnpaidBillsCount ?? 0,
-                    TotalUnpaidAmount = unpaidSummary?.TotalUnpaidAmount ?? 0,
-                    OverdueBillsCount = overdueSummary?.OverdueBillsCount ?? 0,
-                    TotalOverdueAmount = overdueSummary?.TotalOverdueAmount ?? 0
+                    TotalActiveConcessioners = dashboard?.TotalActiveMembers ?? 0,
+                    TotalConcessioners = dashboard?.TotalRegistered ?? 0,
+                    WaterConsumedThisMonth = dashboard?.CurrentMonthConsumption ?? 0,
+                    UnpaidBillsCount = dashboard?.OverdueConcessionerCount ?? 0,
+                    TotalUnpaidAmount = dashboard?.TotalOverdueAmount ?? 0,
+                    OverdueBillsCount = dashboard?.OverdueConcessionerCount ?? 0,
+                    TotalOverdueAmount = dashboard?.TotalOverdueAmount ?? 0
                 };
             }
             catch (Exception ex)

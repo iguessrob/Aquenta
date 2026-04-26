@@ -713,7 +713,7 @@ function renderBillingRows(rows) {
   updateSaveButtonCount();
 }
 
-function applyBillingFilters() {
+function applyBillingFilters(resetPage = true) {
   const searchInput = document.querySelector('.search-input');
   const districtSelect = document.querySelector('.filter-select');
 
@@ -741,7 +741,9 @@ function applyBillingFilters() {
     return matchesSearch && matchesDistrict;
   });
 
-  currentBillingPage = 1;
+  if (resetPage) {
+    currentBillingPage = 1;
+  }
 
   renderBillingRows(filteredBilling);
 }
@@ -1367,7 +1369,7 @@ function setupPrintButton() {
   }
 }
 
-async function loadBilling() {
+async function loadBilling(isInitial = false) {
   const loadingOverlay = document.getElementById('billingTableLoading');
   if (loadingOverlay) loadingOverlay.classList.add('active');
 
@@ -1402,11 +1404,13 @@ async function loadBilling() {
       versionNameEl.textContent = activeVersionResult.versionName || activeVersionResult.VersionName || 'Active';
     }
 
-    currentBillingPage = 1;
+    if (isInitial) {
+      currentBillingPage = 1;
+    }
 
     populateDistrictFilter();
     populatePeriodFilter();
-    applyBillingFilters();
+    applyBillingFilters(isInitial);
   } finally {
     if (loadingOverlay) loadingOverlay.classList.remove('active');
   }
@@ -1421,7 +1425,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupPrintButton();
 
   try {
-    await loadBilling();
+    await loadBilling(true);
   } catch (error) {
     console.error(error);
     showNotification('Failed to load billing data from API.', 'error');

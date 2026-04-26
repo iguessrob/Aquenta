@@ -258,6 +258,26 @@ namespace AquentaAPI.Controllers
             }
         }
 
+        // ==================== NEW REFACTORED REPORTS (V3) ====================
+
+        /// <summary>
+        /// Get total overdue amount and count (V3 View-backed)
+        /// GET: /api/report/overdue-total
+        /// </summary>
+        [HttpGet("overdue-total")]
+        public ActionResult GetTotalOverdueAmount()
+        {
+            try
+            {
+                var total = _reportServices.GetTotalOverdueAmount();
+                return Ok(total);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         /// <summary>
         /// Get total billing by period
         /// GET: /api/report/billing-by-period/3

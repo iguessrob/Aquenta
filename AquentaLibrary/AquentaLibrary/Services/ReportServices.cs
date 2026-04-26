@@ -91,6 +91,13 @@ namespace AquentaLibrary.Services
             return _reportRepository.GetArrearSummaryReport();
         }
 
+        // ==================== NEW REFACTORED REPORTS (V3) ====================
+
+        public dynamic GetTotalOverdueAmount()
+        {
+            return _reportRepository.GetTotalOverdueAmount();
+        }
+
         // ==================== ADVANCED REPORTS ====================
 
         public IEnumerable<dynamic> GetDistrictConsumptionSummary()
