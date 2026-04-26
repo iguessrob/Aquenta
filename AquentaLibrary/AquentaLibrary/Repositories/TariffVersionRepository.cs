@@ -15,13 +15,13 @@ namespace AquentaLibrary.Repositories
                 commandType: CommandType.StoredProcedure);
         }
 
-        public TariffVersionModel GetTariffVersionByName(string versionName)
+        public TariffVersionModel GetTariffVersionById(int id)
         {
             var parameters = new DynamicParameters();
-            parameters.Add("@VersionName", versionName, DbType.String);
+            parameters.Add("@TariffVersionID", id, DbType.Int32);
 
             return dbConnection.QueryFirstOrDefault<TariffVersionModel>(
-                "SELECT DISTINCT VersionName, IsActive FROM tbl_TariffRate WHERE VersionName = @VersionName",
+                "SELECT TariffVersionID, VersionName, IsActive, CreatedAt FROM tbl_TariffVersion WHERE TariffVersionID = @TariffVersionID",
                 parameters,
                 commandType: CommandType.Text);
         }
@@ -33,29 +33,32 @@ namespace AquentaLibrary.Repositories
                 commandType: CommandType.StoredProcedure);
         }
 
-        public string InsertTariffVersion(TariffVersionModel tariffVersion)
+        public int CreateFromCurrentAndSetActive(string versionName)
         {
-            // Note: In single table mode, inserting a version means creating a new preset with rates.
-            // This is usually handled via SP_CreateTariffVersionFromCurrent.
-            // If we just want to track a name, we'd need at least one rate row.
-            return tariffVersion.VersionName;
-        }
+            var parameters = new DynamicParameters();
+            parameters.Add("@NewVersionName", versionName, DbType.String);
 
-            public string CreateFromCurrentAndSetActive(string versionName)
-            {
-                var parameters = new DynamicParameters();
-                parameters.Add("@NewVersionName", versionName, DbType.String);
-
-                return dbConnection.QuerySingle<string>(
+            return dbConnection.QuerySingle<int>(
                 "SP_CreateTariffVersionFromCurrent",
                 parameters,
                 commandType: CommandType.StoredProcedure);
-            }
+        }
 
-        public int UpdateTariffVersionName(string oldName, string newName)
+        public int SetActive(int id)
         {
             var parameters = new DynamicParameters();
-            parameters.Add("@OldName", oldName, DbType.String);
+            parameters.Add("@TariffVersionID", id, DbType.Int32);
+
+            return dbConnection.Execute(
+                "SP_SetActiveTariffVersion",
+                parameters,
+                commandType: CommandType.StoredProcedure);
+        }
+
+        public int UpdateTariffVersionName(int id, string newName)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@TariffVersionID", id, DbType.Int32);
             parameters.Add("@NewName", newName, DbType.String);
 
             return dbConnection.Execute(
@@ -64,24 +67,13 @@ namespace AquentaLibrary.Repositories
                 commandType: CommandType.StoredProcedure);
         }
 
-        public int DeleteTariffVersionSP(string versionName)
+        public int DeleteTariffVersionSP(int id)
         {
             var parameters = new DynamicParameters();
-            parameters.Add("@VersionName", versionName, DbType.String);
+            parameters.Add("@TariffVersionID", id, DbType.Int32);
 
             return dbConnection.Execute(
                 "SP_DeleteTariffVersion",
-                parameters,
-                commandType: CommandType.StoredProcedure);
-        }
-
-        public int SetActive(string versionName)
-        {
-            var parameters = new DynamicParameters();
-            parameters.Add("@VersionName", versionName, DbType.String);
-
-            return dbConnection.Execute(
-                "SP_SetActiveTariffVersion",
                 parameters,
                 commandType: CommandType.StoredProcedure);
         }

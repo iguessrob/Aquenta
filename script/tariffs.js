@@ -6,7 +6,7 @@ const closeSidebar = document.getElementById('closeSidebar');
 let categoriesCache = [];
 let tariffsCache = [];
 let tariffVersionsCache = [];
-let selectedTariffVersionName = null;
+let selectedTariffVersionId = null;
 
 let selectedTariffForEdit = null;
 let selectedTariffForDelete = null;
@@ -129,14 +129,13 @@ function renderVersionSelect() {
   if (!select) return;
 
   select.innerHTML = tariffVersionsCache.map((version) => {
-    const name = String(version.versionName ?? version.VersionName ?? '');
-    const isActive = Boolean(version.isActive ?? version.IsActive);
-    const activeTag = isActive ? ' - Current Rates' : '';
-    return `<option value="${escapeHtml(name)}">${escapeHtml(name)}${escapeHtml(activeTag)}</option>`;
+    const id = Number(version.tariffVersionId ?? version.TariffVersionId ?? 0);
+    const name = String(version.versionName ?? version.VersionName ?? `Version ${id}`);
+    return `<option value="${id}">${escapeHtml(name)}</option>`;
   }).join('');
 
-  if (selectedTariffVersionName) {
-    select.value = selectedTariffVersionName;
+  if (selectedTariffVersionId) {
+    select.value = String(selectedTariffVersionId);
   }
 
   const selected = getSelectedVersion();
@@ -144,16 +143,16 @@ function renderVersionSelect() {
 }
 
 function getSelectedVersion() {
-  return tariffVersionsCache.find((v) => (v.versionName ?? v.VersionName) === selectedTariffVersionName) || null;
+  return tariffVersionsCache.find((v) => Number(v.tariffVersionId ?? v.TariffVersionId ?? 0) === Number(selectedTariffVersionId)) || null;
 }
 
-async function loadTariffVersions(preferredVersionName = null) {
+async function loadTariffVersions(preferredVersionId = null) {
   const api = getApi();
   const versions = await api.get('/TariffVersion');
   tariffVersionsCache = Array.isArray(versions) ? versions : [];
 
   if (!tariffVersionsCache.length) {
-    selectedTariffVersionName = null;
+    selectedTariffVersionId = null;
     renderVersionSelect();
     tariffsCache = [];
     renderTariffTables();
@@ -162,10 +161,10 @@ async function loadTariffVersions(preferredVersionName = null) {
 
   const active = tariffVersionsCache.find((v) => Boolean(v.isActive ?? v.IsActive));
 
-  if (preferredVersionName && tariffVersionsCache.some((v) => (v.versionName ?? v.VersionName) === preferredVersionName)) {
-    selectedTariffVersionName = preferredVersionName;
-  } else if (!selectedTariffVersionName) {
-    selectedTariffVersionName = active?.versionName ?? active?.VersionName ?? tariffVersionsCache[0].versionName ?? tariffVersionsCache[0].VersionName;
+  if (preferredVersionId && tariffVersionsCache.some((v) => Number(v.tariffVersionId ?? v.TariffVersionId ?? 0) === Number(preferredVersionId))) {
+    selectedTariffVersionId = Number(preferredVersionId);
+  } else if (!selectedTariffVersionId) {
+    selectedTariffVersionId = Number((active?.tariffVersionId ?? active?.TariffVersionId) || (tariffVersionsCache[0].tariffVersionId ?? tariffVersionsCache[0].TariffVersionId));
   }
 
   renderVersionSelect();
@@ -182,7 +181,7 @@ function setTableLoading(isLoading) {
 }
 
 async function loadTariffsByVersion() {
-  if (!selectedTariffVersionName) {
+  if (!selectedTariffVersionId) {
     tariffsCache = [];
     renderTariffTables();
     return;
@@ -193,12 +192,12 @@ async function loadTariffsByVersion() {
     const api = getApi();
     const [categories, tariffs] = await Promise.all([
       api.get('/Category'),
-      api.get(`/Tariffs/by-version/${encodeURIComponent(selectedTariffVersionName)}`),
+      api.get(`/Tariffs/by-version/${selectedTariffVersionId}`),
     ]);
 
     categoriesCache = Array.isArray(categories) ? categories : [];
     tariffsCache = Array.isArray(tariffs) ? tariffs : [];
-    console.log(`Loaded ${tariffsCache.length} tariffs for version ${selectedTariffVersionName}`);
+    console.log(`Loaded ${tariffsCache.length} tariffs for version ID ${selectedTariffVersionId}`);
     renderTariffTables();
   } finally {
     setTableLoading(false);
@@ -225,7 +224,6 @@ function renderTariffTables() {
 
     tbody.innerHTML = rows.map((row) => {
       const rateId = Number(row.rateId ?? row.RateId ?? 0);
-      // Formatting: if it's an integer, show no decimals. If it has decimals, show up to 2.
       const cubicVal = toNumber(row.cubicMeter ?? row.CubicMeter);
       const cubic = Number.isInteger(cubicVal) ? cubicVal.toString() : cubicVal.toFixed(2).replace(/\.?0+$/, '');
       const amount = toNumber(row.amount ?? row.Amount).toFixed(2);
@@ -259,7 +257,7 @@ function setupVersionControls() {
 
   if (select) {
     select.addEventListener('change', async (event) => {
-      selectedTariffVersionName = event.target.value;
+      selectedTariffVersionId = Number(event.target.value);
       setVersionBadge(getSelectedVersion());
       await loadTariffsByVersion();
     });
@@ -321,11 +319,11 @@ function setupVersionControls() {
 
       try {
         const api = getApi();
-        const name = String(selected.versionName ?? selected.VersionName);
-        await api.post(`/TariffVersion/set-active/${encodeURIComponent(name)}`);
+        const id = Number(selected.tariffVersionId ?? selected.TariffVersionId);
+        await api.post(`/TariffVersion/set-active/${id}`);
 
-        await loadTariffVersions(name);
-        showNotification(`'${name}' is now the active tariff version.`, 'success');
+        await loadTariffVersions(id);
+        showNotification(`Preset is now the active tariff version.`, 'success');
       } catch (error) {
         console.error(error);
         showNotification(error.message || 'Failed to set active version.', 'error');
@@ -351,11 +349,11 @@ function setupDeleteVersionModal() {
 
     try {
       const api = getApi();
-      const name = String(selected.versionName ?? selected.VersionName);
-      await api.delete(`/TariffVersion/${encodeURIComponent(name)}`);
+      const id = Number(selected.tariffVersionId ?? selected.TariffVersionId);
+      await api.delete(`/TariffVersion/${id}`);
 
       closeModal('deleteVersionModal');
-      selectedTariffVersionName = null; // Reset selection
+      selectedTariffVersionId = null;
       await loadTariffVersions();
       showNotification('Tariff preset deleted successfully.', 'success');
     } catch (error) {
@@ -390,8 +388,8 @@ function setupCreateVersionModal() {
 
       closeModal('createVersionModal');
 
-      const newVersionName = String(response);
-      await loadTariffVersions(newVersionName || null);
+      const newVersionId = Number(response);
+      await loadTariffVersions(newVersionId || null);
       showNotification('New tariff preset created and set as current.', 'success');
     } catch (error) {
       console.error(error);
@@ -426,10 +424,11 @@ function setupEditVersionModal() {
 
     try {
       const api = getApi();
-      await api.put(`/TariffVersion/rename?oldName=${encodeURIComponent(selected.versionName ?? selected.VersionName)}&newName=${encodeURIComponent(versionName)}`);
+      const id = Number(selected.tariffVersionId ?? selected.TariffVersionId);
+      await api.put(`/TariffVersion/rename/${id}?newName=${encodeURIComponent(versionName)}`);
 
       closeModal('editVersionModal');
-      await loadTariffVersions(versionName);
+      await loadTariffVersions(id);
       showNotification('Preset name updated successfully.', 'success');
     } catch (error) {
       console.error(error);
@@ -469,7 +468,7 @@ function setupAddRateModal() {
     const cubicMeter = Number(document.getElementById('cubicMeterInput')?.value || 0);
     const amount = Number(document.getElementById('amountInput')?.value || 0);
 
-    if (!selectedTariffVersionName) {
+    if (!selectedTariffVersionId) {
       showNotification('Please select a tariff preset.', 'error');
       return;
     }
@@ -482,8 +481,7 @@ function setupAddRateModal() {
       await api.post('/Tariffs', {
         rateId: 0,
         categoryId: Number(category.categoryId ?? category.CategoryId),
-        versionName: selectedTariffVersionName,
-        isActive: true,
+        tariffVersionId: Number(selectedTariffVersionId),
         cubicMeter,
         amount,
       });
@@ -537,8 +535,7 @@ function setupEditRateModal() {
       await api.put('/Tariffs', {
         rateId: Number(selectedTariffForEdit.rateId ?? selectedTariffForEdit.RateId),
         categoryId: Number(selectedTariffForEdit.categoryId ?? selectedTariffForEdit.CategoryId),
-        versionName: selectedTariffVersionName || selectedTariffForEdit.versionName || selectedTariffForEdit.VersionName,
-        isActive: Boolean(selectedTariffForEdit.isActive ?? selectedTariffForEdit.IsActive),
+        tariffVersionId: Number(selectedTariffVersionId || selectedTariffForEdit.tariffVersionId || selectedTariffForEdit.TariffVersionId || 0),
         cubicMeter: Number(document.getElementById('editCubicMeterInput').value),
         amount: Number(document.getElementById('editAmountInput').value),
       });

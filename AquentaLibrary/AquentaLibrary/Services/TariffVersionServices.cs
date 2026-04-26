@@ -13,9 +13,9 @@ namespace AquentaLibrary.Services
             return tariffVersionRepo.GetAllTariffVersions();
         }
 
-        public TariffVersionModel GetByName(string versionName)
+        public TariffVersionModel GetById(int id)
         {
-            return tariffVersionRepo.GetTariffVersionByName(versionName);
+            return tariffVersionRepo.GetTariffVersionById(id);
         }
 
         public TariffVersionModel GetActiveVersion()
@@ -23,29 +23,24 @@ namespace AquentaLibrary.Services
             return tariffVersionRepo.GetActiveTariffVersion();
         }
 
-        public bool Add(TariffVersionModel tariffVersion)
-        {
-            return !string.IsNullOrEmpty(tariffVersionRepo.InsertTariffVersion(tariffVersion));
-        }
-
-        public string CreateFromCurrentAndSetActive(string versionName)
+        public int CreateFromCurrentAndSetActive(string versionName)
         {
             return tariffVersionRepo.CreateFromCurrentAndSetActive(versionName);
         }
 
-        public bool UpdateName(string oldName, string newName)
+        public bool UpdateName(int id, string newName)
         {
-            return tariffVersionRepo.UpdateTariffVersionName(oldName, newName) > 0;
+            return tariffVersionRepo.UpdateTariffVersionName(id, newName) > 0;
         }
 
-        public bool Delete(string versionName)
+        public bool Delete(int id)
         {
-            return tariffVersionRepo.DeleteTariffVersionSP(versionName) > 0;
+            return tariffVersionRepo.DeleteTariffVersionSP(id) > 0;
         }
 
-        public bool SetActive(string versionName)
+        public bool SetActive(int id)
         {
-            return tariffVersionRepo.SetActive(versionName) > 0;
+            return tariffVersionRepo.SetActive(id) > 0;
         }
     }
 }

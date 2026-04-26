@@ -1,298 +1,203 @@
 -- ============================================================================
--- AQUENTA TARIFF PRESET (VERSION) MIGRATION - SINGLE TABLE APPROACH
--- Consolidates Tariff Versioning into tbl_TariffRate as presets.
+-- AQUENTA TARIFF VERSIONING MIGRATION - MULTI-TABLE APPROACH
+-- Restores tbl_TariffVersion as a separate table.
 -- ============================================================================
 
 SET NOCOUNT ON;
 GO
 
--- 1. Cleanup old table and foreign keys/constraints if they exist
--- We need to be aggressive here to handle different naming conventions from previous attempts.
+-- 1. Cleanup existing columns/tables if they exist to start fresh
+-- Drop constraints first
+DECLARE @Sql NVARCHAR(MAX) = '';
+SELECT @Sql += 'ALTER TABLE tbl_TariffRate DROP CONSTRAINT ' + QUOTENAME(d.name) + ';' + CHAR(13)
+FROM sys.default_constraints d
+INNER JOIN sys.columns c ON d.parent_column_id = c.column_id AND d.parent_object_id = c.object_id
+WHERE d.parent_object_id = OBJECT_ID('tbl_TariffRate')
+AND c.name IN ('VersionName', 'IsActive', 'TariffVersionID');
 
--- Drop any FKs referencing tbl_TariffVersion
-DECLARE @SqlFK NVARCHAR(MAX) = '';
-SELECT @SqlFK += 'ALTER TABLE ' + QUOTENAME(OBJECT_SCHEMA_NAME(parent_object_id)) + '.' + QUOTENAME(OBJECT_NAME(parent_object_id)) + 
-                 ' DROP CONSTRAINT ' + QUOTENAME(name) + ';' + CHAR(13)
-FROM sys.foreign_keys
-WHERE referenced_object_id = OBJECT_ID('tbl_TariffVersion');
+IF @Sql <> '' EXEC sp_executesql @Sql;
 
-IF @SqlFK <> '' EXEC sp_executesql @SqlFK;
-
--- Drop any constraints on tbl_TariffRate that involve TariffVersionID
-DECLARE @SqlDrops NVARCHAR(MAX) = '';
-
--- 1. Handle Constraints (Unique, Foreign Key, etc.)
-SELECT @SqlDrops += 'IF OBJECT_ID(''' + QUOTENAME(name) + ''', ''C'') IS NOT NULL OR OBJECT_ID(''' + QUOTENAME(name) + ''', ''F'') IS NOT NULL OR OBJECT_ID(''' + QUOTENAME(name) + ''', ''PK'') IS NOT NULL OR OBJECT_ID(''' + QUOTENAME(name) + ''', ''UQ'') IS NOT NULL ' +
-                    'ALTER TABLE [tbl_TariffRate] DROP CONSTRAINT ' + QUOTENAME(name) + ';' + CHAR(13)
-FROM sys.objects
-WHERE parent_object_id = OBJECT_ID('tbl_TariffRate')
-AND (name LIKE '%TariffVersion%' OR name LIKE '%TariffRate_Version%');
-
--- 2. Handle Indexes (that are NOT constraints)
-SELECT @SqlDrops += 'IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = ''' + i.name + ''' AND object_id = OBJECT_ID(''tbl_TariffRate'')) ' +
-                    'DROP INDEX ' + QUOTENAME(i.name) + ' ON [tbl_TariffRate];' + CHAR(13)
-FROM sys.indexes i
-JOIN sys.index_columns ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id
-JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
-WHERE i.object_id = OBJECT_ID('tbl_TariffRate') 
-AND c.name = 'TariffVersionID'
-AND i.is_primary_key = 0 AND i.is_unique_constraint = 0;
-
-IF @SqlDrops <> '' EXEC sp_executesql @SqlDrops;
-
-IF OBJECT_ID('dbo.tbl_TariffVersion', 'U') IS NOT NULL DROP TABLE tbl_TariffVersion;
+-- Drop columns if they exist
+IF COL_LENGTH('tbl_TariffRate', 'VersionName') IS NOT NULL ALTER TABLE tbl_TariffRate DROP COLUMN VersionName;
+IF COL_LENGTH('tbl_TariffRate', 'IsActive') IS NOT NULL ALTER TABLE tbl_TariffRate DROP COLUMN IsActive;
 GO
 
--- 2. Add columns to tbl_TariffRate
-IF COL_LENGTH('dbo.tbl_TariffRate', 'VersionName') IS NULL
+-- Drop existing FK if it exists
+IF OBJECT_ID('dbo.FK_TariffRate_Version', 'F') IS NOT NULL
 BEGIN
-    ALTER TABLE tbl_TariffRate
-    ADD VersionName NVARCHAR(100) NULL;
+    ALTER TABLE tbl_TariffRate DROP CONSTRAINT FK_TariffRate_Version;
 END
 GO
 
-IF COL_LENGTH('dbo.tbl_TariffRate', 'IsActive') IS NULL
+-- 2. Create/Restore tbl_TariffVersion
+IF OBJECT_ID('dbo.tbl_TariffVersion', 'U') IS NULL
 BEGIN
-    ALTER TABLE tbl_TariffRate
-    ADD IsActive BIT NOT NULL DEFAULT 0;
+    CREATE TABLE tbl_TariffVersion (
+        TariffVersionID INT PRIMARY KEY IDENTITY(1,1),
+        VersionName NVARCHAR(100) NOT NULL,
+        IsActive BIT NOT NULL DEFAULT 0,
+        CreatedAt DATETIME NOT NULL DEFAULT GETDATE()
+    );
+
+    -- Insert a default version if none exists
+    INSERT INTO tbl_TariffVersion (VersionName, IsActive)
+    VALUES ('Version 1.0', 1);
 END
 GO
 
--- 3. Cleanup old TariffVersionID column if it exists
-IF COL_LENGTH('dbo.tbl_TariffRate', 'TariffVersionID') IS NOT NULL
+-- 3. Restore TariffVersionID in tbl_TariffRate
+IF COL_LENGTH('tbl_TariffRate', 'TariffVersionID') IS NULL
 BEGIN
-    ALTER TABLE tbl_TariffRate DROP COLUMN TariffVersionID;
+    ALTER TABLE tbl_TariffRate ADD TariffVersionID INT;
 END
 GO
 
--- 4. Initialize first preset if empty
-IF NOT EXISTS (SELECT 1 FROM tbl_TariffRate WHERE VersionName IS NOT NULL)
+-- Populate the column (Separate batch to ensure it exists)
+IF COL_LENGTH('tbl_TariffRate', 'TariffVersionID') IS NOT NULL
 BEGIN
-    UPDATE tbl_TariffRate
-    SET VersionName = 'Version 1.0 (Dec 2025 - Feb 2026)',
-        IsActive = 1
-    WHERE VersionName IS NULL;
-END
-GO
+    -- Map existing rates to the active version if they don't have one
+    DECLARE @ActiveID INT;
+    SELECT TOP 1 @ActiveID = TariffVersionID FROM tbl_TariffVersion WHERE IsActive = 1;
+    
+    -- Using EXEC to avoid compile-time error if column was just added
+    DECLARE @PopulateSql NVARCHAR(MAX) = 'UPDATE tbl_TariffRate SET TariffVersionID = ' + CAST(@ActiveID AS NVARCHAR) + ' WHERE TariffVersionID IS NULL';
+    EXEC sp_executesql @PopulateSql;
 
--- 5. Ensure VersionName is NOT NULL for future entries
-ALTER TABLE tbl_TariffRate ALTER COLUMN VersionName NVARCHAR(100) NOT NULL;
+    -- Make it NOT NULL
+    ALTER TABLE tbl_TariffRate ALTER COLUMN TariffVersionID INT NOT NULL;
+
+    -- Add FK if it doesn't exist
+    IF OBJECT_ID('dbo.FK_TariffRate_Version', 'F') IS NULL
+    BEGIN
+        ALTER TABLE tbl_TariffRate ADD CONSTRAINT FK_TariffRate_Version 
+        FOREIGN KEY (TariffVersionID) REFERENCES tbl_TariffVersion(TariffVersionID);
+    END
+END
 GO
 
 -- ----------------------------------------------------------------------------
--- STORED PROCEDURES (REFACTORED FOR SINGLE TABLE)
+-- STORED PROCEDURES (REFACTORED FOR MULTI-TABLE)
 -- ----------------------------------------------------------------------------
 
--- Get All Tariff Rates (By Version Name)
-CREATE OR ALTER PROCEDURE SP_GetAllTariffRate
-AS
-BEGIN
-    SET NOCOUNT ON;
-    SELECT RateID, CategoryID, VersionName, IsActive, CubicMeter, Amount
-    FROM tbl_TariffRate
-    ORDER BY VersionName, CategoryID, CubicMeter;
-END
-GO
-
-CREATE OR ALTER PROCEDURE SP_GetTariffRateById
-    @RateID INT
-AS
-BEGIN
-    SET NOCOUNT ON;
-    SELECT RateID, CategoryID, VersionName, IsActive, CubicMeter, Amount
-    FROM tbl_TariffRate
-    WHERE RateID = @RateID;
-END
-GO
-
-CREATE OR ALTER PROCEDURE SP_GetTariffRateByVersionName
-    @VersionName NVARCHAR(100)
-AS
-BEGIN
-    SET NOCOUNT ON;
-    SELECT RateID, CategoryID, VersionName, IsActive, CubicMeter, Amount
-    FROM tbl_TariffRate
-    WHERE VersionName = @VersionName
-    ORDER BY CategoryID, CubicMeter;
-END
-GO
-
-CREATE OR ALTER PROCEDURE SP_InsertTariffRate
-    @CategoryID INT,
-    @VersionName NVARCHAR(100),
-    @IsActive BIT,
-    @CubicMeter DECIMAL(5,2),
-    @Amount DECIMAL(8,2)
-AS
-BEGIN
-    SET NOCOUNT ON;
-    INSERT INTO tbl_TariffRate (CategoryID, VersionName, IsActive, CubicMeter, Amount)
-    VALUES (@CategoryID, @VersionName, @IsActive, @CubicMeter, @Amount);
-    SELECT SCOPE_IDENTITY() AS RateID;
-END
-GO
-
-CREATE OR ALTER PROCEDURE SP_UpdateTariffRate
-    @RateID INT,
-    @CategoryID INT,
-    @VersionName NVARCHAR(100),
-    @IsActive BIT,
-    @CubicMeter DECIMAL(5,2),
-    @Amount DECIMAL(8,2)
-AS
-BEGIN
-    SET NOCOUNT ON;
-    UPDATE tbl_TariffRate
-    SET CategoryID = @CategoryID,
-        VersionName = @VersionName,
-        IsActive = @IsActive,
-        CubicMeter = @CubicMeter,
-        Amount = @Amount
-    WHERE RateID = @RateID;
-    SELECT @@ROWCOUNT AS RowsAffected;
-END
-GO
-
-CREATE OR ALTER PROCEDURE SP_DeleteTariffRate
-    @RateID INT
-AS
-BEGIN
-    SET NOCOUNT ON;
-    DELETE FROM tbl_TariffRate WHERE RateID = @RateID;
-    SELECT @@ROWCOUNT AS RowsAffected;
-END
-GO
-
--- PRESET (VERSION) MANAGEMENT PROCEDURES
-
+-- Get All Versions
 CREATE OR ALTER PROCEDURE SP_GetAllTariffVersion
 AS
 BEGIN
     SET NOCOUNT ON;
-    SELECT DISTINCT 
-        VersionName, 
-        IsActive,
-        (SELECT MAX(RateID) FROM tbl_TariffRate r2 WHERE r2.VersionName = r1.VersionName) as SortID
-    FROM tbl_TariffRate r1
-    ORDER BY IsActive DESC, SortID DESC;
+    SELECT TariffVersionID, VersionName, IsActive, CreatedAt
+    FROM tbl_TariffVersion
+    ORDER BY IsActive DESC, CreatedAt DESC;
 END
 GO
 
+-- Get Active Version
 CREATE OR ALTER PROCEDURE SP_GetActiveTariffVersion
 AS
 BEGIN
     SET NOCOUNT ON;
-    SELECT DISTINCT TOP 1 VersionName, IsActive
-    FROM tbl_TariffRate
+    SELECT TOP 1 TariffVersionID, VersionName, IsActive, CreatedAt
+    FROM tbl_TariffVersion
     WHERE IsActive = 1;
 END
 GO
 
-CREATE OR ALTER PROCEDURE SP_CreateTariffVersionFromCurrent
-    @VersionName NVARCHAR(100)
+-- Get Rates By Version ID
+CREATE OR ALTER PROCEDURE SP_GetTariffRateByVersionId
+    @TariffVersionID INT
 AS
 BEGIN
     SET NOCOUNT ON;
-    SET XACT_ABORT ON;
-    
-    BEGIN TRANSACTION;
-
-    -- 1. Deactivate current active preset
-    UPDATE tbl_TariffRate SET IsActive = 0 WHERE IsActive = 1;
-
-    -- 2. Clone rates into new preset and set as active
-    INSERT INTO tbl_TariffRate (CategoryID, VersionName, IsActive, CubicMeter, Amount)
-    SELECT CategoryID, @VersionName, 1, CubicMeter, Amount
+    SELECT RateID, CategoryID, TariffVersionID, CubicMeter, Amount
     FROM tbl_TariffRate
-    WHERE VersionName = (SELECT TOP 1 VersionName FROM (SELECT DISTINCT VersionName, IsActive FROM tbl_TariffRate) t WHERE IsActive = 0 ORDER BY VersionName DESC); -- Fallback or specific logic
-
-    -- Actually, safer to just use the one we just deactivated
-    -- Let's re-query it before deactivation or use a variable
-    
-    COMMIT TRANSACTION;
-    
-    SELECT @VersionName AS VersionName;
+    WHERE TariffVersionID = @TariffVersionID
+    ORDER BY CategoryID, CubicMeter;
 END
 GO
 
--- Better version of CreateFromCurrent
+-- Create New Version from Current Active
 CREATE OR ALTER PROCEDURE SP_CreateTariffVersionFromCurrent
     @NewVersionName NVARCHAR(100)
 AS
 BEGIN
     SET NOCOUNT ON;
-    SET XACT_ABORT ON;
-    
-    DECLARE @OldActiveName NVARCHAR(100);
-    SELECT TOP 1 @OldActiveName = VersionName FROM tbl_TariffRate WHERE IsActive = 1;
-
     BEGIN TRANSACTION;
+    BEGIN TRY
+        -- 1. Get current active version
+        DECLARE @OldActiveID INT;
+        SELECT TOP 1 @OldActiveID = TariffVersionID FROM tbl_TariffVersion WHERE IsActive = 1;
 
-    UPDATE tbl_TariffRate SET IsActive = 0 WHERE IsActive = 1;
+        -- 2. Deactivate all
+        UPDATE tbl_TariffVersion SET IsActive = 0;
 
-    INSERT INTO tbl_TariffRate (CategoryID, VersionName, IsActive, CubicMeter, Amount)
-    SELECT CategoryID, @NewVersionName, 1, CubicMeter, Amount
-    FROM tbl_TariffRate
-    WHERE VersionName = @OldActiveName;
+        -- 3. Create new version
+        INSERT INTO tbl_TariffVersion (VersionName, IsActive)
+        VALUES (@NewVersionName, 1);
+        
+        DECLARE @NewID INT = SCOPE_IDENTITY();
 
-    COMMIT TRANSACTION;
-    
-    SELECT @NewVersionName AS VersionName;
+        -- 4. Copy rates from old active to new
+        IF @OldActiveID IS NOT NULL
+        BEGIN
+            INSERT INTO tbl_TariffRate (CategoryID, TariffVersionID, CubicMeter, Amount)
+            SELECT CategoryID, @NewID, CubicMeter, Amount
+            FROM tbl_TariffRate
+            WHERE TariffVersionID = @OldActiveID;
+        END
+
+        COMMIT;
+        SELECT @NewID AS NewID;
+    END TRY
+    BEGIN CATCH
+        ROLLBACK;
+        THROW;
+    END CATCH
 END
 GO
 
+-- Set Active Version
 CREATE OR ALTER PROCEDURE SP_SetActiveTariffVersion
-    @VersionName NVARCHAR(100)
-AS
-BEGIN
-    SET NOCOUNT ON;
-    SET XACT_ABORT ON;
-
-    BEGIN TRANSACTION;
-    UPDATE tbl_TariffRate SET IsActive = 0;
-    UPDATE tbl_TariffRate SET IsActive = 1 WHERE VersionName = @VersionName;
-    COMMIT TRANSACTION;
-
-    SELECT @@ROWCOUNT AS RowsAffected;
-END
-GO
-
-CREATE OR ALTER PROCEDURE SP_UpdateTariffVersionName
-    @OldName NVARCHAR(100),
-    @NewName NVARCHAR(100)
-AS
-BEGIN
-    SET NOCOUNT ON;
-    UPDATE tbl_TariffRate
-    SET VersionName = @NewName
-    WHERE VersionName = @OldName;
-    SELECT @@ROWCOUNT AS RowsAffected;
-END
-GO
-
-CREATE OR ALTER PROCEDURE SP_DeleteTariffVersion
-    @VersionName NVARCHAR(100)
-AS
-BEGIN
-    SET NOCOUNT ON;
-    DELETE FROM tbl_TariffRate WHERE VersionName = @VersionName;
-    SELECT @@ROWCOUNT AS RowsAffected;
-END
-GO
--- Set Active Tariff Version
-CREATE OR ALTER PROCEDURE SP_SetActiveTariffVersion
-    @VersionName NVARCHAR(100)
+    @TariffVersionID INT
 AS
 BEGIN
     SET NOCOUNT ON;
     BEGIN TRANSACTION;
     BEGIN TRY
-        -- 1. Set all to inactive
-        UPDATE tbl_TariffRate SET IsActive = 0;
-        
-        -- 2. Set the target to active
-        UPDATE tbl_TariffRate SET IsActive = 1 WHERE VersionName = @VersionName;
-        
+        UPDATE tbl_TariffVersion SET IsActive = 0;
+        UPDATE tbl_TariffVersion SET IsActive = 1 WHERE TariffVersionID = @TariffVersionID;
+        COMMIT;
+    END TRY
+    BEGIN CATCH
+        ROLLBACK;
+        THROW;
+    END CATCH
+END
+GO
+
+-- Update Version Name
+CREATE OR ALTER PROCEDURE SP_UpdateTariffVersionName
+    @TariffVersionID INT,
+    @NewName NVARCHAR(100)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    UPDATE tbl_TariffVersion SET VersionName = @NewName WHERE TariffVersionID = @TariffVersionID;
+END
+GO
+
+-- Delete Version (and its rates)
+CREATE OR ALTER PROCEDURE SP_DeleteTariffVersion
+    @TariffVersionID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRANSACTION;
+    BEGIN TRY
+        -- 1. Delete associated rates first
+        DELETE FROM tbl_TariffRate WHERE TariffVersionID = @TariffVersionID;
+
+        -- 2. Delete the version record
+        DELETE FROM tbl_TariffVersion WHERE TariffVersionID = @TariffVersionID;
+
         COMMIT;
     END TRY
     BEGIN CATCH

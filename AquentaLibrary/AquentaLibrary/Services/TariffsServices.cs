@@ -28,16 +28,16 @@ namespace AquentaLibrary.Services
             return tariffsRepo.GetTariffsByCategoryId(categoryId);
         }
 
-        public bool Add(TariffsModel period)
+        public bool Add(TariffsModel tariff)
         {
-            EnsureTariffVersion(period);
-            return tariffsRepo.AddTariffs(period);
+            EnsureTariffVersion(tariff);
+            return tariffsRepo.AddTariffs(tariff);
         }
 
-        public bool Update(TariffsModel period)
+        public bool Update(TariffsModel tariff)
         {
-            EnsureTariffVersion(period);
-            return tariffsRepo.UpdateTariffs(period);
+            EnsureTariffVersion(tariff);
+            return tariffsRepo.UpdateTariffs(tariff);
         }
 
         public bool Delete(int id)
@@ -45,14 +45,14 @@ namespace AquentaLibrary.Services
             return tariffsRepo.DeleteTariffs(id);
         }
 
-        public IEnumerable<TariffsModel> GetByVersionName(string versionName)
+        public IEnumerable<TariffsModel> GetByVersionId(int tariffVersionId)
         {
-            return tariffsRepo.GetTariffsByVersionName(versionName);
+            return tariffsRepo.GetTariffsByVersionId(tariffVersionId);
         }
 
         private void EnsureTariffVersion(TariffsModel tariff)
         {
-            if (tariff == null || !string.IsNullOrEmpty(tariff.VersionName))
+            if (tariff == null || tariff.TariffVersionId > 0)
             {
                 return;
             }
@@ -63,8 +63,7 @@ namespace AquentaLibrary.Services
                 throw new InvalidOperationException("No active tariff version is available.");
             }
 
-            tariff.VersionName = activeVersion.VersionName;
-            tariff.IsActive = activeVersion.IsActive;
+            tariff.TariffVersionId = activeVersion.TariffVersionId;
         }
     }
 }

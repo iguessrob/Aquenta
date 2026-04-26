@@ -11,122 +11,90 @@ namespace AquentaLibrary.Repositories
 {
     public class TariffsRepository : GenericRepository<TariffsModel>
     {
-        public bool AddTariffs(TariffsModel tariff)
-        {
-            return Add(tariff);
-        }
-
-        public bool DeleteTariffs(int id)
-        {
-            return Delete(id);
-        }
-
-        /// <summary>
-        /// Get all tariffs using SP_GetAllTariffRate
-        /// </summary>
         public IEnumerable<TariffsModel> GetAllTariffs()
         {
             return dbConnection.Query<TariffsModel>(
-                "SP_GetAllTariffRate",
-                commandType: CommandType.StoredProcedure);
+                "SELECT RateID, CategoryID, TariffVersionID, CubicMeter, Amount FROM tbl_TariffRate",
+                commandType: CommandType.Text);
         }
 
-        /// <summary>
-        /// Get tariff by ID using SP_GetTariffRateById
-        /// </summary>
         public TariffsModel GetTariffsById(int id)
         {
             var parameters = new DynamicParameters();
             parameters.Add("@RateID", id, DbType.Int32);
 
             return dbConnection.QueryFirstOrDefault<TariffsModel>(
-                "SP_GetTariffRateById",
+                "SELECT RateID, CategoryID, TariffVersionID, CubicMeter, Amount FROM tbl_TariffRate WHERE RateID = @RateID",
                 parameters,
-                commandType: CommandType.StoredProcedure);
+                commandType: CommandType.Text);
         }
 
-        /// <summary>
-        /// Get tariffs by category ID using SP_GetTariffRateByCategoryId
-        /// </summary>
         public IEnumerable<TariffsModel> GetTariffsByCategoryId(int categoryId)
         {
             var parameters = new DynamicParameters();
             parameters.Add("@CategoryID", categoryId, DbType.Int32);
 
             return dbConnection.Query<TariffsModel>(
-                "SP_GetTariffRateByCategoryId",
+                "SELECT RateID, CategoryID, TariffVersionID, CubicMeter, Amount FROM tbl_TariffRate WHERE CategoryID = @CategoryID",
                 parameters,
-                commandType: CommandType.StoredProcedure);
+                commandType: CommandType.Text);
         }
 
-        /// <summary>
-        /// Get tariffs by version name using SP_GetTariffRateByVersionName
-        /// </summary>
-        public IEnumerable<TariffsModel> GetTariffsByVersionName(string versionName)
+        public IEnumerable<TariffsModel> GetTariffsByVersionId(int tariffVersionId)
         {
             var parameters = new DynamicParameters();
-            parameters.Add("@VersionName", versionName, DbType.String);
+            parameters.Add("@TariffVersionID", tariffVersionId, DbType.Int32);
 
             return dbConnection.Query<TariffsModel>(
-                "SP_GetTariffRateByVersionName",
+                "SP_GetTariffRateByVersionId",
                 parameters,
                 commandType: CommandType.StoredProcedure);
         }
 
-        /// <summary>
-        /// Insert tariff using SP_InsertTariffRate
-        /// </summary>
-        public int InsertTariffs(TariffsModel tariff)
+        public bool AddTariffs(TariffsModel tariff)
         {
             var parameters = new DynamicParameters();
-            parameters.Add("@CategoryId", tariff.CategoryId, DbType.Int32);
-            parameters.Add("@VersionName", tariff.VersionName, DbType.String);
-            parameters.Add("@IsActive", tariff.IsActive, DbType.Boolean);
-            parameters.Add("@CubicMeter", tariff.CubicMeter, DbType.Decimal);
-            parameters.Add("@Amount", tariff.Amount, DbType.Decimal);
+            parameters.Add("@CategoryID", tariff.CategoryId, DbType.Int32);
+            parameters.Add("@TariffVersionID", tariff.TariffVersionId, DbType.Int32);
+            parameters.Add("@CubicMeter", tariff.CubicMeter, DbType.Double);
+            parameters.Add("@Amount", tariff.Amount, DbType.Double);
 
-            return dbConnection.QuerySingle<int>(
-                "SP_InsertTariffRate",
+            var result = dbConnection.Execute(
+                "INSERT INTO tbl_TariffRate (CategoryID, TariffVersionID, CubicMeter, Amount) VALUES (@CategoryID, @TariffVersionID, @CubicMeter, @Amount)",
                 parameters,
-                commandType: CommandType.StoredProcedure);
+                commandType: CommandType.Text);
+
+            return result > 0;
         }
 
-        /// <summary>
-        /// Update tariff using SP_UpdateTariffRate
-        /// </summary>
-        public int UpdateTariffsSP(TariffsModel tariff)
+        public bool UpdateTariffs(TariffsModel tariff)
         {
             var parameters = new DynamicParameters();
-                parameters.Add("@RateId", tariff.RateId, DbType.Int32);
-                parameters.Add("@CategoryId", tariff.CategoryId, DbType.Int32);
-            parameters.Add("@VersionName", tariff.VersionName, DbType.String);
-            parameters.Add("@IsActive", tariff.IsActive, DbType.Boolean);
-            parameters.Add("@CubicMeter", tariff.CubicMeter, DbType.Decimal);
-            parameters.Add("@Amount", tariff.Amount, DbType.Decimal);
+            parameters.Add("@RateID", tariff.RateId, DbType.Int32);
+            parameters.Add("@CategoryID", tariff.CategoryId, DbType.Int32);
+            parameters.Add("@TariffVersionID", tariff.TariffVersionId, DbType.Int32);
+            parameters.Add("@CubicMeter", tariff.CubicMeter, DbType.Double);
+            parameters.Add("@Amount", tariff.Amount, DbType.Double);
 
-            return dbConnection.Execute(
-                "SP_UpdateTariffRate",
+            var result = dbConnection.Execute(
+                "UPDATE tbl_TariffRate SET CategoryID = @CategoryID, TariffVersionID = @TariffVersionID, CubicMeter = @CubicMeter, Amount = @Amount WHERE RateID = @RateID",
                 parameters,
-                commandType: CommandType.StoredProcedure);
+                commandType: CommandType.Text);
+
+            return result > 0;
         }
 
-        /// <summary>
-        /// Delete tariff using SP_DeleteTariffRate
-        /// </summary>
-        public int DeleteTariffsSP(int id)
+        public bool DeleteTariffs(int id)
         {
             var parameters = new DynamicParameters();
             parameters.Add("@RateID", id, DbType.Int32);
 
-            return dbConnection.Execute(
-                "SP_DeleteTariffRate",
+            var result = dbConnection.Execute(
+                "DELETE FROM tbl_TariffRate WHERE RateID = @RateID",
                 parameters,
-                commandType: CommandType.StoredProcedure);
-        }
+                commandType: CommandType.Text);
 
-        public bool UpdateTariffs(TariffsModel tariffs)
-        {
-            return Update(tariffs);
+            return result > 0;
         }
     }
 }

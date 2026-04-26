@@ -10,31 +10,23 @@ namespace AquentaAPI.Controllers
     {
         private readonly TariffVersionServices tariffVersionServices = new TariffVersionServices();
 
-        [HttpPost]
-        public ActionResult<bool> AddTariffVersion([FromBody] TariffVersionModel tariffVersion)
-        {
-            if (tariffVersion == null) return BadRequest("Tariff version data is required.");
-            var result = tariffVersionServices.Add(tariffVersion);
-            return Ok(result);
-        }
-
         [HttpPost("create-current")]
-        public ActionResult<string> CreateTariffVersionFromCurrent([FromBody] TariffVersionModel request)
+        public ActionResult<int> CreateTariffVersionFromCurrent([FromBody] TariffVersionModel request)
         {
             if (request == null || string.IsNullOrWhiteSpace(request.VersionName))
             {
                 return BadRequest("Version name is required.");
             }
 
-            var newName = tariffVersionServices.CreateFromCurrentAndSetActive(request.VersionName.Trim());
-            return Ok(newName);
+            var newId = tariffVersionServices.CreateFromCurrentAndSetActive(request.VersionName.Trim());
+            return Ok(newId);
         }
 
-        [HttpPut("rename")]
-        public ActionResult<bool> UpdateTariffVersionName([FromQuery] string oldName, [FromQuery] string newName)
+        [HttpPut("rename/{id}")]
+        public ActionResult<bool> UpdateTariffVersionName(int id, [FromQuery] string newName)
         {
-            if (string.IsNullOrWhiteSpace(oldName) || string.IsNullOrWhiteSpace(newName)) return BadRequest("Both names are required.");
-            var result = tariffVersionServices.UpdateName(oldName, newName);
+            if (string.IsNullOrWhiteSpace(newName)) return BadRequest("New name is required.");
+            var result = tariffVersionServices.UpdateName(id, newName);
             return Ok(result);
         }
 
@@ -52,23 +44,22 @@ namespace AquentaAPI.Controllers
             return Ok(version);
         }
 
-        [HttpGet("{name}")]
-        public TariffVersionModel GetTariffVersionByName(string name)
+        [HttpGet("{id}")]
+        public TariffVersionModel GetTariffVersionById(int id)
         {
-            return tariffVersionServices.GetByName(name);
+            return tariffVersionServices.GetById(id);
         }
 
-        [HttpDelete("{name}")]
-        public bool DeleteTariffVersion(string name)
+        [HttpDelete("{id}")]
+        public bool DeleteTariffVersion(int id)
         {
-            return tariffVersionServices.Delete(name);
+            return tariffVersionServices.Delete(id);
         }
 
-        [HttpPost("set-active/{name}")]
-        public ActionResult<bool> SetActive(string name)
+        [HttpPost("set-active/{id}")]
+        public ActionResult<bool> SetActive(int id)
         {
-            if (string.IsNullOrWhiteSpace(name)) return BadRequest("Name is required.");
-            var result = tariffVersionServices.SetActive(name);
+            var result = tariffVersionServices.SetActive(id);
             return Ok(result);
         }
     }
