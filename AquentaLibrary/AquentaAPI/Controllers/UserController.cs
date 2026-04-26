@@ -68,13 +68,35 @@ namespace AquentaAPI.Controllers
 
             var user = candidateUsers.FirstOrDefault(u =>
             {
-                return !string.IsNullOrWhiteSpace(u.Pass)
-                    && BCrypt.Net.BCrypt.EnhancedVerify(inputPassword, u.Pass);
+                if (string.IsNullOrWhiteSpace(u.Pass))
+                {
+                    return false;
+                }
+
+                try
+                {
+                    return BCrypt.Net.BCrypt.EnhancedVerify(inputPassword, u.Pass);
+                }
+                catch (BCrypt.Net.SaltParseException)
+                {
+                    // Backward compatibility for legacy plain-text passwords.
+                    return string.Equals(u.Pass.Trim(), inputPassword, System.StringComparison.Ordinal);
+                }
             });
 
             if (user == null)
             {
                 return Unauthorized("Invalid account number or password.");
+            }
+
+            try
+            {
+                // If password is legacy plain text, upgrade it to bcrypt hash after successful login.
+                BCrypt.Net.BCrypt.EnhancedVerify(inputPassword, user.Pass);
+            }
+            catch (BCrypt.Net.SaltParseException)
+            {
+                userRepository.UpdatePassword(user.UserId, inputPassword);
             }
 
             // Find matching concessioner record for this user
