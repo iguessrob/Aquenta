@@ -207,7 +207,6 @@
 
     .report-table-scroll {
       width: 100%;
-      position: relative;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
     }
@@ -429,7 +428,7 @@
       <main class="content">
         <div class="report-header-section">
           <div class="report-header-left">
-            <h2 class="report-main-title">Monthly Consumption Summary</h2>
+            <h2 class="report-main-title">Total Consumption</h2>
           </div>
           <button class="print-report-btn" onclick="window.print()">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -442,8 +441,12 @@
         </div>
 
         <div class="report-table-container table-loading-wrap" id="reportTableWrap">
+          <div class="table-loading-overlay" id="reportTableLoading">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">Loading consumption data...</p>
+          </div>
           <div class="report-table-header">
-            <h3 class="report-section-title">Total Consumption</h3>
+            <h3 class="report-section-title">Monthly Consumption Summary</h3>
             <div class="year-selector" aria-label="Select report year">
               <button id="reportPrevYear" class="year-btn" type="button" aria-label="Previous year">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -459,10 +462,6 @@
             </div>
           </div>
           <div class="report-table-scroll">
-            <div class="table-loading-overlay" id="reportTableLoading">
-              <div class="loading-spinner"></div>
-              <p class="loading-text">Loading consumption data...</p>
-            </div>
             <table class="consumption-table">
               <thead>
                 <tr>

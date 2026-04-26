@@ -70,6 +70,11 @@
     gap: 12px;
   }
 
+  .report-header-left {
+    width: 100%;
+    align-items: flex-start;
+  }
+
   .print-btn {
     width: 100%;
     justify-content: center;
@@ -77,6 +82,8 @@
 
   .report-title {
     font-size: 20px;
+    width: 100%;
+    text-align: left !important;
   }
 }
 
