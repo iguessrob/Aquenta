@@ -231,22 +231,19 @@
                 <label class="form-label" for="editDistrict">District/Purok <span class="required">*</span></label>
                 <select id="editDistrict" name="district" class="form-select">
                   <option value="">Select district</option>
-                  <option>Purok 1</option>
-                  <option>Purok 2</option>
-                  <option>Purok 3</option>
-                  <option>Purok 4</option>
-                  <option>Purok 5</option>
-                  <option>Purok 6</option>
-                  <option>Purok 7</option>
                 </select>
               </div>
               <div class="form-field">
-                <label class="form-label" for="editDistrictSequence">Account Order</label>
+                <label class="form-label" for="editDistrictSequence">Account Order <span class="required">*</span></label>
                 <input
-                  type="text"
+                  type="number"
                   id="editDistrictSequence"
                   name="districtSequence"
                   class="form-input"
+                  min="1"
+                  step="1"
+                  placeholder="Enter Account Order"
+                  required
                 />
               </div>
             </div>
@@ -262,8 +259,6 @@
                 <label class="form-label" for="editRateClassification">Rate Classification <span class="required">*</span></label>
                 <select id="editRateClassification" name="rateClassification" class="form-select">
                   <option value="">Select rate</option>
-                  <option>Residential</option>
-                  <option>Commercial</option>
                 </select>
               </div>
               <div class="form-field">

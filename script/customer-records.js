@@ -104,12 +104,15 @@
 
   async function hydrateConcessionerLookupSelects(isEditPage = false) {
     const lookups = await fetchLookups();
+    const districtValues = getSortedUniqueNames(lookups.districts, ['districtName', 'DistrictName']);
     const rateValues = getSortedUniqueNames(lookups.categories, ['categoryName', 'CategoryName']);
     const membershipValues = getSortedUniqueNames(lookups.memberships, ['membershipName', 'MembershipName']);
 
+    const districtSelect = document.getElementById(isEditPage ? 'editDistrict' : 'district');
     const rateSelect = document.getElementById(isEditPage ? 'editRateClassification' : 'rateClassification');
     const membershipSelect = document.getElementById(isEditPage ? 'editMembership' : 'membership');
 
+    populateSelectOptions(districtSelect, districtValues);
     populateSelectOptions(rateSelect, rateValues);
     populateSelectOptions(membershipSelect, membershipValues);
   }
@@ -611,10 +614,15 @@
         membership: String(formData.get('membership') || '').trim(),
       };
 
-      const requiredFields = ['accountNumber', 'firstName', 'lastName', 'meterNumber', 'district', 'rateClassification', 'connectionStatus', 'membership'];
+      const requiredFields = ['accountNumber', 'firstName', 'lastName', 'meterNumber', 'district', 'districtSequence', 'rateClassification', 'connectionStatus', 'membership'];
       const missing = requiredFields.filter((key) => !updates[key]);
       if (missing.length > 0) {
         window.alert('Please fill in all required fields.');
+        return;
+      }
+
+      if (!/^\d+$/.test(updates.districtSequence) || Number(updates.districtSequence) <= 0) {
+        window.alert('Account Order is required and must be a positive whole number.');
         return;
       }
 
