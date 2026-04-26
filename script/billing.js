@@ -1375,7 +1375,7 @@ async function loadBilling() {
       api.get('/Concessioner/active'),
       api.get('/User'),
       api.get('/Period'),
-      api.get('/Tariffs'),
+      api.get('/Tariffs/active'),
     ]);
 
     let districts = [];

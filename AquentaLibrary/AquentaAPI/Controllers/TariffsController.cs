@@ -63,6 +63,13 @@ namespace AquentaAPI.Controllers
             return Ok(tariffs);
         }
 
+        [HttpGet("active")]
+        public ActionResult GetActiveTariffs()
+        {
+            var tariffs = tariffsServices.GetActiveTariffRates();
+            return Ok(tariffs);
+        }
+
         [HttpGet("by-category/{categoryId}")]
         public ActionResult GetTariffsByCategoryId(int categoryId)
         {

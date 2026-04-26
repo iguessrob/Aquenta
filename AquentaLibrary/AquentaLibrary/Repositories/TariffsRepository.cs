@@ -46,9 +46,19 @@ namespace AquentaLibrary.Repositories
             parameters.Add("@TariffVersionID", tariffVersionId, DbType.Int32);
 
             return dbConnection.Query<TariffsModel>(
-                "SP_GetTariffRateByVersionId",
+                "SP_GetTariffRateByTariffVersionId",
                 parameters,
                 commandType: CommandType.StoredProcedure);
+        }
+
+        public IEnumerable<TariffsModel> GetActiveTariffRates()
+        {
+            return dbConnection.Query<TariffsModel>(@"
+                SELECT r.RateID, r.CategoryID, r.TariffVersionID, r.CubicMeter, r.Amount 
+                FROM tbl_TariffRate r
+                INNER JOIN tbl_TariffVersion v ON r.TariffVersionID = v.TariffVersionID
+                WHERE v.IsActive = 1",
+                commandType: CommandType.Text);
         }
 
         public bool AddTariffs(TariffsModel tariff)

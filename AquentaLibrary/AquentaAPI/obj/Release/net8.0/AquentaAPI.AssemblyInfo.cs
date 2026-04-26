@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AquentaAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3217df9d3b47007b3f9c225b6be3b284660a0396")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f40e5c21c88949b3786e39b018f6aac5de16c1b8")]
 [assembly: System.Reflection.AssemblyProductAttribute("AquentaAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AquentaAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

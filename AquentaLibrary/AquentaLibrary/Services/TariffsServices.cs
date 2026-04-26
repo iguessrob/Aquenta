@@ -70,6 +70,11 @@ namespace AquentaLibrary.Services
             return tariffsRepo.GetTariffsByVersionId(tariffVersionId);
         }
 
+        public IEnumerable<TariffsModel> GetActiveTariffRates()
+        {
+            return tariffsRepo.GetActiveTariffRates();
+        }
+
         private void EnsureTariffVersion(TariffsModel tariff)
         {
             if (tariff == null || tariff.TariffVersionId > 0)
