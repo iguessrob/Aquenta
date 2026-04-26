@@ -117,6 +117,7 @@
       font-weight: 600;
       color: #111827;
       margin: 0;
+      text-align: left;
     }
 
     .report-header-left {
@@ -206,6 +207,7 @@
 
     .report-table-scroll {
       width: 100%;
+      position: relative;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
     }
@@ -440,10 +442,6 @@
         </div>
 
         <div class="report-table-container table-loading-wrap" id="reportTableWrap">
-          <div class="table-loading-overlay" id="reportTableLoading">
-            <div class="loading-spinner"></div>
-            <p class="loading-text">Loading consumption data...</p>
-          </div>
           <div class="report-table-header">
             <h3 class="report-section-title">Total Consumption</h3>
             <div class="year-selector" aria-label="Select report year">
@@ -461,6 +459,10 @@
             </div>
           </div>
           <div class="report-table-scroll">
+            <div class="table-loading-overlay" id="reportTableLoading">
+              <div class="loading-spinner"></div>
+              <p class="loading-text">Loading consumption data...</p>
+            </div>
             <table class="consumption-table">
               <thead>
                 <tr>
