@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -46,5 +46,8 @@ namespace AquentaLibrary.Models
 
         [Column("Status")]
         public string Status { get; set; }
+
+        [Column("IsDeleted")]
+        public bool IsDeleted { get; set; }
     }
 }

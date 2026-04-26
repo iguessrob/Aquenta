@@ -1,5 +1,5 @@
 (function () {
-  const PAGE_SIZE = 8;
+  const PAGE_SIZE = 25;
 
   const sidebar = document.getElementById('sidebar');
   const mobileOverlay = document.getElementById('mobileOverlay');

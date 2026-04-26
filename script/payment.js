@@ -46,17 +46,11 @@ function getApi() {
 }
 
 function showNotification(message, type = 'error') {
-  const container = document.getElementById('notificationContainer');
-  if (!container) return;
-
-  const note = document.createElement('div');
-  note.className = `notification ${type}`;
-  note.textContent = message;
-  container.appendChild(note);
-
-  setTimeout(() => {
-    note.remove();
-  }, 3500);
+  if (window.showNotification) {
+    window.showNotification(message, type);
+  } else {
+    alert(message);
+  }
 }
 
 function formatPeso(value) {

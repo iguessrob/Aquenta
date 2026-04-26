@@ -12,7 +12,10 @@
   const districtFilter = document.getElementById('districtFilter');
   const membershipFilter = document.getElementById('membershipFilter');
 
+  const PAGE_SIZE = 25;
+  let currentPage = 1;
   let allDebtors = [];
+  let filteredDebtorsCache = [];
 
   function getApi() {
     if (!window.AquentaApiClient) {
@@ -170,16 +173,32 @@
   function renderDetails(debtors) {
     if (!agingDetailsBody) return;
 
+    const totalRecords = debtors.length;
+    const totalPages = Math.ceil(totalRecords / PAGE_SIZE) || 1;
+    if (currentPage > totalPages) currentPage = totalPages;
+
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const end = Math.min(start + PAGE_SIZE, totalRecords);
+    const visibleRows = debtors.slice(start, end);
+
+    if (recordCountText) {
+      recordCountText.textContent = totalRecords === 0
+        ? 'Showing 0 to 0 of 0 records'
+        : `Showing ${start + 1} to ${end} of ${totalRecords} records`;
+    }
+
+    renderPaginationUI(totalPages);
+
     agingDetailsBody.innerHTML = '';
 
-    if (!debtors.length) {
+    if (!visibleRows.length) {
       const row = document.createElement('tr');
       row.innerHTML = '<td colspan="9" style="text-align:center; padding: 20px; color: #64748b;">No records match the selected filters.</td>';
       agingDetailsBody.appendChild(row);
       return;
     }
 
-    debtors.forEach((customer) => {
+    visibleRows.forEach((customer) => {
       const row = document.createElement('tr');
       row.innerHTML = `
         <td>${customer.accountNumber ?? customer.AccountNumber ?? ''}</td>
@@ -196,14 +215,59 @@
     });
   }
 
-  function updateView() {
-    const filteredDebtors = filterDebtors();
-    renderSummary(filteredDebtors);
-    renderDetails(filteredDebtors);
+  function renderPaginationUI(totalPages) {
+    const pagination = document.querySelector('.pagination');
+    if (!pagination) return;
+    pagination.innerHTML = '';
 
-    if (recordCountText) {
-      recordCountText.textContent = `Showing 1 to ${filteredDebtors.length} of ${filteredDebtors.length} records`;
+    // Previous Button
+    const prevBtn = document.createElement('button');
+    prevBtn.className = 'pagination-btn';
+    prevBtn.disabled = currentPage === 1;
+    prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+    prevBtn.addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage--;
+        renderDetails(filteredDebtorsCache);
+      }
+    });
+    pagination.appendChild(prevBtn);
+
+    // Page Numbers
+    const startPage = Math.max(1, currentPage - 1);
+    const endPage = Math.min(totalPages, startPage + 2);
+    const finalStart = Math.max(1, endPage - 2);
+
+    for (let i = finalStart; i <= endPage; i++) {
+      const btn = document.createElement('button');
+      btn.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
+      btn.textContent = i;
+      btn.addEventListener('click', () => {
+        currentPage = i;
+        renderDetails(filteredDebtorsCache);
+      });
+      pagination.appendChild(btn);
     }
+
+    // Next Button
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'pagination-btn';
+    nextBtn.disabled = currentPage === totalPages;
+    nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+    nextBtn.addEventListener('click', () => {
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderDetails(filteredDebtorsCache);
+      }
+    });
+    pagination.appendChild(nextBtn);
+  }
+
+  function updateView() {
+    currentPage = 1;
+    filteredDebtorsCache = filterDebtors();
+    renderSummary(filteredDebtorsCache);
+    renderDetails(filteredDebtorsCache);
   }
 
   async function loadAgingReceivables() {

@@ -52,6 +52,7 @@
     }
     return window.AquentaApiClient;
   }
+  const PAGE_SIZE = 25;
 
   function normalizeById(items, idKeys) {
     const map = new Map();
@@ -449,7 +450,7 @@
       applyAllFilters();
     } catch (error) {
       console.error(error);
-      window.alert('Failed to load customer records from API.');
+      window.showNotification('Failed to load customer records from API.', 'error');
     }
 
     if (searchInput) searchInput.addEventListener('input', applyAllFilters);
@@ -513,12 +514,12 @@
       const requiredFields = ['accountNumber', 'firstName', 'lastName', 'meterNumber', 'district', 'districtSequence', 'rateClassification', 'connectionStatus', 'membership'];
       const missing = requiredFields.filter((key) => !data[key]);
       if (missing.length > 0) {
-        window.alert('Please fill in all required fields.');
+        window.showNotification('Please fill in all required fields.', 'warning');
         return;
       }
 
       if (!/^\d+$/.test(data.districtSequence) || Number(data.districtSequence) <= 0) {
-        window.alert('Account Order is required and must be a positive whole number.');
+        window.showNotification('Account Order is required and must be a positive whole number.', 'warning');
         return;
       }
 
@@ -527,7 +528,7 @@
         window.location.href = `view-customer.html?id=${encodeURIComponent(created.concessionerId)}`;
       } catch (error) {
         console.error(error);
-        window.alert(error.message || 'Failed to add concessioner.');
+        window.showNotification(error.message || 'Failed to add concessioner.', 'error');
       }
     });
   }
@@ -617,12 +618,12 @@
       const requiredFields = ['accountNumber', 'firstName', 'lastName', 'meterNumber', 'district', 'districtSequence', 'rateClassification', 'connectionStatus', 'membership'];
       const missing = requiredFields.filter((key) => !updates[key]);
       if (missing.length > 0) {
-        window.alert('Please fill in all required fields.');
+        window.showNotification('Please fill in all required fields.', 'warning');
         return;
       }
 
       if (!/^\d+$/.test(updates.districtSequence) || Number(updates.districtSequence) <= 0) {
-        window.alert('Account Order is required and must be a positive whole number.');
+        window.showNotification('Account Order is required and must be a positive whole number.', 'warning');
         return;
       }
 
@@ -631,7 +632,7 @@
         window.location.href = `view-customer.html?id=${encodeURIComponent(updated.concessionerId)}`;
       } catch (error) {
         console.error(error);
-        window.alert(error.message || 'Failed to save changes.');
+        window.showNotification(error.message || 'Failed to save changes.', 'error');
       }
     });
   }
@@ -720,14 +721,61 @@
                 pass: newPassword
               });
 
-              window.alert('Password has been reset to the default: ' + newPassword);
+              if (window.showNotification) {
+                window.showNotification('Password has been reset to the default: ' + newPassword, 'success');
+              } else {
+                window.alert('Password has been reset to the default: ' + newPassword);
+              }
             } catch (error) {
               console.error('Reset password failed:', error);
-              window.alert('Failed to reset password: ' + (error.message || 'Unknown error'));
+              if (window.showNotification) {
+                window.showNotification('Failed to reset password: ' + (error.message || 'Unknown error'), 'error');
+              } else {
+                window.alert('Failed to reset password: ' + (error.message || 'Unknown error'));
+              }
             }
           }
         });
         profileActions.appendChild(resetBtn);
+      }
+
+      const existingDelete = document.getElementById('deleteConcessionerBtn');
+      if (!existingDelete) {
+        const deleteBtn = document.createElement('button');
+        deleteBtn.id = 'deleteConcessionerBtn';
+        deleteBtn.type = 'button';
+        deleteBtn.className = 'btn-danger btn-compact';
+        deleteBtn.style.marginLeft = '8px';
+        deleteBtn.style.backgroundColor = '#ef4444'; // Red for delete
+        deleteBtn.textContent = 'Delete Concessioner';
+        deleteBtn.addEventListener('click', async () => {
+          const confirmMsg = `Are you sure you want to delete ${customer.fullName || 'this concessioner'}? This action is reversible but will hide the record from all lists.`;
+          if (window.confirm(confirmMsg)) {
+            try {
+              const api = getApi();
+              await api.delete(`/Concessioner?id=${customer.concessionerId}`);
+              
+              if (window.showNotification) {
+                window.showNotification('Concessioner has been successfully deleted.', 'success');
+              } else {
+                window.alert('Concessioner has been successfully deleted.');
+              }
+              
+              // Redirect to list after a short delay
+              setTimeout(() => {
+                window.location.href = 'customer-record.html';
+              }, 1500);
+            } catch (error) {
+              console.error('Delete concessioner failed:', error);
+              if (window.showNotification) {
+                window.showNotification('Failed to delete concessioner: ' + (error.message || 'Unknown error'), 'error');
+              } else {
+                window.alert('Failed to delete concessioner: ' + (error.message || 'Unknown error'));
+              }
+            }
+          }
+        });
+        profileActions.appendChild(deleteBtn);
       }
     }
   }

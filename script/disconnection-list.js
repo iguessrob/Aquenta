@@ -9,6 +9,9 @@
   const recordCountText = document.querySelector('.table-footer p');
   const disconnectionMonthFilter = document.getElementById('disconnectionMonthFilter');
 
+  const PAGE_SIZE = 25;
+  let currentPage = 1;
+
   let disconnectionRows = [];
   let filteredDisconnectionRows = [];
 
@@ -74,26 +77,36 @@
   }
 
   function renderDisconnectionList(rows) {
+    const totalRecords = rows.length;
+    const totalPages = Math.ceil(totalRecords / PAGE_SIZE) || 1;
+    if (currentPage > totalPages) currentPage = totalPages;
+
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const end = Math.min(start + PAGE_SIZE, totalRecords);
+    const visibleRows = rows.slice(start, end);
+
     if (disconnectionCountElem) {
-      disconnectionCountElem.textContent = `Concessioners to be Disconnected: ${rows.length}`;
+      disconnectionCountElem.textContent = `Concessioners to be Disconnected: ${totalRecords}`;
     }
 
     if (recordCountText) {
-      recordCountText.textContent = rows.length
-        ? `Showing 1 to ${rows.length} of ${rows.length} records`
+      recordCountText.textContent = totalRecords
+        ? `Showing ${start + 1} to ${end} of ${totalRecords} records`
         : 'Showing 0 to 0 of 0 records';
     }
+
+    renderPaginationUI(totalPages);
 
     if (!disconnectionTableBody) return;
 
     disconnectionTableBody.innerHTML = '';
 
-    if (rows.length === 0) {
+    if (visibleRows.length === 0) {
       disconnectionTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No accounts subject to disconnection.</td></tr>';
       return;
     }
 
-    rows.forEach((c) => {
+    visibleRows.forEach((c) => {
       const row = document.createElement('tr');
       row.innerHTML = `
         <td>${escapeHtml(getValue(c, ['accountNumber', 'AccountNumber'], ''))}</td>
@@ -106,9 +119,59 @@
     });
   }
 
+  function renderPaginationUI(totalPages) {
+    const pagination = document.querySelector('.pagination');
+    if (!pagination) return;
+
+    pagination.innerHTML = '';
+
+    // Previous Button
+    const prevBtn = document.createElement('button');
+    prevBtn.className = 'pagination-btn';
+    prevBtn.disabled = currentPage === 1;
+    prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+    prevBtn.addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage--;
+        renderDisconnectionList(filteredDisconnectionRows);
+      }
+    });
+    pagination.appendChild(prevBtn);
+
+    // Page Numbers
+    const startPage = Math.max(1, currentPage - 1);
+    const endPage = Math.min(totalPages, startPage + 2);
+    const finalStart = Math.max(1, endPage - 2);
+
+    for (let i = finalStart; i <= endPage; i++) {
+      const btn = document.createElement('button');
+      btn.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
+      btn.textContent = i;
+      btn.addEventListener('click', () => {
+        currentPage = i;
+        renderDisconnectionList(filteredDisconnectionRows);
+      });
+      pagination.appendChild(btn);
+    }
+
+    // Next Button
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'pagination-btn';
+    nextBtn.disabled = currentPage === totalPages;
+    nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+    nextBtn.addEventListener('click', () => {
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderDisconnectionList(filteredDisconnectionRows);
+      }
+    });
+    pagination.appendChild(nextBtn);
+  }
+
   function applyFilters() {
     const selectedMonth = Number(disconnectionMonthFilter?.value || 0);
 
+    currentPage = 1;
     filteredDisconnectionRows = disconnectionRows.filter((row) => {
       const rowMonthCount = getMonthCount(row);
       const matchesMonth = !selectedMonth || rowMonthCount === selectedMonth;
@@ -140,14 +203,7 @@
   }
 
   function setupPaginationGuards() {
-    const pagination = document.querySelector('.pagination');
-    if (!pagination) return;
-
-    const prevBtn = pagination.querySelector('button[aria-label="Previous page"]');
-    const nextBtn = pagination.querySelector('button[aria-label="Next page"]');
-    
-    if (prevBtn) prevBtn.disabled = true;
-    if (nextBtn) nextBtn.disabled = true;
+    // Dynamically handled by renderPaginationUI
   }
 
   async function init() {

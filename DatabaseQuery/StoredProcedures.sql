@@ -630,9 +630,11 @@ BEGIN
 		c.Address,
 		c.ContactNumber,
 		c.EmailAddress,
-		c.Status
+		c.Status,
+		c.IsDeleted
 	FROM tbl_Concessioner c
 	LEFT JOIN tbl_District d ON c.DistrictID = d.DistrictID
+	WHERE c.IsDeleted = 0
 	ORDER BY
 		CASE
 			WHEN UPPER(LTRIM(RTRIM(d.DistrictName))) LIKE 'PUROK %'
@@ -660,10 +662,11 @@ BEGIN
 		c.Address,
 		c.ContactNumber,
 		c.EmailAddress,
-		c.Status
+		c.Status,
+		c.IsDeleted
 	FROM tbl_Concessioner c
 	LEFT JOIN tbl_District d ON c.DistrictID = d.DistrictID
-	WHERE c.Status = 'Active'
+	WHERE c.Status = 'Active' AND c.IsDeleted = 0
 	ORDER BY
 		CASE
 			WHEN UPPER(LTRIM(RTRIM(d.DistrictName))) LIKE 'PUROK %'
@@ -692,9 +695,10 @@ BEGIN
 		Address,
 		ContactNumber,
 		EmailAddress,
-		Status
+		Status,
+		IsDeleted
 	FROM tbl_Concessioner
-	WHERE ConcessionerID = @ConcessionerID;
+	WHERE ConcessionerID = @ConcessionerID AND IsDeleted = 0;
 END
 GO
 
@@ -715,10 +719,11 @@ BEGIN
 		c.Address,
 		c.ContactNumber,
 		c.EmailAddress,
-		c.Status
+		c.Status,
+		c.IsDeleted
 	FROM tbl_Concessioner c
 	LEFT JOIN tbl_District d ON c.DistrictID = d.DistrictID
-	WHERE c.Status = @Status
+	WHERE c.Status = @Status AND c.IsDeleted = 0
 	ORDER BY
 		CASE
 			WHEN UPPER(LTRIM(RTRIM(d.DistrictName))) LIKE 'PUROK %'
@@ -747,9 +752,10 @@ BEGIN
 		Address,
 		ContactNumber,
 		EmailAddress,
-		Status
+		Status,
+		IsDeleted
 	FROM tbl_Concessioner
-	WHERE DistrictID = @DistrictID
+	WHERE DistrictID = @DistrictID AND IsDeleted = 0
 	ORDER BY AccountOrder, ConcessionerID;
 END
 GO
@@ -771,10 +777,11 @@ BEGIN
 		c.Address,
 		c.ContactNumber,
 		c.EmailAddress,
-		c.Status
+		c.Status,
+		c.IsDeleted
 	FROM tbl_Concessioner c
 	LEFT JOIN tbl_District d ON c.DistrictID = d.DistrictID
-	WHERE c.UserID = @UserID
+	WHERE c.UserID = @UserID AND c.IsDeleted = 0
 	ORDER BY
 		CASE
 			WHEN UPPER(LTRIM(RTRIM(d.DistrictName))) LIKE 'PUROK %'
@@ -866,12 +873,13 @@ BEGIN
 END
 GO
 
--- Delete Concessioner
+-- Soft Delete Concessioner
 CREATE PROCEDURE SP_DeleteConcessioner
 	@ConcessionerID INT
 AS
 BEGIN
-	DELETE FROM tbl_Concessioner
+	UPDATE tbl_Concessioner
+	SET IsDeleted = 1
 	WHERE ConcessionerID = @ConcessionerID;
 	
 	SELECT @@ROWCOUNT AS RowsAffected;

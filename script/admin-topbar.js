@@ -91,6 +91,44 @@
     });
   }
 
+  // --- Global Notification System ---
+  window.showNotification = function(message, type = 'success') {
+    let container = document.getElementById('notificationContainer');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'notificationContainer';
+      container.className = 'notification-container';
+      document.body.appendChild(container);
+    }
+
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    
+    let icon = 'info-circle';
+    if (type === 'success') icon = 'check-circle';
+    if (type === 'error') icon = 'exclamation-circle';
+    if (type === 'warning') icon = 'exclamation-triangle';
+
+    notification.innerHTML = `
+      <i class="fas fa-${icon}"></i>
+      <span class="notification-message">${message}</span>
+      <button class="notification-close">&times;</button>
+    `;
+
+    container.appendChild(notification);
+
+    // Auto-remove after 5 seconds
+    const timer = setTimeout(() => {
+      notification.classList.add('notification-fade-out');
+      notification.addEventListener('transitionend', () => notification.remove());
+    }, 5000);
+
+    notification.querySelector('.notification-close').onclick = () => {
+      clearTimeout(timer);
+      notification.remove();
+    };
+  };
+
   function setupAdminDropdown() {
     const infoBtn = document.getElementById('adminInfoBtn');
     const dropdown = document.getElementById('adminDropdown');

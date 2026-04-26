@@ -19,29 +19,12 @@ function getApi() {
   return window.AquentaApiClient;
 }
 
-function showNotification(message, type = 'info', duration = 4000) {
-  const container = document.getElementById('notificationContainer');
-  if (!container) return;
-
-  const notification = document.createElement('div');
-  notification.className = `notification ${type}`;
-
-  let iconSvg = '';
-  if (type === 'success') {
-    iconSvg = '<svg class="notification-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>';
-  } else if (type === 'error') {
-    iconSvg = '<svg class="notification-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
+function showNotification(message, type = 'info') {
+  if (window.showNotification) {
+    window.showNotification(message, type);
   } else {
-    iconSvg = '<svg class="notification-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>';
+    alert(message);
   }
-
-  notification.innerHTML = `${iconSvg}<span class="notification-message">${message}</span>`;
-  container.appendChild(notification);
-
-  setTimeout(() => {
-    notification.classList.add('removing');
-    setTimeout(() => notification.remove(), 300);
-  }, duration);
 }
 
 function toNumber(val, fallback = 0) {

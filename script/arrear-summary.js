@@ -14,7 +14,10 @@
   const statusFilter = document.getElementById('arrearStatusFilter');
   const membershipFilter = document.getElementById('arrearMembershipFilter');
 
+  const PAGE_SIZE = 25;
+  let currentPage = 1;
   let allRows = [];
+  let filteredRowsCache = [];
 
   function getApi() {
     if (!window.AquentaApiClient) {
@@ -146,7 +149,8 @@
     const statusValue = normalizeText(statusFilter?.value);
     const membershipValue = normalizeText(membershipFilter?.value);
 
-    const filteredRows = allRows.filter((row) => {
+    currentPage = 1;
+    filteredRowsCache = allRows.filter((row) => {
       const accountNumber = normalizeText(pick(row, ['accountNumber', 'AccountNumber']));
       const firstName = normalizeText(pick(row, ['firstName', 'FirstName']));
       const lastName = normalizeText(pick(row, ['lastName', 'LastName']));
@@ -164,12 +168,11 @@
       return matchesSearch && matchesDistrict && matchesStatus && matchesMembership;
     });
 
-    const totalArrears = filteredRows.reduce((sum, row) => sum + toNumber(pick(row, ['totalArrears', 'TotalArrears'], 0)), 0);
-    const totalPenalty = filteredRows.reduce((sum, row) => sum + toNumber(pick(row, ['totalPenalty', 'TotalPenalty'], 0)), 0);
+    const totalArrears = filteredRowsCache.reduce((sum, row) => sum + toNumber(pick(row, ['totalArrears', 'TotalArrears'], 0)), 0);
+    const totalPenalty = filteredRowsCache.reduce((sum, row) => sum + toNumber(pick(row, ['totalPenalty', 'TotalPenalty'], 0)), 0);
 
-    setSummary(totalArrears, totalPenalty, filteredRows.length);
-    renderRows(filteredRows);
-    updateFooter(filteredRows.length);
+    setSummary(totalArrears, totalPenalty, filteredRowsCache.length);
+    renderRows(filteredRowsCache);
   }
 
   function bindFilters() {
@@ -196,12 +199,22 @@
   function renderRows(rows) {
     if (!arrearTableBody) return;
 
-    if (!rows.length) {
+    const totalRecords = rows.length;
+    const totalPages = Math.ceil(totalRecords / PAGE_SIZE) || 1;
+    if (currentPage > totalPages) currentPage = totalPages;
+
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const end = Math.min(start + PAGE_SIZE, totalRecords);
+    const visibleRows = rows.slice(start, end);
+
+    updateFooter(totalRecords, start, end, totalPages);
+
+    if (!visibleRows.length) {
       arrearTableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No unpaid or overdue balances found.</td></tr>';
       return;
     }
 
-    arrearTableBody.innerHTML = rows.map((row) => {
+    arrearTableBody.innerHTML = visibleRows.map((row) => {
       const accountNumber = pick(row, ['accountNumber', 'AccountNumber']);
       const firstName = pick(row, ['firstName', 'FirstName']);
       const lastName = pick(row, ['lastName', 'LastName']);
@@ -223,22 +236,61 @@
     }).join('');
   }
 
-  function updateFooter(totalRows) {
+  function updateFooter(totalRows, start, end, totalPages) {
     if (recordCountText) {
       recordCountText.textContent = totalRows === 0
         ? 'Showing 0 to 0 of 0 records'
-        : `Showing 1 to ${totalRows} of ${totalRows} records`;
+        : `Showing ${start + 1} to ${end} of ${totalRows} records`;
     }
 
+    renderPaginationUI(totalPages);
+  }
+
+  function renderPaginationUI(totalPages) {
     if (!pagination) return;
+    pagination.innerHTML = '';
 
-    const prevBtn = pagination.querySelector('button[aria-label="Previous page"]');
-    const nextBtn = pagination.querySelector('button[aria-label="Next page"]');
-    const pageBtn = pagination.querySelector('button.active');
+    // Previous Button
+    const prevBtn = document.createElement('button');
+    prevBtn.className = 'pagination-btn';
+    prevBtn.disabled = currentPage === 1;
+    prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+    prevBtn.addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage--;
+        renderRows(filteredRowsCache);
+      }
+    });
+    pagination.appendChild(prevBtn);
 
-    if (prevBtn) prevBtn.disabled = true;
-    if (nextBtn) nextBtn.disabled = true;
-    if (pageBtn) pageBtn.textContent = totalRows > 0 ? '1' : '0';
+    // Page Numbers
+    const startPage = Math.max(1, currentPage - 1);
+    const endPage = Math.min(totalPages, startPage + 2);
+    const finalStart = Math.max(1, endPage - 2);
+
+    for (let i = finalStart; i <= endPage; i++) {
+      const btn = document.createElement('button');
+      btn.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
+      btn.textContent = i;
+      btn.addEventListener('click', () => {
+        currentPage = i;
+        renderRows(filteredRowsCache);
+      });
+      pagination.appendChild(btn);
+    }
+
+    // Next Button
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'pagination-btn';
+    nextBtn.disabled = currentPage === totalPages;
+    nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+    nextBtn.addEventListener('click', () => {
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderRows(filteredRowsCache);
+      }
+    });
+    pagination.appendChild(nextBtn);
   }
 
   async function loadArrearSummary() {

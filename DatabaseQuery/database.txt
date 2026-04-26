@@ -71,6 +71,7 @@ CREATE TABLE tbl_Concessioner
     ContactNumber NVARCHAR(15) NOT NULL,
     EmailAddress NVARCHAR(50),
     Status NVARCHAR(20) NOT NULL,
+    IsDeleted BIT NOT NULL DEFAULT 0,
     FOREIGN KEY (UserID) REFERENCES tbl_User(UserID),
     FOREIGN KEY (CategoryID) REFERENCES tbl_Category(CategoryID),
     FOREIGN KEY (MembershipID) REFERENCES tbl_Membership(MembershipID),
