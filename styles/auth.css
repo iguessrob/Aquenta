@@ -300,6 +300,16 @@ body.loading-active {
     margin-right: 2rem;
 }
 
+.privacy a {
+    color: #ffffff;
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+}
+
+.privacy a:hover {
+    opacity: 0.8;
+}
+
 /* Login Panel - Right Side */
 .login-panel {
     position: relative;
@@ -524,6 +534,16 @@ body.loading-active {
     font-size: 14px;
     font-weight: 500;
     text-align: right;
+}
+
+.mobile-privacy a {
+    color: #ffffff;
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+}
+
+.mobile-privacy a:hover {
+    opacity: 0.8;
 }
 
 /* Desktop Styles - 1024px and above */
