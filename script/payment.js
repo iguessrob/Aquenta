@@ -93,24 +93,6 @@ function formatPeriodOption(period) {
   return start.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 }
 
-function getPaymentMonthKey(value) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '';
-
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  return `${year}-${month}`;
-}
-
-function getPaymentMonthLabel(value) {
-  const date = new Date(`${value}-01T00:00:00`);
-  if (Number.isNaN(date.getTime())) return value;
-
-  return date.toLocaleDateString('en-US', {
-    month: 'long',
-    year: 'numeric',
-  });
-}
 
 function formatPeriodCover(period) {
   if (!period) return '--';
@@ -341,7 +323,7 @@ function renderPaginationHost(rows) {
   host.innerHTML = renderPaginationFooter(rows);
 }
 
-function buildPaymentRows(monthFilter = '', periodFilter = 0) {
+function buildPaymentRows(periodFilter = 0) {
   const periodMap = new Map(periodCache.map((period) => [toNumber(pick(period, ['periodId', 'PeriodId'], 0), 0), period]));
   const userMap = new Map(userCache.map((user) => [toNumber(pick(user, ['userId', 'UserId', 'userID', 'UserID'], 0), 0), user]));
   const selectedPeriodId = periodFilter > 0 ? periodFilter : toNumber(document.getElementById('paymentPeriodFilter')?.value, 0);
@@ -355,10 +337,9 @@ function buildPaymentRows(monthFilter = '', periodFilter = 0) {
     billingByConcessionerAndPeriod.get(cid).set(pid, b);
   });
 
-  // Map payments by billing, filtered by month if provided
+  // Map payments by billing
   const paymentByBilling = new Map();
   paymentCache.forEach((p) => {
-    if (monthFilter && getPaymentMonthKey(pick(p, ['datePaid', 'DatePaid'], null)) !== monthFilter) return;
     const bid = toNumber(pick(p, ['billingId', 'BillingId', 'billingID', 'BillingID'], 0), 0);
     paymentByBilling.set(bid, p);
   });
@@ -441,7 +422,7 @@ function populatePeriodFilter() {
     return bd.getTime() - ad.getTime();
   });
 
-  select.innerHTML = '<option value="">All Periods</option>' + sorted
+  select.innerHTML = sorted
     .map((period) => {
       const id = toNumber(pick(period, ['periodId', 'PeriodId'], 0), 0);
       if (id <= 0) return '';
@@ -454,35 +435,16 @@ function populatePeriodFilter() {
   }
 }
 
-function populateMonthFilter() {
-  const select = document.getElementById('paymentMonthFilter');
-  if (!select) return;
-
-  const current = select.value;
-  const months = [...new Set(paymentCache
-    .map((payment) => getPaymentMonthKey(pick(payment, ['datePaid', 'DatePaid'], null)))
-    .filter(Boolean))]
-    .sort((a, b) => b.localeCompare(a));
-
-  select.innerHTML = '<option value="">All Months</option>' + months
-    .map((month) => `<option value="${month}">${getPaymentMonthLabel(month)}</option>`)
-    .join('');
-
-  if (current && select.querySelector(`option[value="${current}"]`)) {
-    select.value = current;
-  }
-}
 
 function renderRows() {
   const tbody = document.getElementById('paymentRows');
   if (!tbody) return;
 
   const search = String(document.getElementById('paymentSearch')?.value || '').trim().toLowerCase();
-  const monthFilter = String(document.getElementById('paymentMonthFilter')?.value || '').trim();
   const periodFilter = toNumber(document.getElementById('paymentPeriodFilter')?.value, 0);
   const statusFilter = String(document.getElementById('paymentStatusFilter')?.value || 'all').trim().toLowerCase();
 
-  const rows = buildPaymentRows(monthFilter, periodFilter).filter((row) => {
+  const rows = buildPaymentRows(periodFilter).filter((row) => {
     const matchesSearch = !search
       || String(row.name).toLowerCase().includes(search)
       || String(row.accountNumber).toLowerCase().includes(search);
@@ -572,12 +534,6 @@ function setupFilters() {
     });
   }
 
-  if (month) {
-    month.addEventListener('change', () => {
-      currentPaymentPage = 1;
-      renderRows();
-    });
-  }
 
   if (period) {
     period.addEventListener('change', () => {
@@ -824,7 +780,6 @@ async function loadData() {
     userCache = Array.isArray(users) ? users : [];
     periodCache = Array.isArray(periods) ? periods : [];
 
-    populateMonthFilter();
     populatePeriodFilter();
     renderRows();
   } finally {
