@@ -879,6 +879,42 @@ body[data-page="view-customer"] .profile-toolbar {
   }
 }
 
+
+/* Transactions Table Specifics */
+.transaction-table thead {
+  background-color: #3b82f6 !important; /* Blue header as per image */
+}
+
+.transaction-table thead th {
+  color: #ffffff !important;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.total-row {
+  background-color: #f8fafc;
+}
+
+.total-row td {
+  border-top: 2px solid #e2e8f0;
+  padding: 14px 16px !important;
+}
+
+.total-value {
+  color: #ef4444; /* Red totals as per image */
+  font-weight: 700;
+  font-size: 14px;
+}
+
+body[data-page="view-customer"] .transaction-table th:nth-child(1) { width: 22%; }
+body[data-page="view-customer"] .transaction-table th:nth-child(2) { width: 10%; }
+body[data-page="view-customer"] .transaction-table th:nth-child(3) { width: 10%; }
+body[data-page="view-customer"] .transaction-table th:nth-child(4) { width: 12%; }
+body[data-page="view-customer"] .transaction-table th:nth-child(5) { width: 12%; }
+body[data-page="view-customer"] .transaction-table th:nth-child(6) { width: 12%; }
+body[data-page="view-customer"] .transaction-table th:nth-child(7) { width: 12%; }
+body[data-page="view-customer"] .transaction-table th:nth-child(8) { width: 10%; }
+
 @media (max-width: 480px) {
   body[data-page="add-concessioner"] .content,
   body[data-page="edit-concessioner"] .content,

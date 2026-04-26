@@ -183,6 +183,7 @@
           <div class="profile-tabs">
             <button class="profile-tab active" data-tab="billing">Billing History</button>
             <button class="profile-tab" data-tab="payments">Payment History</button>
+            <button class="profile-tab" data-tab="transactions">Transactions</button>
           </div>
 
           <!-- Billing History -->
@@ -277,6 +278,61 @@
                 <tbody>
                   <!-- Data will be loaded dynamically -->
                 </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Transactions (Ledger) -->
+          <div class="profile-tab-panel hidden" id="tab-transactions">
+            <div class="profile-toolbar">
+              <div class="filter-pill">
+                <span>Year:</span>
+                <select id="transactionYearSelect" class="filter-select">
+                  <option value="ALL">All Years</option>
+                </select>
+              </div>
+              <div class="profile-toolbar-right">
+                <div class="customer-search profile-search-small">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
+                  </svg>
+                  <input
+                    type="text"
+                    id="transactionSearchInput"
+                    class="customer-search-input"
+                    placeholder="Search transactions..."
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="customer-table-wrapper">
+              <table class="customer-table transaction-table">
+                <thead>
+                  <tr>
+                    <th>PERIOD</th>
+                    <th>PRESENT</th>
+                    <th>PREVIOUS</th>
+                    <th>CONSUMPTION</th>
+                    <th>BILLING</th>
+                    <th>COLLECTION</th>
+                    <th>DATE PAID</th>
+                    <th>BALANCE</th>
+                  </tr>
+                </thead>
+                <tbody id="transactionTableBody">
+                  <!-- Data will be loaded dynamically -->
+                </tbody>
+                <tfoot>
+                  <tr class="total-row">
+                    <td colspan="4" style="text-align: right; font-weight: 700;">TOTAL</td>
+                    <td id="totalBillingValue" class="total-value">₱ 0.00</td>
+                    <td id="totalCollectionValue" class="total-value">₱ 0.00</td>
+                    <td></td>
+                    <td id="totalBalanceValue" class="total-value">₱ 0.00</td>
+                  </tr>
+                </tfoot>
               </table>
             </div>
           </div>

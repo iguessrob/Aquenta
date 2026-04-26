@@ -21,7 +21,9 @@ Thumbs.db
 *.AssemblyInfoInputs.cache
 *.csproj.AssemblyReference.cache
 *.pdb
-*.sourcelink.json
+*.sourcelink.json# Build folders
+[Bb]in/
+[Oo]bj/
 *.dswa.cache.json
 *.dll
 

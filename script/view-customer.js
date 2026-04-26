@@ -18,6 +18,9 @@
   const billingStatusSelect = document.getElementById('billingStatusSelect');
   const billingSearchInput = document.getElementById('billingSearchInput');
   const paymentSearchInput = document.getElementById('paymentSearchInput');
+  const transactionTableBody = document.getElementById('transactionTableBody');
+  const transactionYearSelect = document.getElementById('transactionYearSelect');
+  const transactionSearchInput = document.getElementById('transactionSearchInput');
 
   function pick(obj, keys, fallback = '') {
     for (const key of keys) {
@@ -61,6 +64,7 @@
       });
       periodCache = periods || [];
 
+      seedTransactionYearFilter();
       applyFilters();
     } catch (err) {
       console.error('Failed to load history:', err);
@@ -71,6 +75,8 @@
     const bStatus = (billingStatusSelect?.value || 'ALL').toUpperCase();
     const bTerm = (billingSearchInput?.value || '').trim().toLowerCase();
     const pTerm = (paymentSearchInput?.value || '').trim().toLowerCase();
+    const tTerm = (transactionSearchInput?.value || '').trim().toLowerCase();
+    const tYear = transactionYearSelect?.value || 'ALL';
 
     filteredBillings = billingCache.filter(bill => {
       const status = String(pick(bill, ['billStatus', 'BillStatus'], 'Unpaid')).toUpperCase();
@@ -91,9 +97,37 @@
     renderTables();
   }
 
+  function seedTransactionYearFilter() {
+    if (!transactionYearSelect) return;
+    
+    // Clear existing options except "All Years"
+    while (transactionYearSelect.options.length > 1) {
+      transactionYearSelect.remove(1);
+    }
+
+    const years = new Set();
+    billingCache.forEach(bill => {
+      const periodId = pick(bill, ['periodId', 'PeriodId', 'periodID', 'PeriodID']);
+      const period = periodCache.find(p => pick(p, ['periodId', 'PeriodId']) === periodId);
+      if (period) {
+        const start = new Date(pick(period, ['periodStart', 'PeriodStart']));
+        if (!isNaN(start.getFullYear())) years.add(start.getFullYear());
+      }
+    });
+
+    const sortedYears = Array.from(years).sort((a, b) => b - a);
+    sortedYears.forEach(year => {
+      const opt = document.createElement('option');
+      opt.value = year;
+      opt.textContent = year;
+      transactionYearSelect.appendChild(opt);
+    });
+  }
+
   function renderTables() {
     renderBillingTable();
     renderPaymentTable();
+    renderTransactionsTable();
   }
 
   function renderBillingTable() {
@@ -161,16 +195,96 @@
     });
   }
 
+  function renderTransactionsTable() {
+    if (!transactionTableBody) return;
+    transactionTableBody.innerHTML = '';
+
+    const tTerm = (transactionSearchInput?.value || '').trim().toLowerCase();
+    const tYear = transactionYearSelect?.value || 'ALL';
+
+    let totalBilling = 0;
+    let totalCollection = 0;
+    let totalBalance = 0;
+
+    // Filter billings based on search term and year
+    const displayBillings = billingCache.filter(bill => {
+      const periodId = pick(bill, ['periodId', 'PeriodId', 'periodID', 'PeriodID']);
+      const period = periodCache.find(p => pick(p, ['periodId', 'PeriodId']) === periodId);
+      const periodLabel = period ? formatDate(pick(period, ['periodStart', 'PeriodStart'])) + ' - ' + formatDate(pick(period, ['periodEnd', 'PeriodEnd'])) : '';
+      const periodYear = period ? new Date(pick(period, ['periodStart', 'PeriodStart'])).getFullYear().toString() : '';
+
+      const matchesSearch = !tTerm || periodLabel.toLowerCase().includes(tTerm);
+      const matchesYear = tYear === 'ALL' || periodYear === tYear;
+      return matchesSearch && matchesYear;
+    }).sort((a, b) => a.billingId - b.billingId);
+
+    if (displayBillings.length === 0) {
+      transactionTableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 2rem; color: #64748b;">No transaction records found.</td></tr>';
+      return;
+    }
+
+    displayBillings.forEach(bill => {
+      const bId = pick(bill, ['billingId', 'BillingId']);
+      const periodId = pick(bill, ['periodId', 'PeriodId', 'periodID', 'PeriodID']);
+      const period = periodCache.find(p => pick(p, ['periodId', 'PeriodId']) === periodId);
+      const periodLabel = period ? formatDate(pick(period, ['periodStart', 'PeriodStart'])) + ' - ' + formatDate(pick(period, ['periodEnd', 'PeriodEnd'])) : 'Period ' + periodId;
+
+      const present = toNumber(pick(bill, ['currentReading', 'CurrentReading'], 0));
+      const previous = toNumber(pick(bill, ['prevReading', 'PrevReading'], 0));
+      const consumption = Math.max(0, present - previous);
+      
+      const billAmount = toNumber(pick(bill, ['billAmount', 'BillAmount'], 0));
+      const penalty = toNumber(pick(bill, ['penalty', 'Penalty'], 0));
+      const totalBill = billAmount + penalty;
+
+      // Calculate collection (payments for this billing)
+      const payments = paymentCache.filter(p => toNumber(pick(p, ['billingId', 'BillingId'])) === bId);
+      const collection = payments.reduce((sum, p) => sum + toNumber(pick(p, ['amountPaid', 'AmountPaid'], 0)), 0);
+      const datePaid = payments.length > 0 ? formatDate(pick(payments[0], ['datePaid', 'DatePaid'])) : '--';
+
+      const balance = Math.max(0, totalBill - collection);
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${periodLabel}</td>
+        <td>${present}</td>
+        <td>${previous}</td>
+        <td>${consumption}</td>
+        <td>${formatPeso(totalBill)}</td>
+        <td>${formatPeso(collection)}</td>
+        <td>${datePaid}</td>
+        <td>${formatPeso(balance)}</td>
+      `;
+      transactionTableBody.appendChild(tr);
+
+      totalBilling += totalBill;
+      totalCollection += collection;
+      totalBalance += balance;
+    });
+
+    // Update Totals
+    const totalBillingEl = document.getElementById('totalBillingValue');
+    const totalCollectionEl = document.getElementById('totalCollectionValue');
+    const totalBalanceEl = document.getElementById('totalBalanceValue');
+
+    if (totalBillingEl) totalBillingEl.textContent = formatPeso(totalBilling);
+    if (totalCollectionEl) totalCollectionEl.textContent = formatPeso(totalCollection);
+    if (totalBalanceEl) totalBalanceEl.textContent = formatPeso(totalBalance);
+  }
+
   // Event Listeners
   if (billingStatusSelect) billingStatusSelect.addEventListener('change', applyFilters);
   if (billingSearchInput) billingSearchInput.addEventListener('input', applyFilters);
   if (paymentSearchInput) paymentSearchInput.addEventListener('input', applyFilters);
+  if (transactionSearchInput) transactionSearchInput.addEventListener('input', applyFilters);
+  if (transactionYearSelect) transactionYearSelect.addEventListener('change', applyFilters);
 
   // Tab toggle logic
   const tabButtons = document.querySelectorAll('.profile-tab');
   const tabPanels = {
     billing: document.getElementById('tab-billing'),
     payments: document.getElementById('tab-payments'),
+    transactions: document.getElementById('tab-transactions'),
   };
 
   tabButtons.forEach((btn) => {
