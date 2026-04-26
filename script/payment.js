@@ -60,7 +60,9 @@ function showNotification(message, type = 'error') {
 }
 
 function formatPeso(value) {
-  return `₱ ${toNumber(value).toLocaleString('en-PH', {
+  const num = toNumber(value);
+  if (num <= 0) return '--';
+  return `₱ ${num.toLocaleString('en-PH', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`;
