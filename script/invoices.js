@@ -660,7 +660,7 @@ function buildInvoiceRows() {
       penalty,
       total: amount + arrears + penalty,
     };
-  });
+  }).filter(row => row.billingId > 0);
 }
 
 function renderRows() {
