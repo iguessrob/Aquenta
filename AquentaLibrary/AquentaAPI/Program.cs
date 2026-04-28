@@ -69,6 +69,9 @@ app.Use(async (context, next) =>
 // Use the properly configured CORS policy (replaces the dangerous "BULLETPROOF" middleware)
 app.UseCors("AllowFrontend");
 
+// Force HTTPS redirection
+app.UseHttpsRedirection();
+
 // Configure the HTTP request pipeline.
 app.UseSwagger();
 app.UseSwaggerUI(c =>
