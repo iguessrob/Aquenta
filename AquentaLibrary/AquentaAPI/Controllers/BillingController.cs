@@ -29,14 +29,22 @@ namespace AquentaAPI.Controllers
         [HttpGet]
         public ActionResult GetAllBilling()
         {
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
             var user = billingServices.GetAll();
             return Ok(user);
         }
 
         [HttpGet("{id}")]
-        public BillingModel GetByBillingId(int id)
+        public ActionResult GetByBillingId(int id)
         {
-            return billingServices.GetbyId(id);
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
+            var billing = billingServices.GetbyId(id);
+            if (billing == null) return NotFound("Billing record not found.");
+            return Ok(billing);
         }
 
         [HttpDelete]
@@ -50,8 +58,26 @@ namespace AquentaAPI.Controllers
         [HttpGet("concessioner/{concessionerId}")]
         public ActionResult GetBillingByConcessionerId(int concessionerId)
         {
-            var billings = billingServices.GetByConcessionerId(concessionerId);
-            return Ok(billings);
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            var requestingUserId = HttpContext.Items["UserId"] as int? ?? 0;
+
+            if (role == "Admin")
+            {
+                // Admin can view any concessioner's billing
+                var billings = billingServices.GetByConcessionerId(concessionerId);
+                return Ok(billings);
+            }
+
+            // IDOR Protection: Concessioner can only view their own billing
+            var concessionerServices = new ConcessionerServices();
+            var concessioner = concessionerServices.GetbyId(concessionerId);
+            if (concessioner == null || concessioner.UserId != requestingUserId)
+            {
+                return StatusCode(403, "You do not have permission to view this billing data.");
+            }
+
+            var ownBillings = billingServices.GetByConcessionerId(concessionerId);
+            return Ok(ownBillings);
         }
 
         [HttpGet("water-consumption/monthly")]
@@ -59,6 +85,9 @@ namespace AquentaAPI.Controllers
             [FromQuery] DateTime startDate,
             [FromQuery] DateTime endDate)
         {
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
             if (startDate >= endDate)
                 return BadRequest("startDate must be earlier than endDate.");
 
@@ -69,6 +98,9 @@ namespace AquentaAPI.Controllers
         [HttpGet("water-consumption/latest-month")]
         public ActionResult<int> GetLatestMonthWaterConsumption()
         {
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
             var total = billingServices.GetLatestMonthWaterConsumption();
             return Ok(total);
         }

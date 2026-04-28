@@ -9,11 +9,32 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.SetIsOriginAllowed(origin =>
-                origin.EndsWith(".azurestaticapps.net") ||
-                origin.Contains("localhost"))
-            .AllowAnyHeader()
-            .AllowAnyMethod();
+        if (builder.Environment.IsDevelopment())
+        {
+            // In Development: allow localhost for local testing
+            policy.SetIsOriginAllowed(origin =>
+                    origin.Contains("localhost") || origin.Contains("127.0.0.1"))
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        }
+        else
+        {
+            // In Production: strictly allow only known origins
+            policy.WithOrigins(
+                    "https://www.aquenta-coop.com",
+                    "https://aquenta-coop.com")
+                .SetIsOriginAllowedToAllowWildcardSubdomains()
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+
+            // Also allow Azure Static Web Apps staging environments
+            policy.SetIsOriginAllowed(origin =>
+                    origin.EndsWith(".azurestaticapps.net") ||
+                    origin == "https://www.aquenta-coop.com" ||
+                    origin == "https://aquenta-coop.com")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        }
     });
 });
 
@@ -40,25 +61,8 @@ app.Use(async (context, next) =>
     await next();
 });
 
-// 2. BULLETPROOF CORS (Handles Custom Domains)
-app.Use(async (context, next) =>
-{
-    var origin = context.Request.Headers["Origin"].ToString();
-    if (!string.IsNullOrEmpty(origin))
-    {
-        context.Response.Headers["Access-Control-Allow-Origin"] = origin;
-        context.Response.Headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS";
-        context.Response.Headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With";
-    }
-
-    if (context.Request.Method == "OPTIONS")
-    {
-        context.Response.StatusCode = 200;
-        return;
-    }
-
-    await next();
-});
+// Use the properly configured CORS policy (replaces the dangerous "BULLETPROOF" middleware)
+app.UseCors("AllowFrontend");
 
 // Configure the HTTP request pipeline.
 app.UseSwagger();

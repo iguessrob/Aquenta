@@ -29,14 +29,22 @@ namespace AquentaAPI.Controllers
         [HttpGet]
         public ActionResult GetAllPeriod()
         {
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
             var period = periodServices.GetAll();
             return Ok(period);
         }
 
         [HttpGet("{id}")]
-        public PeriodModel GetPeriodById(int id)
+        public ActionResult GetPeriodById(int id)
         {
-            return periodServices.GetbyId(id);
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
+            var period = periodServices.GetbyId(id);
+            if (period == null) return NotFound("Period not found.");
+            return Ok(period);
         }
 
         [HttpDelete]

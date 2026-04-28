@@ -52,14 +52,32 @@ namespace AquentaAPI.Controllers
         [HttpGet("active")]
         public ActionResult GetAllActiveConcessioners()
         {
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
             var user = concessionerServices.GetAllActive();
             return Ok(user);
         }
 
         [HttpGet("{id}")]
-        public ConcessionerModel GetByConcessionerId(int id)
+        public ActionResult GetByConcessionerId(int id)
         {
-            return concessionerServices.GetbyId(id);
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            var requestingUserId = HttpContext.Items["UserId"] as int? ?? 0;
+
+            var concessioner = concessionerServices.GetbyId(id);
+            if (concessioner == null)
+            {
+                return NotFound("Concessioner not found.");
+            }
+
+            // IDOR Protection: Non-admin users can only view their own concessioner record
+            if (role != "Admin" && concessioner.UserId != requestingUserId)
+            {
+                return StatusCode(403, "You do not have permission to view this record.");
+            }
+
+            return Ok(concessioner);
         }
 
         [HttpDelete]
@@ -74,6 +92,9 @@ namespace AquentaAPI.Controllers
         [HttpGet("active/count")]
         public ActionResult<int> GetTotalActiveConcessioners([FromQuery] string status)
         {
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
             if (string.IsNullOrWhiteSpace(status))
                 return BadRequest("status query parameter is required.");
 
@@ -84,6 +105,15 @@ namespace AquentaAPI.Controllers
         [HttpGet("user/{userId}")]
         public ActionResult GetByUserId(int userId)
         {
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            var requestingUserId = HttpContext.Items["UserId"] as int? ?? 0;
+
+            // IDOR Protection: Non-admin users can only look up their own concessioner record
+            if (role != "Admin" && requestingUserId != userId)
+            {
+                return StatusCode(403, "You do not have permission to view this record.");
+            }
+
             var concessioner = concessionerServices.GetByUserId(userId);
             if (concessioner == null)
                 return NotFound("No concessioner found for this user.");

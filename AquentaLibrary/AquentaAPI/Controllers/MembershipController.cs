@@ -29,14 +29,22 @@ namespace AquentaAPI.Controllers
         [HttpGet]
         public ActionResult GetAllMembership()
         {
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
             var membership = membershipServices.GetAll();
             return Ok(membership);
         }
 
         [HttpGet("{id}")]
-        public MembershipModel GetMembershipById(int id)
+        public ActionResult GetMembershipById(int id)
         {
-            return membershipServices.GetbyId(id);
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
+            var membership = membershipServices.GetbyId(id);
+            if (membership == null) return NotFound("Membership not found.");
+            return Ok(membership);
         }
 
         [HttpDelete]

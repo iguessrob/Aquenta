@@ -39,6 +39,9 @@ namespace AquentaAPI.Controllers
         [HttpGet]
         public ActionResult GetAllTariffVersions()
         {
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
             var versions = tariffVersionServices.GetAll();
             return Ok(versions);
         }
@@ -46,14 +49,22 @@ namespace AquentaAPI.Controllers
         [HttpGet("active")]
         public ActionResult GetActiveTariffVersion()
         {
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
             var version = tariffVersionServices.GetActiveVersion();
             return Ok(version);
         }
 
         [HttpGet("{id}")]
-        public TariffVersionModel GetTariffVersionById(int id)
+        public ActionResult GetTariffVersionById(int id)
         {
-            return tariffVersionServices.GetById(id);
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
+            var version = tariffVersionServices.GetById(id);
+            if (version == null) return NotFound("Tariff version not found.");
+            return Ok(version);
         }
 
         [HttpDelete("{id}")]

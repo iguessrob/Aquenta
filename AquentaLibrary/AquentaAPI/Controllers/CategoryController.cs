@@ -29,14 +29,22 @@ namespace AquentaAPI.Controllers
         [HttpGet]
         public ActionResult GetAllCategory()
         {
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
             var user = categoryServices.GetAll();
             return Ok(user);
         }
 
         [HttpGet("{id}")]
-        public CategoryModel GetByCategoryId(int id)
+        public ActionResult GetByCategoryId(int id)
         {
-            return categoryServices.GetbyId(id);
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
+            var category = categoryServices.GetbyId(id);
+            if (category == null) return NotFound("Category not found.");
+            return Ok(category);
         }
 
         [HttpDelete]

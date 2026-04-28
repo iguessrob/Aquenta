@@ -1,3 +1,4 @@
+using AquentaAPI.Models.DTOs;
 using AquentaLibrary.Models;
 using AquentaLibrary.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -36,6 +37,21 @@ namespace AquentaAPI.Controllers
             public int? ConcessionerId { get; set; }
             public string? AccountNumber { get; set; }
             public string Token { get; set; } = string.Empty;
+        }
+
+        /// <summary>
+        /// Maps a UserModel to a UserDto, stripping sensitive fields (password, IsDeleted, CreatedAt).
+        /// </summary>
+        private static UserDto ToDto(UserModel user)
+        {
+            return new UserDto
+            {
+                UserId = user.UserId,
+                UserName = user.UserName ?? string.Empty,
+                FirstName = user.FirstName ?? string.Empty,
+                LastName = user.LastName ?? string.Empty,
+                UserRole = user.UserRole ?? string.Empty
+            };
         }
 
         [HttpPost("login")]
@@ -144,14 +160,31 @@ namespace AquentaAPI.Controllers
             var role = HttpContext.Items["UserRole"]?.ToString();
             if (role != "Admin") return Unauthorized("Administrative privileges required.");
 
-            var user = userServices.GetAll();
-            return Ok(user);
+            var users = userServices.GetAll();
+            // Return DTOs instead of raw UserModel to prevent password hash leakage
+            var dtos = users.Where(u => !u.IsDeleted).Select(ToDto).ToList();
+            return Ok(dtos);
         }
 
         [HttpGet("{id}")]
-        public UserModel GetByUserId(int id)
+        public ActionResult GetByUserId(int id)
         {
-            return userServices.GetbyId(id);
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            var requestingUserId = HttpContext.Items["UserId"] as int? ?? 0;
+
+            // IDOR Protection: Non-admin users can only view their own data
+            if (role != "Admin" && requestingUserId != id)
+            {
+                return StatusCode(403, "You do not have permission to view this user.");
+            }
+
+            var user = userServices.GetbyId(id);
+            if (user == null || user.IsDeleted)
+            {
+                return NotFound("User not found.");
+            }
+
+            return Ok(ToDto(user));
         }
 
         [HttpDelete]

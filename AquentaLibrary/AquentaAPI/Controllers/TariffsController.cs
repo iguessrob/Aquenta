@@ -59,6 +59,9 @@ namespace AquentaAPI.Controllers
         [HttpGet]
         public ActionResult GetAllTariffs()
         {
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
             var tariffs = tariffsServices.GetAll();
             return Ok(tariffs);
         }
@@ -66,6 +69,9 @@ namespace AquentaAPI.Controllers
         [HttpGet("active")]
         public ActionResult GetActiveTariffs()
         {
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
             var tariffs = tariffsServices.GetActiveTariffRates();
             return Ok(tariffs);
         }
@@ -73,6 +79,9 @@ namespace AquentaAPI.Controllers
         [HttpGet("by-category/{categoryId}")]
         public ActionResult GetTariffsByCategoryId(int categoryId)
         {
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
             var tariffs = tariffsServices.GetByCategoryId(categoryId);
             return Ok(tariffs);
         }
@@ -80,14 +89,22 @@ namespace AquentaAPI.Controllers
         [HttpGet("by-version/{tariffVersionId}")]
         public ActionResult GetTariffsByVersionId(int tariffVersionId)
         {
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
             var tariffs = tariffsServices.GetByVersionId(tariffVersionId);
             return Ok(tariffs);
         }
 
         [HttpGet("{id}")]
-        public TariffsModel GetTariffsById(int id)
+        public ActionResult GetTariffsById(int id)
         {
-            return tariffsServices.GetbyId(id);
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
+            var tariff = tariffsServices.GetbyId(id);
+            if (tariff == null) return NotFound("Tariff not found.");
+            return Ok(tariff);
         }
 
         [HttpDelete]

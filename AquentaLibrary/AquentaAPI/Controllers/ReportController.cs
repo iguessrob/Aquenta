@@ -11,6 +11,16 @@ namespace AquentaAPI.Controllers
     {
         private readonly ReportServices _reportServices = new ReportServices(new AquentaLibrary.Repositories.ReportRepository());
 
+        /// <summary>
+        /// Helper: checks if the requesting user is Admin. Returns null if authorized, or an UnauthorizedResult if not.
+        /// </summary>
+        private ActionResult? RequireAdmin()
+        {
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            return null;
+        }
+
         // ==================== DASHBOARD ENDPOINTS ====================
 
         /// <summary>
@@ -20,8 +30,8 @@ namespace AquentaAPI.Controllers
         [HttpGet("dashboard")]
         public ActionResult GetDashboardSummary()
         {
-            var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            var authResult = RequireAdmin();
+            if (authResult != null) return authResult;
 
             try
             {
@@ -41,6 +51,9 @@ namespace AquentaAPI.Controllers
         [HttpGet("active-concessioners")]
         public ActionResult<int> GetTotalActiveConcessioners(string status = "Active")
         {
+            var authResult = RequireAdmin();
+            if (authResult != null) return authResult;
+
             try
             {
                 var total = _reportServices.GetTotalActiveConcessioners(status);
@@ -59,6 +72,9 @@ namespace AquentaAPI.Controllers
         [HttpGet("total-concessioners")]
         public ActionResult<int> GetTotalConcessioners()
         {
+            var authResult = RequireAdmin();
+            if (authResult != null) return authResult;
+
             try
             {
                 var total = _reportServices.GetTotalConcessioners();
@@ -77,6 +93,9 @@ namespace AquentaAPI.Controllers
         [HttpGet("water-consumption")]
         public ActionResult<int> GetMonthlyWaterConsumption(DateTime startDate, DateTime endDate)
         {
+            var authResult = RequireAdmin();
+            if (authResult != null) return authResult;
+
             try
             {
                 var consumption = _reportServices.GetMonthlyWaterConsumption(startDate, endDate);
@@ -95,8 +114,8 @@ namespace AquentaAPI.Controllers
         [HttpGet("pending-collections")]
         public ActionResult GetPendingCollections()
         {
-            var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            var authResult = RequireAdmin();
+            if (authResult != null) return authResult;
 
             try
             {
@@ -116,6 +135,9 @@ namespace AquentaAPI.Controllers
         [HttpGet("latest-month-pending-collections")]
         public ActionResult<decimal> GetLatestMonthPendingCollections()
         {
+            var authResult = RequireAdmin();
+            if (authResult != null) return authResult;
+
             try
             {
                 var pending = _reportServices.GetLatestMonthPendingCollections();
@@ -134,6 +156,9 @@ namespace AquentaAPI.Controllers
         [HttpGet("total-monthly-account-receivable")]
         public ActionResult<decimal> GetTotalMonthlyAccountReceivable()
         {
+            var authResult = RequireAdmin();
+            if (authResult != null) return authResult;
+
             try
             {
                 var total = _reportServices.GetTotalMonthlyAccountReceivable();
@@ -152,6 +177,9 @@ namespace AquentaAPI.Controllers
         [HttpGet("total-monthly-collection")]
         public ActionResult<decimal> GetTotalMonthlyCollection()
         {
+            var authResult = RequireAdmin();
+            if (authResult != null) return authResult;
+
             try
             {
                 var total = _reportServices.GetTotalMonthlyCollection();
@@ -170,6 +198,9 @@ namespace AquentaAPI.Controllers
         [HttpGet("total-annual-account-receivable")]
         public ActionResult<decimal> GetTotalAnnualAccountReceivable()
         {
+            var authResult = RequireAdmin();
+            if (authResult != null) return authResult;
+
             try
             {
                 var total = _reportServices.GetTotalAnnualAccountReceivable();
@@ -188,6 +219,9 @@ namespace AquentaAPI.Controllers
         [HttpGet("unpaid-summary")]
         public ActionResult<dynamic> GetUnpaidBillsSummary()
         {
+            var authResult = RequireAdmin();
+            if (authResult != null) return authResult;
+
             try
             {
                 var summary = _reportServices.GetUnpaidBillsSummary();
@@ -206,6 +240,9 @@ namespace AquentaAPI.Controllers
         [HttpGet("overdue-summary")]
         public ActionResult<dynamic> GetOverdueBillsSummary()
         {
+            var authResult = RequireAdmin();
+            if (authResult != null) return authResult;
+
             try
             {
                 var summary = _reportServices.GetOverdueBillsSummary();
@@ -224,6 +261,9 @@ namespace AquentaAPI.Controllers
         [HttpGet("billing-progress-by-zone")]
         public ActionResult<IEnumerable<dynamic>> GetBillingProgressByZone(int periodId)
         {
+            var authResult = RequireAdmin();
+            if (authResult != null) return authResult;
+
             try
             {
                 if (periodId <= 0)
@@ -247,6 +287,9 @@ namespace AquentaAPI.Controllers
         [HttpGet("arrear-summary")]
         public ActionResult<IEnumerable<dynamic>> GetArrearSummaryReport()
         {
+            var authResult = RequireAdmin();
+            if (authResult != null) return authResult;
+
             try
             {
                 var arrears = _reportServices.GetArrearSummaryReport();
@@ -267,6 +310,9 @@ namespace AquentaAPI.Controllers
         [HttpGet("overdue-total")]
         public ActionResult GetTotalOverdueAmount()
         {
+            var authResult = RequireAdmin();
+            if (authResult != null) return authResult;
+
             try
             {
                 var total = _reportServices.GetTotalOverdueAmount();
@@ -285,6 +331,9 @@ namespace AquentaAPI.Controllers
         [HttpGet("billing-by-period/{periodId}")]
         public ActionResult<dynamic> GetTotalBillingByPeriod(int periodId)
         {
+            var authResult = RequireAdmin();
+            if (authResult != null) return authResult;
+
             try
             {
                 var billing = _reportServices.GetTotalBillingByPeriod(periodId);
@@ -303,6 +352,9 @@ namespace AquentaAPI.Controllers
         [HttpGet("payment-collections")]
         public ActionResult<dynamic> GetTotalPaymentCollections(DateTime startDate, DateTime endDate)
         {
+            var authResult = RequireAdmin();
+            if (authResult != null) return authResult;
+
             try
             {
                 var collections = _reportServices.GetTotalPaymentCollections(startDate, endDate);
@@ -324,6 +376,9 @@ namespace AquentaAPI.Controllers
         [HttpGet("consumption/{year}")]
         public ActionResult<IEnumerable<dynamic>> GetMonthlyConsumptionReport(int year)
         {
+            var authResult = RequireAdmin();
+            if (authResult != null) return authResult;
+
             try
             {
                 var consumption = _reportServices.GetMonthlyConsumptionReport(year);
@@ -343,6 +398,9 @@ namespace AquentaAPI.Controllers
         [HttpGet("consumption-water-loss/{year}")]
         public ActionResult<IEnumerable<dynamic>> GetMonthlyWaterLossReport(int year)
         {
+            var authResult = RequireAdmin();
+            if (authResult != null) return authResult;
+
             try
             {
                 var report = _reportServices.GetMonthlyWaterLossReport(year);
@@ -362,6 +420,9 @@ namespace AquentaAPI.Controllers
         [HttpGet("latest-month-water-distribution")]
         public ActionResult<dynamic> GetLatestMonthWaterDistributionSummary()
         {
+            var authResult = RequireAdmin();
+            if (authResult != null) return authResult;
+
             try
             {
                 var summary = _reportServices.GetLatestMonthWaterDistributionSummary();
@@ -380,6 +441,9 @@ namespace AquentaAPI.Controllers
         [HttpGet("latest-period-selector")]
         public ActionResult<dynamic> GetLatestPeriodSelector()
         {
+            var authResult = RequireAdmin();
+            if (authResult != null) return authResult;
+
             try
             {
                 var selector = _reportServices.GetLatestPeriodSelector();
@@ -398,6 +462,9 @@ namespace AquentaAPI.Controllers
         [HttpGet("district-consumption")]
         public ActionResult<IEnumerable<dynamic>> GetDistrictConsumptionSummary()
         {
+            var authResult = RequireAdmin();
+            if (authResult != null) return authResult;
+
             try
             {
                 var districts = _reportServices.GetDistrictConsumptionSummary();
@@ -416,6 +483,9 @@ namespace AquentaAPI.Controllers
         [HttpGet("billing-summary")]
         public ActionResult<IEnumerable<dynamic>> GetBillingWithPaymentSummary()
         {
+            var authResult = RequireAdmin();
+            if (authResult != null) return authResult;
+
             try
             {
                 var billing = _reportServices.GetBillingWithPaymentSummary();
@@ -434,6 +504,9 @@ namespace AquentaAPI.Controllers
         [HttpGet("active-customers-debt")]
         public ActionResult<IEnumerable<dynamic>> GetActiveCustomerDebtAndUsageSummary()
         {
+            var authResult = RequireAdmin();
+            if (authResult != null) return authResult;
+
             try
             {
                 var customers = _reportServices.GetActiveCustomerDebtAndUsageSummary();
@@ -452,8 +525,8 @@ namespace AquentaAPI.Controllers
         [HttpGet("delinquent-customers")]
         public ActionResult GetDelinquentCustomersReport()
         {
-            var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            var authResult = RequireAdmin();
+            if (authResult != null) return authResult;
 
             try
             {
@@ -473,6 +546,9 @@ namespace AquentaAPI.Controllers
         [HttpGet("collection-performance")]
         public ActionResult<IEnumerable<dynamic>> GetCollectionPerformanceSummary(DateTime startDate, DateTime endDate)
         {
+            var authResult = RequireAdmin();
+            if (authResult != null) return authResult;
+
             try
             {
                 var performance = _reportServices.GetCollectionPerformanceSummary(startDate, endDate);
@@ -491,6 +567,9 @@ namespace AquentaAPI.Controllers
         [HttpGet("revenue/{year}")]
         public ActionResult<IEnumerable<dynamic>> GetMonthlyRevenueReport(int year)
         {
+            var authResult = RequireAdmin();
+            if (authResult != null) return authResult;
+
             try
             {
                 var revenue = _reportServices.GetMonthlyRevenueReport(year);
@@ -509,6 +588,24 @@ namespace AquentaAPI.Controllers
         [HttpGet("customer-detail/{concessionerId}")]
         public ActionResult<dynamic> GetCustomerAccountDetailReport(int concessionerId)
         {
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            var requestingUserId = HttpContext.Items["UserId"] as int? ?? 0;
+
+            if (role == "Admin")
+            {
+                // Admin can view any customer detail
+            }
+            else
+            {
+                // IDOR Protection: Concessioner can only view their own detail report
+                var concessionerServices = new ConcessionerServices();
+                var concessioner = concessionerServices.GetbyId(concessionerId);
+                if (concessioner == null || concessioner.UserId != requestingUserId)
+                {
+                    return StatusCode(403, "You do not have permission to view this report.");
+                }
+            }
+
             try
             {
                 var detail = _reportServices.GetCustomerAccountDetailReport(concessionerId);

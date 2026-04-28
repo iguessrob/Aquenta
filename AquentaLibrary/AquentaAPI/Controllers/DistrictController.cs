@@ -29,14 +29,22 @@ namespace AquentaAPI.Controllers
         [HttpGet]
         public ActionResult GetAllDistrict()
         {
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
             var district = districtServices.GetAll();
             return Ok(district);
         }
 
         [HttpGet("{id}")]
-        public DistrictModel GetDistrictById(int id)
+        public ActionResult GetDistrictById(int id)
         {
-            return districtServices.GetbyId(id);
+            var role = HttpContext.Items["UserRole"]?.ToString();
+            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+
+            var district = districtServices.GetbyId(id);
+            if (district == null) return NotFound("District not found.");
+            return Ok(district);
         }
 
         [HttpDelete]
