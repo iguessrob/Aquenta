@@ -62,6 +62,8 @@ app.Use(async (context, next) =>
     context.Response.Headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload";
     context.Response.Headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://aquentawebapp-bgcjgpgfbbfddmb6.southeastasia-01.azurewebsites.net;";
     context.Response.Headers["Referrer-Policy"] = "same-origin";
+    context.Response.Headers["X-Robots-Tag"] = "noindex, nofollow";
+    context.Response.Headers["X-XSS-Protection"] = "1; mode=block";
 
     await next();
 });

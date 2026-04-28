@@ -6,10 +6,11 @@
     "X-Content-Type-Options": "nosniff",
     "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
     "Referrer-Policy": "same-origin",
-    "Permissions-Policy": "geolocation=(), camera=(), microphone=()"
+    "Permissions-Policy": "geolocation=(), camera=(), microphone=()",
+    "X-Robots-Tag": "noindex, nofollow"
   },
   "navigationFallback": {
     "rewrite": "/index.html",
-    "exclude": ["/assets/*", "/script/*", "/styles/*", "/api/*"]
+    "exclude": ["/assets/*", "/script/*", "/styles/*", "/api/*", "/robots.txt"]
   }
 }
