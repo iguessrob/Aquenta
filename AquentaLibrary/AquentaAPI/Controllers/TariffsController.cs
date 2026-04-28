@@ -14,7 +14,7 @@ namespace AquentaAPI.Controllers
         public ActionResult<bool> AddTariffs([FromBody] TariffsModel tariffs)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             if (tariffs == null) return BadRequest("Tariff data is required.");
 
@@ -37,7 +37,7 @@ namespace AquentaAPI.Controllers
         public ActionResult<bool> UpdateTariffs([FromBody] TariffsModel tariffs)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             if (tariffs == null) return BadRequest("Tariff data is required.");
 
@@ -60,7 +60,7 @@ namespace AquentaAPI.Controllers
         public ActionResult GetAllTariffs()
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             var tariffs = tariffsServices.GetAll();
             return Ok(tariffs);
@@ -70,7 +70,7 @@ namespace AquentaAPI.Controllers
         public ActionResult GetActiveTariffs()
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             var tariffs = tariffsServices.GetActiveTariffRates();
             return Ok(tariffs);
@@ -80,7 +80,7 @@ namespace AquentaAPI.Controllers
         public ActionResult GetTariffsByCategoryId(int categoryId)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             var tariffs = tariffsServices.GetByCategoryId(categoryId);
             return Ok(tariffs);
@@ -90,7 +90,7 @@ namespace AquentaAPI.Controllers
         public ActionResult GetTariffsByVersionId(int tariffVersionId)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             var tariffs = tariffsServices.GetByVersionId(tariffVersionId);
             return Ok(tariffs);
@@ -100,7 +100,7 @@ namespace AquentaAPI.Controllers
         public ActionResult GetTariffsById(int id)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             var tariff = tariffsServices.GetbyId(id);
             if (tariff == null) return NotFound("Tariff not found.");
@@ -111,7 +111,7 @@ namespace AquentaAPI.Controllers
         public ActionResult<bool> DeleteTariffs(int id)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             return Ok(tariffsServices.Delete(id));
         }

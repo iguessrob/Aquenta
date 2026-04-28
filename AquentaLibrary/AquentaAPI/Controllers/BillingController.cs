@@ -5,8 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 namespace AquentaAPI.Controllers
 {
     [Route("api/[controller]")]
+    [Route("[controller]")] // Fallback
     [ApiController]
-    public class BillingController : Controller
+    public class BillingController : ControllerBase
     {
         BillingServices billingServices = new BillingServices();
 
@@ -14,7 +15,7 @@ namespace AquentaAPI.Controllers
         public ActionResult<bool> AddBilling(BillingModel billing)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
             return Ok(billingServices.Add(billing));
         }
 
@@ -22,7 +23,7 @@ namespace AquentaAPI.Controllers
         public ActionResult<bool> UpdateBilling(BillingModel billing)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
             return Ok(billingServices.Update(billing));
         }
 
@@ -30,7 +31,7 @@ namespace AquentaAPI.Controllers
         public ActionResult GetAllBilling()
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             var user = billingServices.GetAll();
             return Ok(user);
@@ -40,7 +41,7 @@ namespace AquentaAPI.Controllers
         public ActionResult GetByBillingId(int id)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             var billing = billingServices.GetbyId(id);
             if (billing == null) return NotFound("Billing record not found.");
@@ -51,7 +52,7 @@ namespace AquentaAPI.Controllers
         public ActionResult<bool> DeleteBilling(int id)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
             return Ok(billingServices.Delete(id));
         }
 
@@ -61,7 +62,7 @@ namespace AquentaAPI.Controllers
             var role = HttpContext.Items["UserRole"]?.ToString();
             var requestingUserId = HttpContext.Items["UserId"] as int? ?? 0;
 
-            if (role == "Admin")
+            if (string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase))
             {
                 // Admin can view any concessioner's billing
                 var billings = billingServices.GetByConcessionerId(concessionerId);
@@ -86,7 +87,7 @@ namespace AquentaAPI.Controllers
             [FromQuery] DateTime endDate)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             if (startDate >= endDate)
                 return BadRequest("startDate must be earlier than endDate.");
@@ -99,7 +100,7 @@ namespace AquentaAPI.Controllers
         public ActionResult<int> GetLatestMonthWaterConsumption()
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             var total = billingServices.GetLatestMonthWaterConsumption();
             return Ok(total);

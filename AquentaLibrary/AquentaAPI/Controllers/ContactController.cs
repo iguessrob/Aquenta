@@ -144,7 +144,7 @@ namespace AquentaAPI.Controllers
         public ActionResult GetAllContacts()
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             var submissions = _contactSubmissionServices.GetAll();
             return Ok(submissions);
@@ -154,7 +154,7 @@ namespace AquentaAPI.Controllers
         public ActionResult GetContactById(int id)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             var submission = _contactSubmissionServices.GetById(id);
             if (submission == null)

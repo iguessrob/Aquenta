@@ -14,7 +14,7 @@ namespace AquentaAPI.Controllers
         public ActionResult<int> CreateTariffVersionFromCurrent([FromBody] TariffVersionModel request)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             if (request == null || string.IsNullOrWhiteSpace(request.VersionName))
             {
@@ -29,7 +29,7 @@ namespace AquentaAPI.Controllers
         public ActionResult<bool> UpdateTariffVersionName(int id, [FromQuery] string newName)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             if (string.IsNullOrWhiteSpace(newName)) return BadRequest("New name is required.");
             var result = tariffVersionServices.UpdateName(id, newName);
@@ -40,7 +40,7 @@ namespace AquentaAPI.Controllers
         public ActionResult GetAllTariffVersions()
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             var versions = tariffVersionServices.GetAll();
             return Ok(versions);
@@ -50,7 +50,7 @@ namespace AquentaAPI.Controllers
         public ActionResult GetActiveTariffVersion()
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             var version = tariffVersionServices.GetActiveVersion();
             return Ok(version);
@@ -60,7 +60,7 @@ namespace AquentaAPI.Controllers
         public ActionResult GetTariffVersionById(int id)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             var version = tariffVersionServices.GetById(id);
             if (version == null) return NotFound("Tariff version not found.");
@@ -71,7 +71,7 @@ namespace AquentaAPI.Controllers
         public ActionResult<bool> DeleteTariffVersion(int id)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             return Ok(tariffVersionServices.Delete(id));
         }
@@ -80,7 +80,7 @@ namespace AquentaAPI.Controllers
         public ActionResult<bool> SetActive(int id)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             var result = tariffVersionServices.SetActive(id);
             return Ok(result);

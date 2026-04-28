@@ -7,6 +7,7 @@ namespace AquentaAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Route("[controller]")] // Fallback in case /api is stripped
     public class ReportController : ControllerBase
     {
         private readonly ReportServices _reportServices = new ReportServices(new AquentaLibrary.Repositories.ReportRepository());
@@ -17,7 +18,7 @@ namespace AquentaAPI.Controllers
         private ActionResult? RequireAdmin()
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
             return null;
         }
 
@@ -591,7 +592,7 @@ namespace AquentaAPI.Controllers
             var role = HttpContext.Items["UserRole"]?.ToString();
             var requestingUserId = HttpContext.Items["UserId"] as int? ?? 0;
 
-            if (role == "Admin")
+            if (string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase))
             {
                 // Admin can view any customer detail
             }

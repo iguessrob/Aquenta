@@ -6,9 +6,10 @@ using System.Linq;
 
 namespace AquentaAPI.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
-    public class UserController : Controller
+    [Route("api/[controller]")]
+    [Route("[controller]")] // Fallback in case /api is stripped
+    public class UserController : ControllerBase
     {
         private readonly UserServices userServices = new UserServices();
         private readonly ConcessionerServices concessionerServices = new ConcessionerServices();
@@ -135,7 +136,7 @@ namespace AquentaAPI.Controllers
         public ActionResult<bool> AddUser([FromBody] UserModel user)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             if (user == null) return BadRequest("User data is required.");
             var result = userServices.Add(user);
@@ -146,7 +147,7 @@ namespace AquentaAPI.Controllers
         public ActionResult<bool> UpdateUser([FromBody] UserModel user)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             if (user == null) return BadRequest("User data is required.");
             var result = userServices.Update(user);
@@ -158,7 +159,7 @@ namespace AquentaAPI.Controllers
         public ActionResult GetAllUser()
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             var users = userServices.GetAll();
             // Return DTOs instead of raw UserModel to prevent password hash leakage
@@ -173,7 +174,7 @@ namespace AquentaAPI.Controllers
             var requestingUserId = HttpContext.Items["UserId"] as int? ?? 0;
 
             // IDOR Protection: Non-admin users can only view their own data
-            if (role != "Admin" && requestingUserId != id)
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase) && requestingUserId != id)
             {
                 return StatusCode(403, "You do not have permission to view this user.");
             }
@@ -191,7 +192,7 @@ namespace AquentaAPI.Controllers
         public ActionResult<bool> DeleteUser(int id)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             var result = userServices.Delete(id);
             return Ok(result);

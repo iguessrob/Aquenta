@@ -69,7 +69,7 @@ app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Aquenta API v1");
-    c.RoutePrefix = string.Empty;
+    // Removed c.RoutePrefix = string.Empty; to avoid root conflict
 });
 
 // 3. JWT AUTHENTICATION MIDDLEWARE
@@ -79,15 +79,15 @@ app.Use(async (context, next) =>
     
     // Define public endpoints that don't need a token
     var publicPaths = new[] { 
-        "/api/user/login", 
-        "/api/user/forgot-password", 
-        "/api/user/reset-password",
-        "/api/contact",
-        "/health",
-        "/swagger"
+        "user/login", 
+        "user/forgot-password", 
+        "user/reset-password",
+        "contact",
+        "health",
+        "swagger"
     };
 
-    if (publicPaths.Any(p => path.Contains(p)))
+    if (publicPaths.Any(p => path.Contains(p.ToLower())))
     {
         await next();
         return;
@@ -131,27 +131,12 @@ else
 
 app.UseRouting();
 app.UseAuthorization();
-app.MapControllers();
 
-app.MapGet("/health", () =>
-{
-    try
-    {
-        var connectionString = AquentaLibrary.Repositories.SqlConnectionResolver.GetWorkingConnectionString();
-        // Hide sensitive parts of connection string for safety, but show the server
-        var displayString = connectionString.Split(';')[0];
-        return Results.Ok(new { Status = "Healthy", Database = "Connected", Info = displayString });
-    }
-    catch (Exception ex)
-    {
-        var message = ex.Message;
-        if (ex.InnerException != null)
-        {
-            message += " Details: " + ex.InnerException.Message;
-        }
-        return Results.Problem(detail: message, title: "Database Connection Failed");
-    }
-});
+// Explicitly map controllers with a fallback to ensure routes are found
+app.MapControllers();
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 SeedMissingMonthlyPeriods();
 

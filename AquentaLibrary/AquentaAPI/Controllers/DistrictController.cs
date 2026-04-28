@@ -14,7 +14,7 @@ namespace AquentaAPI.Controllers
         public ActionResult<bool> AddDistrict(DistrictModel district)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
             return Ok(districtServices.Add(district));
         }
 
@@ -22,7 +22,7 @@ namespace AquentaAPI.Controllers
         public ActionResult<bool> UpdateDistrict(DistrictModel district)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
             return Ok(districtServices.Update(district));
         }
 
@@ -30,7 +30,7 @@ namespace AquentaAPI.Controllers
         public ActionResult GetAllDistrict()
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             var district = districtServices.GetAll();
             return Ok(district);
@@ -40,7 +40,7 @@ namespace AquentaAPI.Controllers
         public ActionResult GetDistrictById(int id)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             var district = districtServices.GetbyId(id);
             if (district == null) return NotFound("District not found.");
@@ -51,7 +51,7 @@ namespace AquentaAPI.Controllers
         public ActionResult<bool> DeleteDistrict(int id)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
             return Ok(districtServices.Delete(id));
         }
     }

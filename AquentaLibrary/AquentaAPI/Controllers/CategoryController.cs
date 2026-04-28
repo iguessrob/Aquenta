@@ -14,7 +14,7 @@ namespace AquentaAPI.Controllers
         public ActionResult<bool> AddCategory(CategoryModel category)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
             return Ok(categoryServices.Add(category));
         }
 
@@ -22,7 +22,7 @@ namespace AquentaAPI.Controllers
         public ActionResult<bool> UpdateCategory(CategoryModel category)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
             return Ok(categoryServices.Update(category));
         }
 
@@ -30,7 +30,7 @@ namespace AquentaAPI.Controllers
         public ActionResult GetAllCategory()
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             var user = categoryServices.GetAll();
             return Ok(user);
@@ -40,7 +40,7 @@ namespace AquentaAPI.Controllers
         public ActionResult GetByCategoryId(int id)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             var category = categoryServices.GetbyId(id);
             if (category == null) return NotFound("Category not found.");
@@ -51,7 +51,7 @@ namespace AquentaAPI.Controllers
         public ActionResult<bool> DeleteCategory(int id)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
             return Ok(categoryServices.Delete(id));
         }
     }

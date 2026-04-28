@@ -14,7 +14,7 @@ namespace AquentaAPI.Controllers
         public ActionResult<bool> AddPeriod(PeriodModel period)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
             return Ok(periodServices.Add(period));
         }
 
@@ -22,7 +22,7 @@ namespace AquentaAPI.Controllers
         public ActionResult<bool> UpdatePeriod(PeriodModel period)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
             return Ok(periodServices.Update(period));
         }
 
@@ -30,7 +30,7 @@ namespace AquentaAPI.Controllers
         public ActionResult GetAllPeriod()
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             var period = periodServices.GetAll();
             return Ok(period);
@@ -40,7 +40,7 @@ namespace AquentaAPI.Controllers
         public ActionResult GetPeriodById(int id)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             var period = periodServices.GetbyId(id);
             if (period == null) return NotFound("Period not found.");
@@ -51,7 +51,7 @@ namespace AquentaAPI.Controllers
         public ActionResult<bool> DeletePeriod(int id)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
             return Ok(periodServices.Delete(id));
         }
     }

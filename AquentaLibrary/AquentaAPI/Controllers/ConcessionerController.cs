@@ -5,8 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 namespace AquentaAPI.Controllers
 {
     [Route("api/[controller]")]
+    [Route("[controller]")] // Fallback
     [ApiController]
-    public class ConcessionerController : Controller
+    public class ConcessionerController : ControllerBase
     {
         ConcessionerServices concessionerServices = new ConcessionerServices();
 
@@ -23,7 +24,7 @@ namespace AquentaAPI.Controllers
         public ActionResult<bool> AddConcessioner(ConcessionerModel concessioner)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             NormalizeOptionalFields(concessioner);
             return Ok(concessionerServices.Add(concessioner));
@@ -33,7 +34,7 @@ namespace AquentaAPI.Controllers
         public ActionResult<bool> UpdateConcessioner(ConcessionerModel concessioner)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             NormalizeOptionalFields(concessioner);
             return Ok(concessionerServices.Update(concessioner));
@@ -43,7 +44,7 @@ namespace AquentaAPI.Controllers
         public ActionResult GetAllConcessioners()
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             var user = concessionerServices.GetAll();
             return Ok(user);
@@ -53,7 +54,7 @@ namespace AquentaAPI.Controllers
         public ActionResult GetAllActiveConcessioners()
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             var user = concessionerServices.GetAllActive();
             return Ok(user);
@@ -72,7 +73,7 @@ namespace AquentaAPI.Controllers
             }
 
             // IDOR Protection: Non-admin users can only view their own concessioner record
-            if (role != "Admin" && concessioner.UserId != requestingUserId)
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase) && concessioner.UserId != requestingUserId)
             {
                 return StatusCode(403, "You do not have permission to view this record.");
             }
@@ -84,7 +85,7 @@ namespace AquentaAPI.Controllers
         public ActionResult<bool> DeleteConcessioner(int id)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             return Ok(concessionerServices.Delete(id));
         }
@@ -93,7 +94,7 @@ namespace AquentaAPI.Controllers
         public ActionResult<int> GetTotalActiveConcessioners([FromQuery] string status)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             if (string.IsNullOrWhiteSpace(status))
                 return BadRequest("status query parameter is required.");
@@ -109,7 +110,7 @@ namespace AquentaAPI.Controllers
             var requestingUserId = HttpContext.Items["UserId"] as int? ?? 0;
 
             // IDOR Protection: Non-admin users can only look up their own concessioner record
-            if (role != "Admin" && requestingUserId != userId)
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase) && requestingUserId != userId)
             {
                 return StatusCode(403, "You do not have permission to view this record.");
             }

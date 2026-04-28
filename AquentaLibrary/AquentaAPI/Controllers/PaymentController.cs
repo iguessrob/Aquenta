@@ -5,8 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 namespace AquentaAPI.Controllers
 {
     [Route("api/[controller]")]
+    [Route("[controller]")] // Fallback
     [ApiController]
-    public class PaymentController : Controller
+    public class PaymentController : ControllerBase
     {
         PaymentServices paymentServices = new PaymentServices();
 
@@ -14,7 +15,7 @@ namespace AquentaAPI.Controllers
         public ActionResult<bool> AddPayment(PaymentModel payment)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
             return Ok(paymentServices.Add(payment));
         }
 
@@ -22,7 +23,7 @@ namespace AquentaAPI.Controllers
         public ActionResult<bool> UpdatePayment(PaymentModel payment )
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
             return Ok(paymentServices.Update(payment));
         }
 
@@ -30,7 +31,7 @@ namespace AquentaAPI.Controllers
         public ActionResult GetAllPayment()
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             var payment = paymentServices.GetAll();
             return Ok(payment);
@@ -40,7 +41,7 @@ namespace AquentaAPI.Controllers
         public ActionResult GetPaymentById(int id)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             var payment = paymentServices.GetbyId(id);
             if (payment == null) return NotFound("Payment record not found.");
@@ -51,7 +52,7 @@ namespace AquentaAPI.Controllers
         public ActionResult<bool> DeletePayment(int id)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
             return Ok(paymentServices.Delete(id));
         }
 
@@ -83,7 +84,7 @@ namespace AquentaAPI.Controllers
         public ActionResult DistributePayment([FromBody] DistributePaymentRequest request)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             try
             {
@@ -103,7 +104,7 @@ namespace AquentaAPI.Controllers
         public ActionResult ReverseDistribution([FromBody] ReverseDistributionRequest request)
         {
             var role = HttpContext.Items["UserRole"]?.ToString();
-            if (role != "Admin") return Unauthorized("Administrative privileges required.");
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             try
             {
