@@ -1,5 +1,13 @@
 {
   "trailingSlash": "auto",
+  "globalHeaders": {
+    "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://aquentawebapp-bgcjgpgfbbfddmb6.southeastasia-01.azurewebsites.net;",
+    "X-Frame-Options": "DENY",
+    "X-Content-Type-Options": "nosniff",
+    "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+    "Referrer-Policy": "same-origin",
+    "Permissions-Policy": "geolocation=(), camera=(), microphone=()"
+  },
   "navigationFallback": {
     "rewrite": "/index.html",
     "exclude": ["/assets/*", "/script/*", "/styles/*", "/api/*"]

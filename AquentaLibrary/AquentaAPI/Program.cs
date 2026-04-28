@@ -53,10 +53,15 @@ var app = builder.Build();
 // SECURITY: Add cache control headers
 app.Use(async (context, next) =>
 {
-    // Apply no-cache headers to all responses
+    // Apply security headers to all responses
     context.Response.Headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0, proxy-revalidate";
     context.Response.Headers["Pragma"] = "no-cache";
     context.Response.Headers["Expires"] = "0";
+    context.Response.Headers["X-Frame-Options"] = "DENY";
+    context.Response.Headers["X-Content-Type-Options"] = "nosniff";
+    context.Response.Headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload";
+    context.Response.Headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://aquentawebapp-bgcjgpgfbbfddmb6.southeastasia-01.azurewebsites.net;";
+    context.Response.Headers["Referrer-Policy"] = "same-origin";
 
     await next();
 });
