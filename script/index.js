@@ -46,6 +46,119 @@ function toggleFAQ(index) {
     }
 }
 
+function getEscapeHtml() {
+    if (window.AquentaApiClient && typeof window.AquentaApiClient.escapeHtml === 'function') {
+        return window.AquentaApiClient.escapeHtml;
+    }
+
+    return function (unsafe) {
+        return String(unsafe ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    };
+}
+
+function formatMultilineText(text) {
+    return getEscapeHtml()(text || '').replace(/\n/g, '<br>');
+}
+
+function extractIframeSrc(embedCode) {
+    if (!embedCode) return '';
+
+    const temp = document.createElement('div');
+    temp.innerHTML = embedCode;
+    const iframe = temp.querySelector('iframe');
+    if (iframe && iframe.getAttribute('src')) {
+        return iframe.getAttribute('src');
+    }
+
+    const srcMatch = String(embedCode).match(/src=["']([^"']+)["']/i);
+    return srcMatch ? srcMatch[1] : '';
+}
+
+function renderFaqSection(faqs) {
+    const container = document.getElementById('landingPageFaqList');
+    if (!container || !Array.isArray(faqs) || !faqs.length) {
+        return;
+    }
+
+    const escapeHtml = getEscapeHtml();
+    container.innerHTML = faqs.map((faq, index) => `
+        <div class="faq-item">
+            <button class="faq-question" onclick="toggleFAQ(${index})">
+                <span class="faq-question-text">${escapeHtml(faq.question || '')}</span>
+                <div class="faq-toggle" id="toggle-${index}">
+                    <svg viewBox="0 0 24 24">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                </div>
+            </button>
+            <div class="faq-answer" id="answer-${index}">
+                <p class="faq-answer-text">${escapeHtml(faq.answer || '')}</p>
+            </div>
+        </div>
+    `).join('');
+
+    currentOpenIndex = null;
+}
+
+function renderContactInfo(settings) {
+    if (!settings) return;
+
+    const officeName = settings.officeName || '';
+    const address = settings.address || '';
+    const officeHours = settings.officeHours || '';
+    const landlineNumber = settings.landlineNumber || '';
+    const emailAddress = settings.emailAddress || '';
+    const mapEmbedCode = settings.googleMapsEmbedCode || '';
+
+    const addressEl = document.getElementById('landingPageAddress');
+    if (addressEl) {
+        addressEl.innerHTML = `${getEscapeHtml()(officeName)}<br>${formatMultilineText(address)}`;
+    }
+
+    const hoursEl = document.getElementById('landingPageOfficeHours');
+    if (hoursEl) {
+        hoursEl.innerHTML = formatMultilineText(officeHours);
+    }
+
+    const landlineEl = document.getElementById('landingPageLandline');
+    if (landlineEl) {
+        landlineEl.textContent = landlineNumber;
+    }
+
+    const emailEl = document.getElementById('landingPageEmail');
+    if (emailEl) {
+        emailEl.textContent = emailAddress;
+    }
+
+    const mapFrame = document.getElementById('landingPageMapFrame');
+    const mapSrc = extractIframeSrc(mapEmbedCode);
+    if (mapFrame && mapSrc) {
+        mapFrame.src = mapSrc;
+    }
+}
+
+async function loadLandingPageContent() {
+    if (!window.AquentaApiClient || typeof window.AquentaApiClient.getLandingPage !== 'function') {
+        return;
+    }
+
+    try {
+        const payload = await window.AquentaApiClient.getLandingPage();
+        if (!payload) return;
+
+        renderContactInfo(payload.settings || {});
+        renderFaqSection(payload.faqs || []);
+    } catch (error) {
+        console.warn('Unable to load landing page content from API:', error);
+    }
+}
+
 // Contact Form
 function updateCharCount() {
     const messageField = document.getElementById('messageField');
@@ -230,6 +343,8 @@ async function handleSubmit(event) {
 
 // Get Started button navigation
 document.addEventListener('DOMContentLoaded', function() {
+    loadLandingPageContent();
+
     const getStartedBtn = document.querySelector('.hero-btn');
     if (getStartedBtn) {
         getStartedBtn.addEventListener('click', function() {

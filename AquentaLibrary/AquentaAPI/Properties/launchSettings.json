@@ -16,7 +16,8 @@
       "launchUrl": "swagger",
       "applicationUrl": "http://localhost:5024",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "AQUENTA_SQL_CONNECTION": "Server=(localdb)\\MSSQLLocalDB;Database=AquentaDB;Trusted_Connection=True;MultipleActiveResultSets=True;TrustServerCertificate=True;"
       }
     },
     "https": {
@@ -26,7 +27,8 @@
       "launchUrl": "swagger",
       "applicationUrl": "https://localhost:7049;http://localhost:5024",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "AQUENTA_SQL_CONNECTION": "Server=(localdb)\\MSSQLLocalDB;Database=AquentaDB;Trusted_Connection=True;MultipleActiveResultSets=True;TrustServerCertificate=True;"
       }
     },
     "IIS Express": {
@@ -34,7 +36,8 @@
       "launchBrowser": true,
       "launchUrl": "swagger",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "AQUENTA_SQL_CONNECTION": "Server=(localdb)\\MSSQLLocalDB;Database=AquentaDB;Trusted_Connection=True;MultipleActiveResultSets=True;TrustServerCertificate=True;"
       }
     }
   }
