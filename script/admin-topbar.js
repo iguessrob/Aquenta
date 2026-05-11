@@ -134,6 +134,34 @@
     const dropdown = document.getElementById('adminDropdown');
     const logoutBtn = document.getElementById('adminLogoutBtn');
 
+    function ensureLandingPageEditorLink() {
+      if (!dropdown || dropdown.querySelector('[data-admin-link="landing-page-editor"]')) {
+        return;
+      }
+
+      const editorLink = document.createElement('a');
+      editorLink.className = 'profile-dropdown-item';
+      editorLink.href = '/landing-page-editor.html';
+      editorLink.dataset.adminLink = 'landing-page-editor';
+      editorLink.innerHTML = `
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 4h12a2 2 0 0 1 2 2v14H6a2 2 0 0 1-2-2V4z"></path>
+          <path d="M8 4v14"></path>
+          <path d="M4 8h10"></path>
+          <path d="M9 12h4"></path>
+        </svg>
+        <span>Landing Page Editor</span>
+      `;
+
+      editorLink.addEventListener('click', () => {
+        dropdown.classList.remove('show');
+        infoBtn?.querySelector('.admin-profile')?.classList.remove('active');
+      });
+
+      const insertBeforeNode = logoutBtn || dropdown.firstElementChild;
+      dropdown.insertBefore(editorLink, insertBeforeNode);
+    }
+
     if (infoBtn && dropdown) {
       infoBtn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -149,6 +177,8 @@
       });
     }
 
+    ensureLandingPageEditorLink();
+
     if (logoutBtn) {
       logoutBtn.addEventListener('click', () => {
         // Clear all session data
@@ -157,8 +187,8 @@
         sessionStorage.clear();
         
         // Prevent back-navigation via history manipulation
-        window.location.href = '/auth';
-        window.history.replaceState({ isLoggedOut: true }, '', '/auth');
+        window.location.href = '/auth.html';
+        window.history.replaceState({ isLoggedOut: true }, '', '/auth.html');
       });
     }
   }
