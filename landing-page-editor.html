@@ -365,7 +365,7 @@
                 <line x1="3" y1="18" x2="21" y2="18"></line>
               </svg>
             </button>
-            <h1 class="page-title">Landing Page Content</h1>
+            <h1 class="page-title">Landing Page Editor</h1>
           </div>
           <div class="topbar-right">
             <div class="admin-info-wrapper">
@@ -413,8 +413,8 @@
               <section class="editor-card">
                 <div class="card-header">
                   <div>
-                    <h3 class="card-title">Page settings</h3>
-                    <p class="card-subtitle">These values control the landing page title, intro copy, and the office details displayed below the hero section.</p>
+                    <h3 class="card-title">Page Settings</h3>
+                    <p class="card-subtitle">Configure the landing page title and subtitle that appear in the hero section.</p>
                   </div>
                   <div class="status-pill" id="editorStatus">Ready</div>
                 </div>
@@ -430,73 +430,94 @@
                       <input class="field-input" id="pageSubtitleField" type="text" maxlength="500">
                     </div>
                   </div>
-
-                  <div class="field-grid cols-2" style="margin-top: 16px;">
-                    <div>
-                      <label class="field-label" for="officeNameField">Office name</label>
-                      <input class="field-input" id="officeNameField" type="text" maxlength="200">
-                    </div>
-                    <div>
-                      <label class="field-label" for="landlineNumberField">Landline number</label>
-                      <input class="field-input" id="landlineNumberField" type="text" maxlength="50">
-                    </div>
-                  </div>
-
-                  <div class="field-grid cols-2" style="margin-top: 16px;">
-                    <div>
-                      <label class="field-label" for="addressLine1Field">Address line 1</label>
-                      <input class="field-input" id="addressLine1Field" type="text" maxlength="200">
-                    </div>
-                    <div>
-                      <label class="field-label" for="addressLine2Field">Address line 2</label>
-                      <input class="field-input" id="addressLine2Field" type="text" maxlength="200">
-                    </div>
-                  </div>
-
-                  <div class="field-grid cols-2" style="margin-top: 16px;">
-                    <div>
-                      <label class="field-label" for="officeHoursWeekdaysField">Weekday hours</label>
-                      <input class="field-input" id="officeHoursWeekdaysField" type="text" maxlength="150">
-                    </div>
-                    <div>
-                      <label class="field-label" for="officeHoursClosedField">Closed schedule</label>
-                      <input class="field-input" id="officeHoursClosedField" type="text" maxlength="150">
-                    </div>
-                  </div>
-
-                  <div class="field-grid cols-2" style="margin-top: 16px;">
-                    <div>
-                      <label class="field-label" for="emailAddressField">Email address</label>
-                      <input class="field-input" id="emailAddressField" type="email" maxlength="120">
-                    </div>
-                    <div>
-                      <label class="field-label" for="googleMapsPlaceIdField">Google Maps place ID</label>
-                      <input class="field-input" id="googleMapsPlaceIdField" type="text" maxlength="200">
-                    </div>
-                  </div>
-
-                  <div class="field-grid cols-2" style="margin-top: 16px;">
-                    <div>
-                      <label class="field-label" for="googleMapsEmbedUrlField">Google Maps embed URL</label>
-                      <input class="field-input" id="googleMapsEmbedUrlField" type="text" maxlength="1000">
-                    </div>
-                    <div>
-                      <label class="field-label" for="mapZoomLevelField">Map zoom level</label>
-                      <input class="field-input" id="mapZoomLevelField" type="number" min="1" max="21">
-                    </div>
-                  </div>
-
-                  <div class="field-grid cols-2" style="margin-top: 16px;">
-                    <div>
-                      <label class="field-label" for="mapLatitudeField">Latitude</label>
-                      <input class="field-input" id="mapLatitudeField" type="text" maxlength="30" placeholder="Optional">
-                    </div>
-                    <div>
-                      <label class="field-label" for="mapLongitudeField">Longitude</label>
-                      <input class="field-input" id="mapLongitudeField" type="text" maxlength="30" placeholder="Optional">
-                    </div>
-                  </div>
                 </form>
+              </section>
+
+              <section class="editor-card">
+                <div class="card-header">
+                  <div>
+                    <h3 class="card-title">Contact Information</h3>
+                    <p class="card-subtitle">Update office details, hours, phone, and email displayed on the landing page.</p>
+                  </div>
+                </div>
+
+                <div class="field-grid cols-2">
+                  <div>
+                    <label class="field-label" for="officeNameField">Office name</label>
+                    <input class="field-input" id="officeNameField" type="text" maxlength="200" form="landingPageForm">
+                  </div>
+                  <div>
+                    <label class="field-label" for="landlineNumberField">Landline number</label>
+                    <input class="field-input" id="landlineNumberField" type="text" maxlength="50" form="landingPageForm">
+                  </div>
+                </div>
+
+                <div class="field-grid cols-2" style="margin-top: 16px;">
+                  <div>
+                    <label class="field-label" for="addressLine1Field">Address line 1</label>
+                    <input class="field-input" id="addressLine1Field" type="text" maxlength="200" form="landingPageForm">
+                  </div>
+                  <div>
+                    <label class="field-label" for="addressLine2Field">Address line 2</label>
+                    <input class="field-input" id="addressLine2Field" type="text" maxlength="200" form="landingPageForm">
+                  </div>
+                </div>
+
+                <div class="field-grid cols-2" style="margin-top: 16px;">
+                  <div>
+                    <label class="field-label" for="officeHoursWeekdaysField">Weekday hours</label>
+                    <input class="field-input" id="officeHoursWeekdaysField" type="text" maxlength="150" form="landingPageForm">
+                  </div>
+                  <div>
+                    <label class="field-label" for="officeHoursClosedField">Closed schedule</label>
+                    <input class="field-input" id="officeHoursClosedField" type="text" maxlength="150" form="landingPageForm">
+                  </div>
+                </div>
+
+                <div class="field-grid" style="margin-top: 16px;">
+                  <div>
+                    <label class="field-label" for="emailAddressField">Email address</label>
+                    <input class="field-input" id="emailAddressField" type="email" maxlength="120" form="landingPageForm">
+                  </div>
+                </div>
+              </section>
+
+              <section class="editor-card">
+                <div class="card-header">
+                  <div>
+                    <h3 class="card-title">Map Location</h3>
+                    <p class="card-subtitle">Configure the Google Maps embed, zoom level, and location coordinates.</p>
+                  </div>
+                </div>
+
+                <div class="field-grid">
+                  <div>
+                    <label class="field-label" for="googleMapsEmbedUrlField">Google Maps embed URL</label>
+                    <input class="field-input" id="googleMapsEmbedUrlField" type="text" maxlength="1000" form="landingPageForm">
+                  </div>
+                </div>
+
+                <div class="field-grid cols-2" style="margin-top: 16px;">
+                  <div>
+                    <label class="field-label" for="googleMapsPlaceIdField">Google Maps place ID</label>
+                    <input class="field-input" id="googleMapsPlaceIdField" type="text" maxlength="200" form="landingPageForm">
+                  </div>
+                  <div>
+                    <label class="field-label" for="mapZoomLevelField">Map zoom level</label>
+                    <input class="field-input" id="mapZoomLevelField" type="number" min="1" max="21" form="landingPageForm">
+                  </div>
+                </div>
+
+                <div class="field-grid cols-2" style="margin-top: 16px;">
+                  <div>
+                    <label class="field-label" for="mapLatitudeField">Latitude</label>
+                    <input class="field-input" id="mapLatitudeField" type="text" maxlength="30" placeholder="Optional" form="landingPageForm">
+                  </div>
+                  <div>
+                    <label class="field-label" for="mapLongitudeField">Longitude</label>
+                    <input class="field-input" id="mapLongitudeField" type="text" maxlength="30" placeholder="Optional" form="landingPageForm">
+                  </div>
+                </div>
               </section>
 
               <section class="editor-card">
