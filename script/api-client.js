@@ -28,7 +28,9 @@
   async function request(path, options) {
     const baseUrl = getApiBaseUrl();
     const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-    const response = await fetch(`${baseUrl}${normalizedPath}`, {
+    const fullUrl = `${baseUrl}${normalizedPath}`;
+    console.log('[API-CLIENT] Attempting request to:', fullUrl);
+    const response = await fetch(fullUrl, {
       headers: {
         'Content-Type': 'application/json',
         ...(options && options.headers ? options.headers : {}),
