@@ -6,27 +6,12 @@ BEGIN
     CREATE TABLE dbo.tbl_LandingPageSettings
     (
         LandingPageSettingsID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-        PageKey NVARCHAR(50) NOT NULL CONSTRAINT UQ_tbl_LandingPageSettings_PageKey UNIQUE,
-        PageTitle NVARCHAR(200) NOT NULL,
-        PageSubtitle NVARCHAR(500) NULL,
         OfficeName NVARCHAR(200) NOT NULL,
-        AddressLine1 NVARCHAR(200) NOT NULL,
-        AddressLine2 NVARCHAR(200) NULL,
-        OfficeHoursWeekdays NVARCHAR(150) NULL,
-        OfficeHoursClosed NVARCHAR(150) NULL,
+        Address NVARCHAR(500) NOT NULL,
+        OfficeHours NVARCHAR(250) NOT NULL,
         LandlineNumber NVARCHAR(50) NULL,
         EmailAddress NVARCHAR(120) NULL,
-        GoogleMapsEmbedUrl NVARCHAR(1000) NULL,
-        GoogleMapsPlaceId NVARCHAR(200) NULL,
-        MapLatitude DECIMAL(10, 7) NULL,
-        MapLongitude DECIMAL(10, 7) NULL,
-        MapZoomLevel INT NULL CONSTRAINT CK_tbl_LandingPageSettings_MapZoomLevel CHECK (MapZoomLevel IS NULL OR (MapZoomLevel BETWEEN 1 AND 21)),
-        IsActive BIT NOT NULL CONSTRAINT DF_tbl_LandingPageSettings_IsActive DEFAULT (1),
-        CreatedAt DATETIME2 NOT NULL CONSTRAINT DF_tbl_LandingPageSettings_CreatedAt DEFAULT SYSUTCDATETIME(),
-        UpdatedAt DATETIME2 NOT NULL CONSTRAINT DF_tbl_LandingPageSettings_UpdatedAt DEFAULT SYSUTCDATETIME(),
-        UpdatedBy NVARCHAR(100) NULL,
-        CONSTRAINT CK_tbl_LandingPageSettings_MapLatitude CHECK (MapLatitude IS NULL OR (MapLatitude BETWEEN -90 AND 90)),
-        CONSTRAINT CK_tbl_LandingPageSettings_MapLongitude CHECK (MapLongitude IS NULL OR (MapLongitude BETWEEN -180 AND 180))
+        GoogleMapsEmbedCode NVARCHAR(MAX) NULL
     );
 END
 GO
@@ -37,52 +22,73 @@ BEGIN
     (
         LandingPageFaqID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
         Question NVARCHAR(300) NOT NULL,
-        Answer NVARCHAR(1000) NOT NULL,
-        SortOrder INT NOT NULL CONSTRAINT DF_tbl_LandingPageFaq_SortOrder DEFAULT (0),
-        IsActive BIT NOT NULL CONSTRAINT DF_tbl_LandingPageFaq_IsActive DEFAULT (1),
+        Answer NVARCHAR(MAX) NOT NULL,
+        SortOrder INT NOT NULL CONSTRAINT DF_tbl_LandingPageFaq_SortOrder DEFAULT (0)
     );
 END
 GO
 
-IF NOT EXISTS (SELECT 1 FROM dbo.tbl_LandingPageSettings WHERE PageKey = 'Home')
+IF NOT EXISTS (SELECT 1 FROM dbo.tbl_LandingPageSettings)
 BEGIN
     INSERT INTO dbo.tbl_LandingPageSettings
     (
-        PageKey,
-        PageTitle,
-        PageSubtitle,
         OfficeName,
-        AddressLine1,
-        AddressLine2,
-        OfficeHoursWeekdays,
-        OfficeHoursClosed,
+        Address,
+        OfficeHours,
         LandlineNumber,
         EmailAddress,
-        GoogleMapsEmbedUrl,
-        GoogleMapsPlaceId,
-        MapLatitude,
-        MapLongitude,
-        MapZoomLevel,
-        UpdatedBy
+        GoogleMapsEmbedCode
     )
     VALUES
     (
-        'Home',
-        'Frequently Asked Questions',
-        'Keep the landing page content current without editing HTML.',
         'St. Joseph Water Billing Cooperative',
         'San Jose Sto. Tomas City Batangas',
-        NULL,
-        'Monday - Saturday: 8:00 AM - 5:00 PM',
-        'Sunday & Holidays: Closed',
+        'Monday - Saturday: 8:00AM - 5:00PM' + CHAR(13) + CHAR(10) + 'Sunday & Holidays: Closed',
         '0433329827',
         'stjosephstb@gmail.com',
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        15,
-        'SYSTEM'
+        '<iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d266.94339329535796!2d121.19827834920255!3d14.073350479111523!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33bd6897606f6737%3A0xa29996840e78ee8!2sSt.%20Joseph%20Multipurpose%20Cooperative!5e0!3m2!1sen!2sph!4v1770888268426!5m2!1sen!2sph" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="St. Joseph Multipurpose Cooperative Location"></iframe>'
+    );
+END
+GO
+
+IF NOT EXISTS (SELECT 1 FROM dbo.tbl_LandingPageFaq)
+BEGIN
+    INSERT INTO dbo.tbl_LandingPageFaq
+    (
+        Question,
+        Answer,
+        SortOrder
+    )
+    VALUES
+    (
+        'Can I update my personal information online?',
+        'Basic account details may be viewable online, but major changes (like name or address) must be requested at the cooperative office for verification.',
+        1
+    ),
+    (
+        'What happens if I miss a payment?',
+        'Late payments may incur additional charges. Please contact our office immediately if you anticipate difficulty meeting a payment deadline to discuss possible arrangements.',
+        2
+    ),
+    (
+        'I forgot my password. What should I do?',
+        'Click on the "Forgot Password" link on the login page. You''ll receive instructions via email to reset your password securely.',
+        3
+    ),
+    (
+        'Why was a penalty added to my bill?',
+        'Penalties are typically added for late payments or missed payment deadlines. Check your billing statement for specific details or contact our office for clarification.',
+        4
+    ),
+    (
+        'Is my personal and billing information secure?',
+        'Yes, we use industry-standard encryption and security measures to protect all customer data. Your information is stored securely and is only accessible to authorized personnel.',
+        5
+    ),
+    (
+        'What if I cannot log in to my account?',
+        'First, try resetting your password. If issues persist, contact our support team with your account number and we''ll help you regain access to your account.',
+        6
     );
 END
 GO
@@ -90,11 +96,11 @@ GO
 IF NOT EXISTS (
     SELECT 1
     FROM sys.indexes
-    WHERE name = 'IX_tbl_LandingPageFaq_IsActive_SortOrder'
+    WHERE name = 'IX_tbl_LandingPageFaq_SortOrder'
       AND object_id = OBJECT_ID('dbo.tbl_LandingPageFaq')
 )
 BEGIN
-    CREATE INDEX IX_tbl_LandingPageFaq_IsActive_SortOrder
-        ON dbo.tbl_LandingPageFaq (IsActive, SortOrder, LandingPageFaqID);
+    CREATE INDEX IX_tbl_LandingPageFaq_SortOrder
+        ON dbo.tbl_LandingPageFaq (SortOrder, LandingPageFaqID);
 END
 GO
