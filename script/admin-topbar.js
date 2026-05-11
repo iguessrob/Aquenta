@@ -141,7 +141,7 @@
 
       const editorLink = document.createElement('a');
       editorLink.className = 'profile-dropdown-item';
-      editorLink.href = '/landing-page-editor.html';
+      editorLink.href = '/landing-page-editor';
       editorLink.dataset.adminLink = 'landing-page-editor';
       editorLink.innerHTML = `
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -187,8 +187,8 @@
         sessionStorage.clear();
         
         // Prevent back-navigation via history manipulation
-        window.location.href = '/auth.html';
-        window.history.replaceState({ isLoggedOut: true }, '', '/auth.html');
+        window.location.href = '/auth';
+        window.history.replaceState({ isLoggedOut: true }, '', '/auth');
       });
     }
   }
