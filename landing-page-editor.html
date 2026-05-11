@@ -101,9 +101,9 @@
 
     .editor-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.85fr);
+      grid-template-columns: 1fr;
       gap: 20px;
-      align-items: start;
+      max-width: 900px;
     }
 
     .editor-column {
@@ -113,27 +113,31 @@
 
     .editor-card,
     .preview-card {
-      padding: 20px;
+      padding: 32px;
     }
 
     .card-header {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
       gap: 12px;
-      margin-bottom: 16px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #e2e8f0;
     }
 
     .card-title {
       margin: 0;
-      font-size: 20px;
+      font-size: 24px;
+      font-weight: 700;
       color: #0f172a;
     }
 
     .card-subtitle {
-      margin: 6px 0 0;
+      margin: 8px 0 0;
       color: #64748b;
       line-height: 1.5;
+      font-size: 14px;
     }
 
     .status-pill {
@@ -194,9 +198,22 @@
     .faq-toolbar {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
       gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .faq-instructions {
+      background: #f0f9ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 12px;
+      padding: 14px;
       margin-bottom: 16px;
+      font-size: 13px;
+      color: #0369a1;
+      line-height: 1.5;
     }
 
     .faq-editor-list {
@@ -249,13 +266,25 @@
       background: #f8fafc;
     }
 
+    .field-textarea.large-embed {
+      min-height: 200px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+    }
+
+    .map-preview-container {
+      margin-top: 16px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+    }
+
     .preview-map {
       width: 100%;
-      min-height: 280px;
+      min-height: 400px;
       border: 0;
-      border-radius: 18px;
       background: #f1f5f9;
-      margin-bottom: 16px;
+      margin-bottom: 0;
     }
 
     .preview-block {
@@ -395,166 +424,93 @@
 
       <main class="content">
         <div class="editor-shell">
-          <section class="hero-panel">
-            <div>
-              <div class="eyebrow">Homepage CMS</div>
-              <h2 class="hero-title">Manage FAQs, contact details, and map location in one place.</h2>
-              <p class="hero-copy">This editor is the first implementation step for turning the landing page into admin-managed content. It is wired to persist through the API when available and falls back to a local draft so the workflow stays usable during backend rollout.</p>
-            </div>
-            <div class="hero-actions">
-              <button type="button" class="action-btn" id="loadLandingPageBtn">Load latest</button>
-              <button type="button" class="ghost-btn" id="resetLandingPageBtn">Reset draft</button>
-              <button type="submit" form="landingPageForm" class="primary-btn" id="saveLandingPageBtn">Save changes</button>
-            </div>
-          </section>
-
           <div class="editor-grid">
             <div class="editor-column">
-              <section class="editor-card">
-                <div class="card-header">
-                  <div>
-                    <h3 class="card-title">Page Settings</h3>
-                    <p class="card-subtitle">Configure the landing page title and subtitle that appear in the hero section.</p>
-                  </div>
-                  <div class="status-pill" id="editorStatus">Ready</div>
-                </div>
+              <form id="landingPageForm"></form>
 
-                <form id="landingPageForm">
-                  <div class="field-grid cols-2">
-                    <div>
-                      <label class="field-label" for="pageTitleField">Page title</label>
-                      <input class="field-input" id="pageTitleField" type="text" maxlength="200">
-                    </div>
-                    <div>
-                      <label class="field-label" for="pageSubtitleField">Page subtitle</label>
-                      <input class="field-input" id="pageSubtitleField" type="text" maxlength="500">
-                    </div>
+              <section class="editor-card">
+                <div class="faq-toolbar">
+                  <div>
+                    <h3 class="card-title">FAQ Management</h3>
+                    <p class="card-subtitle">Add, edit, or remove frequently asked questions</p>
                   </div>
-                </form>
+                  <button type="button" class="primary-btn" id="addFaqBtn">+ Add FAQ</button>
+                </div>
+                <div class="faq-editor-list" id="faqEditorList"></div>
               </section>
 
               <section class="editor-card">
                 <div class="card-header">
                   <div>
-                    <h3 class="card-title">Contact Information</h3>
-                    <p class="card-subtitle">Update office details, hours, phone, and email displayed on the landing page.</p>
+                    <h3 class="card-title">Office Information</h3>
+                    <p class="card-subtitle">Update your office contact details and hours</p>
                   </div>
                 </div>
 
-                <div class="field-grid cols-2">
+                <div class="field-grid">
                   <div>
-                    <label class="field-label" for="officeNameField">Office name</label>
+                    <label class="field-label" for="officeNameField">Office Name</label>
                     <input class="field-input" id="officeNameField" type="text" maxlength="200" form="landingPageForm">
-                  </div>
-                  <div>
-                    <label class="field-label" for="landlineNumberField">Landline number</label>
-                    <input class="field-input" id="landlineNumberField" type="text" maxlength="50" form="landingPageForm">
-                  </div>
-                </div>
-
-                <div class="field-grid cols-2" style="margin-top: 16px;">
-                  <div>
-                    <label class="field-label" for="addressLine1Field">Address line 1</label>
-                    <input class="field-input" id="addressLine1Field" type="text" maxlength="200" form="landingPageForm">
-                  </div>
-                  <div>
-                    <label class="field-label" for="addressLine2Field">Address line 2</label>
-                    <input class="field-input" id="addressLine2Field" type="text" maxlength="200" form="landingPageForm">
-                  </div>
-                </div>
-
-                <div class="field-grid cols-2" style="margin-top: 16px;">
-                  <div>
-                    <label class="field-label" for="officeHoursWeekdaysField">Weekday hours</label>
-                    <input class="field-input" id="officeHoursWeekdaysField" type="text" maxlength="150" form="landingPageForm">
-                  </div>
-                  <div>
-                    <label class="field-label" for="officeHoursClosedField">Closed schedule</label>
-                    <input class="field-input" id="officeHoursClosedField" type="text" maxlength="150" form="landingPageForm">
                   </div>
                 </div>
 
                 <div class="field-grid" style="margin-top: 16px;">
                   <div>
-                    <label class="field-label" for="emailAddressField">Email address</label>
+                    <label class="field-label" for="addressLine1Field">Address</label>
+                    <textarea class="field-textarea" id="addressLine1Field" maxlength="500" form="landingPageForm" placeholder="Enter full address"></textarea>
+                  </div>
+                </div>
+
+                <div class="field-grid cols-2" style="margin-top: 16px;">
+                  <div>
+                    <label class="field-label" for="officeHoursWeekdaysField">Office Hours</label>
+                    <textarea class="field-textarea" id="officeHoursWeekdaysField" maxlength="200" form="landingPageForm" placeholder="e.g., Monday - Saturday: 8:00AM - 5:00PM"></textarea>
+                  </div>
+                  <div>
+                    <label class="field-label" for="landlineNumberField">Mobile Number</label>
+                    <input class="field-input" id="landlineNumberField" type="text" maxlength="50" form="landingPageForm" placeholder="e.g., 0900-000-0000">
+                  </div>
+                </div>
+
+                <div class="field-grid" style="margin-top: 16px;">
+                  <div>
+                    <label class="field-label" for="emailAddressField">Email Address</label>
                     <input class="field-input" id="emailAddressField" type="email" maxlength="120" form="landingPageForm">
                   </div>
                 </div>
+
+                <button type="submit" form="landingPageForm" class="primary-btn" style="margin-top: 20px;" id="saveContactBtn">Save Changes</button>
               </section>
 
               <section class="editor-card">
                 <div class="card-header">
                   <div>
                     <h3 class="card-title">Map Location</h3>
-                    <p class="card-subtitle">Configure the Google Maps embed, zoom level, and location coordinates.</p>
+                    <p class="card-subtitle">Update the pinned location on your office map</p>
                   </div>
+                </div>
+
+                <div class="faq-instructions">
+                  <strong>📍 Google Maps Embed Code</strong><br>
+                  Go to Google Maps → Share → Embed a map → Copy the HTML code and paste it below
                 </div>
 
                 <div class="field-grid">
                   <div>
-                    <label class="field-label" for="googleMapsEmbedUrlField">Google Maps embed URL</label>
-                    <input class="field-input" id="googleMapsEmbedUrlField" type="text" maxlength="1000" form="landingPageForm">
+                    <label class="field-label" for="googleMapsEmbedUrlField">Embed Code</label>
+                    <textarea class="field-textarea large-embed" id="googleMapsEmbedUrlField" maxlength="2000" form="landingPageForm" placeholder="Paste the entire <iframe> HTML code here"></textarea>
                   </div>
                 </div>
 
-                <div class="field-grid cols-2" style="margin-top: 16px;">
-                  <div>
-                    <label class="field-label" for="googleMapsPlaceIdField">Google Maps place ID</label>
-                    <input class="field-input" id="googleMapsPlaceIdField" type="text" maxlength="200" form="landingPageForm">
-                  </div>
-                  <div>
-                    <label class="field-label" for="mapZoomLevelField">Map zoom level</label>
-                    <input class="field-input" id="mapZoomLevelField" type="number" min="1" max="21" form="landingPageForm">
-                  </div>
+                <button type="button" class="primary-btn" style="margin-top: 16px;" id="updateMapBtn">Update Map</button>
+
+                <div class="map-preview-container" style="margin-top: 20px;">
+                  <iframe id="previewMapFrame" class="preview-map" title="Map preview" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
                 </div>
 
-                <div class="field-grid cols-2" style="margin-top: 16px;">
-                  <div>
-                    <label class="field-label" for="mapLatitudeField">Latitude</label>
-                    <input class="field-input" id="mapLatitudeField" type="text" maxlength="30" placeholder="Optional" form="landingPageForm">
-                  </div>
-                  <div>
-                    <label class="field-label" for="mapLongitudeField">Longitude</label>
-                    <input class="field-input" id="mapLongitudeField" type="text" maxlength="30" placeholder="Optional" form="landingPageForm">
-                  </div>
-                </div>
-              </section>
-
-              <section class="editor-card">
-                <div class="faq-toolbar">
-                  <div>
-                    <h3 class="card-title">FAQs</h3>
-                    <p class="card-subtitle">Add, reorder, and remove frequently asked questions without touching the public HTML.</p>
-                  </div>
-                  <button type="button" class="primary-btn" id="addFaqBtn">Add FAQ</button>
-                </div>
-                <div class="faq-editor-list" id="faqEditorList"></div>
+                <p style="font-size: 13px; color: #64748b; margin-top: 12px; text-align: center;">Paste your Google Maps embed code above and click "Update Map" to change the location</p>
               </section>
             </div>
-
-            <aside class="preview-card">
-              <div class="card-header">
-                <div>
-                  <h3 class="card-title">Live preview</h3>
-                  <p class="card-subtitle">This is how the homepage contact and map section will read once the content is published.</p>
-                </div>
-              </div>
-
-              <iframe id="previewMapFrame" class="preview-map" title="Map preview" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-
-              <div class="preview-block">
-                <strong id="previewTitle">Frequently Asked Questions</strong>
-                <div id="previewSubtitle">Keep the landing page content current without editing HTML.</div>
-              </div>
-
-              <div class="preview-block" style="margin-top: 16px;">
-                <strong id="previewOfficeName">St. Joseph Water Billing Cooperative</strong>
-                <div id="previewAddress"></div>
-                <div id="previewHours"></div>
-                <div><strong>Landline:</strong> <span id="previewLandline"></span></div>
-                <div><strong>Email:</strong> <span id="previewEmail"></span></div>
-              </div>
-            </aside>
           </div>
         </div>
       </main>

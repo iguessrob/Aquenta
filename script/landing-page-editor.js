@@ -4,49 +4,48 @@
 
   const defaultState = {
     settings: {
-      pageTitle: 'Frequently Asked Questions',
-      pageSubtitle: 'Keep the landing page content current without editing HTML.',
       officeName: 'St. Joseph Water Billing Cooperative',
       addressLine1: 'San Jose Sto. Tomas City Batangas',
-      addressLine2: '',
-      officeHoursWeekdays: 'Monday - Saturday: 8:00 AM - 5:00 PM',
-      officeHoursClosed: 'Sunday & Holidays: Closed',
+      officeHoursWeekdays: 'Monday - Saturday: 8:00AM - 5:00PM\nSunday & Holidays: Closed',
       landlineNumber: '0433329827',
       emailAddress: 'stjosephstb@gmail.com',
-      googleMapsEmbedUrl: '',
-      googleMapsPlaceId: '',
-      mapLatitude: '',
-      mapLongitude: '',
-      mapZoomLevel: '15'
+      googleMapsEmbedUrl: ''
     },
     faqs: [
       {
         question: 'Can I update my personal information online?',
-        answer: 'Basic account details may be viewable online, but major changes must be requested at the cooperative office for verification.'
+        answer: 'Basic account details may be viewable online, but major changes (like name or address) must be requested at the cooperative office for verification.'
       },
       {
         question: 'What happens if I miss a payment?',
-        answer: 'Late payments may incur additional charges. Please contact the office immediately if you need assistance.'
+        answer: 'Late payments may incur additional charges. Please contact our office immediately if you anticipate difficulty meeting a payment deadline to discuss possible arrangements.'
+      },
+      {
+        question: 'I forgot my password. What should I do?',
+        answer: 'Click on the "Forgot Password" link on the login page. You\'ll receive instructions via email to reset your password securely.'
+      },
+      {
+        question: 'Why was a penalty added to my bill?',
+        answer: 'Penalties are typically added for late payments or missed payment deadlines. Check your billing statement for specific details or contact our office for clarification.'
+      },
+      {
+        question: 'Is my personal and billing information secure?',
+        answer: 'Yes, we use industry-standard encryption and security measures to protect all customer data. Your information is stored securely and is only accessible to authorized personnel.'
+      },
+      {
+        question: 'What if I cannot log in to my account?',
+        answer: 'First, try resetting your password. If issues persist, contact our support team with your account number and we\'ll help you regain access to your account.'
       }
     ]
   };
 
   const els = {
     form: document.getElementById('landingPageForm'),
-    status: document.getElementById('editorStatus'),
-    saveBtn: document.getElementById('saveLandingPageBtn'),
-    loadBtn: document.getElementById('loadLandingPageBtn'),
-    resetBtn: document.getElementById('resetLandingPageBtn'),
     faqList: document.getElementById('faqEditorList'),
     addFaqBtn: document.getElementById('addFaqBtn'),
-    previewMap: document.getElementById('previewMapFrame'),
-    previewTitle: document.getElementById('previewTitle'),
-    previewSubtitle: document.getElementById('previewSubtitle'),
-    previewOfficeName: document.getElementById('previewOfficeName'),
-    previewAddress: document.getElementById('previewAddress'),
-    previewHours: document.getElementById('previewHours'),
-    previewLandline: document.getElementById('previewLandline'),
-    previewEmail: document.getElementById('previewEmail')
+    saveContactBtn: document.getElementById('saveContactBtn'),
+    updateMapBtn: document.getElementById('updateMapBtn'),
+    previewMap: document.getElementById('previewMapFrame')
   };
 
   let state = clone(defaultState);
@@ -67,47 +66,19 @@
   }
 
   function setStatus(message, type = 'info') {
-    if (els.status) {
-      els.status.dataset.type = type;
-      els.status.textContent = message;
-    }
-
     if (window.showNotification) {
       window.showNotification(message, type === 'info' ? 'success' : type);
     }
   }
 
-  function buildMapSrc(settings) {
-    if (settings.googleMapsEmbedUrl) {
-      return settings.googleMapsEmbedUrl;
-    }
-
-    const latitude = String(settings.mapLatitude || '').trim();
-    const longitude = String(settings.mapLongitude || '').trim();
-
-    if (latitude && longitude) {
-      return `https://www.google.com/maps?q=${encodeURIComponent(`${latitude},${longitude}`)}&z=${settings.mapZoomLevel || 15}&output=embed`;
-    }
-
-    return '';
-  }
-
   function getSettingsFromForm() {
     return {
-      pageTitle: document.getElementById('pageTitleField').value.trim(),
-      pageSubtitle: document.getElementById('pageSubtitleField').value.trim(),
       officeName: document.getElementById('officeNameField').value.trim(),
       addressLine1: document.getElementById('addressLine1Field').value.trim(),
-      addressLine2: document.getElementById('addressLine2Field').value.trim(),
       officeHoursWeekdays: document.getElementById('officeHoursWeekdaysField').value.trim(),
-      officeHoursClosed: document.getElementById('officeHoursClosedField').value.trim(),
       landlineNumber: document.getElementById('landlineNumberField').value.trim(),
       emailAddress: document.getElementById('emailAddressField').value.trim(),
-      googleMapsEmbedUrl: document.getElementById('googleMapsEmbedUrlField').value.trim(),
-      googleMapsPlaceId: document.getElementById('googleMapsPlaceIdField').value.trim(),
-      mapLatitude: document.getElementById('mapLatitudeField').value.trim(),
-      mapLongitude: document.getElementById('mapLongitudeField').value.trim(),
-      mapZoomLevel: document.getElementById('mapZoomLevelField').value.trim()
+      googleMapsEmbedUrl: document.getElementById('googleMapsEmbedUrlField').value.trim()
     };
   }
 
@@ -197,20 +168,12 @@
       faqs: Array.isArray(nextState && nextState.faqs) && nextState.faqs.length ? nextState.faqs : clone(defaultState).faqs
     };
 
-    document.getElementById('pageTitleField').value = state.settings.pageTitle || '';
-    document.getElementById('pageSubtitleField').value = state.settings.pageSubtitle || '';
     document.getElementById('officeNameField').value = state.settings.officeName || '';
     document.getElementById('addressLine1Field').value = state.settings.addressLine1 || '';
-    document.getElementById('addressLine2Field').value = state.settings.addressLine2 || '';
     document.getElementById('officeHoursWeekdaysField').value = state.settings.officeHoursWeekdays || '';
-    document.getElementById('officeHoursClosedField').value = state.settings.officeHoursClosed || '';
     document.getElementById('landlineNumberField').value = state.settings.landlineNumber || '';
     document.getElementById('emailAddressField').value = state.settings.emailAddress || '';
     document.getElementById('googleMapsEmbedUrlField').value = state.settings.googleMapsEmbedUrl || '';
-    document.getElementById('googleMapsPlaceIdField').value = state.settings.googleMapsPlaceId || '';
-    document.getElementById('mapLatitudeField').value = state.settings.mapLatitude || '';
-    document.getElementById('mapLongitudeField').value = state.settings.mapLongitude || '';
-    document.getElementById('mapZoomLevelField').value = state.settings.mapZoomLevel || '15';
 
     renderFaqRows();
     updatePreview();
@@ -219,26 +182,21 @@
   function updatePreview() {
     syncStateFromForm();
     const formSettings = state.settings;
-    const combinedFaqs = state.faqs;
 
-    if (els.previewTitle) els.previewTitle.textContent = formSettings.pageTitle || 'Landing Page';
-    if (els.previewSubtitle) els.previewSubtitle.textContent = formSettings.pageSubtitle || '';
-    if (els.previewOfficeName) els.previewOfficeName.textContent = formSettings.officeName || 'Office';
-    if (els.previewAddress) {
-      els.previewAddress.innerHTML = [formSettings.addressLine1, formSettings.addressLine2].filter(Boolean).map(escape).join('<br>');
+    if (els.previewMap && formSettings.googleMapsEmbedUrl) {
+      try {
+        els.previewMap.srcdoc = formSettings.googleMapsEmbedUrl;
+      } catch (e) {
+        // if srcdoc fails, try to extract src from iframe
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = formSettings.googleMapsEmbedUrl;
+        const iframe = tempDiv.querySelector('iframe');
+        if (iframe && iframe.src) {
+          els.previewMap.src = iframe.src;
+          els.previewMap.srcdoc = '';
+        }
+      }
     }
-    if (els.previewHours) {
-      els.previewHours.innerHTML = [formSettings.officeHoursWeekdays, formSettings.officeHoursClosed].filter(Boolean).map(escape).join('<br>');
-    }
-    if (els.previewLandline) els.previewLandline.textContent = formSettings.landlineNumber || '—';
-    if (els.previewEmail) els.previewEmail.textContent = formSettings.emailAddress || '—';
-
-    if (els.previewMap) {
-      const mapSrc = buildMapSrc(formSettings);
-      els.previewMap.src = mapSrc || 'about:blank';
-      els.previewMap.style.opacity = mapSrc ? '1' : '0.45';
-    }
-
   }
 
   function getPersistedDraft() {
@@ -305,21 +263,28 @@
 
   function bindFormEvents() {
     const fieldIds = [
-      'pageTitleField', 'pageSubtitleField', 'officeNameField', 'addressLine1Field', 'addressLine2Field',
-      'officeHoursWeekdaysField', 'officeHoursClosedField', 'landlineNumberField', 'emailAddressField',
-      'googleMapsEmbedUrlField', 'googleMapsPlaceIdField', 'mapLatitudeField', 'mapLongitudeField', 'mapZoomLevelField'
+      'officeNameField', 'addressLine1Field', 'officeHoursWeekdaysField',
+      'landlineNumberField', 'emailAddressField', 'googleMapsEmbedUrlField'
     ];
 
     fieldIds.forEach((id) => {
       const field = document.getElementById(id);
-      field.addEventListener('input', updatePreview);
-      field.addEventListener('change', updatePreview);
+      if (field) {
+        field.addEventListener('input', updatePreview);
+        field.addEventListener('change', updatePreview);
+      }
     });
 
     els.addFaqBtn.addEventListener('click', addFaq);
-    els.saveBtn.addEventListener('click', saveContent);
-    els.loadBtn.addEventListener('click', loadContent);
-    els.resetBtn.addEventListener('click', resetContent);
+    els.saveContactBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      saveContent();
+    });
+    els.updateMapBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      updatePreview();
+      setStatus('Map preview updated', 'success');
+    });
 
     els.form.addEventListener('submit', (event) => {
       event.preventDefault();
