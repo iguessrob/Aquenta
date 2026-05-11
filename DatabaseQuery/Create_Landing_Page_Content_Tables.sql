@@ -40,9 +40,6 @@ BEGIN
         Answer NVARCHAR(1000) NOT NULL,
         SortOrder INT NOT NULL CONSTRAINT DF_tbl_LandingPageFaq_SortOrder DEFAULT (0),
         IsActive BIT NOT NULL CONSTRAINT DF_tbl_LandingPageFaq_IsActive DEFAULT (1),
-        CreatedAt DATETIME2 NOT NULL CONSTRAINT DF_tbl_LandingPageFaq_CreatedAt DEFAULT SYSUTCDATETIME(),
-        UpdatedAt DATETIME2 NOT NULL CONSTRAINT DF_tbl_LandingPageFaq_UpdatedAt DEFAULT SYSUTCDATETIME(),
-        UpdatedBy NVARCHAR(100) NULL
     );
 END
 GO
