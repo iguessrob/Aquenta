@@ -3837,11 +3837,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "c:\\Users\\Geline\\OneDrive\\Desktop\\Gelines_Github\\git-hub-ni-geline\\Aquenta\\AquentaLibrary\\AquentaAPI\\AquentaAPI.csproj",
+      "projectUniqueName": "C:\\Users\\Geline\\OneDrive\\Desktop\\Gelines_Github\\git-hub-ni-geline\\Aquenta\\AquentaLibrary\\AquentaAPI\\AquentaAPI.csproj",
       "projectName": "AquentaAPI",
-      "projectPath": "c:\\Users\\Geline\\OneDrive\\Desktop\\Gelines_Github\\git-hub-ni-geline\\Aquenta\\AquentaLibrary\\AquentaAPI\\AquentaAPI.csproj",
+      "projectPath": "C:\\Users\\Geline\\OneDrive\\Desktop\\Gelines_Github\\git-hub-ni-geline\\Aquenta\\AquentaLibrary\\AquentaAPI\\AquentaAPI.csproj",
       "packagesPath": "C:\\Users\\Geline\\.nuget\\packages\\",
-      "outputPath": "c:\\Users\\Geline\\OneDrive\\Desktop\\Gelines_Github\\git-hub-ni-geline\\Aquenta\\AquentaLibrary\\AquentaAPI\\obj\\",
+      "outputPath": "C:\\Users\\Geline\\OneDrive\\Desktop\\Gelines_Github\\git-hub-ni-geline\\Aquenta\\AquentaLibrary\\AquentaAPI\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -3863,8 +3863,8 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "c:\\Users\\Geline\\OneDrive\\Desktop\\Gelines_Github\\git-hub-ni-geline\\Aquenta\\AquentaLibrary\\AquentaLibrary\\AquentaLibrary.csproj": {
-              "projectPath": "c:\\Users\\Geline\\OneDrive\\Desktop\\Gelines_Github\\git-hub-ni-geline\\Aquenta\\AquentaLibrary\\AquentaLibrary\\AquentaLibrary.csproj"
+            "C:\\Users\\Geline\\OneDrive\\Desktop\\Gelines_Github\\git-hub-ni-geline\\Aquenta\\AquentaLibrary\\AquentaLibrary\\AquentaLibrary.csproj": {
+              "projectPath": "C:\\Users\\Geline\\OneDrive\\Desktop\\Gelines_Github\\git-hub-ni-geline\\Aquenta\\AquentaLibrary\\AquentaLibrary\\AquentaLibrary.csproj"
             }
           }
         }

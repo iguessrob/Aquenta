@@ -1,6 +1,6 @@
 (function () {
   const STORAGE_KEY = 'aquentaLandingPageDraft';
-  const API_PATH = '/landing-page/home';
+  const API_PATH = '/landingpage/home';
 
   const defaultState = {
     settings: {
@@ -213,9 +213,9 @@
   }
 
   async function loadContent() {
-    if (window.AquentaApiClient) {
+    if (window.AquentaApiClient && typeof window.AquentaApiClient.getLandingPage === 'function') {
       try {
-        const payload = await window.AquentaApiClient.get(API_PATH);
+        const payload = await window.AquentaApiClient.getLandingPage();
         if (payload) {
           applyState(payload);
           persistDraft(payload);
@@ -238,9 +238,9 @@
       faqs: getFaqsFromForm()
     };
 
-    if (window.AquentaApiClient) {
+    if (window.AquentaApiClient && typeof window.AquentaApiClient.saveLandingPage === 'function') {
       try {
-        await window.AquentaApiClient.put(API_PATH, payload);
+        await window.AquentaApiClient.saveLandingPage(payload);
         persistDraft(payload);
         setStatus('Landing-page content saved to the API.', 'success');
         return;

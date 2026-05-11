@@ -92,7 +92,10 @@
     post: (path, body) => request(path, { method: 'POST', body: JSON.stringify(body) }),
     put: (path, body) => request(path, { method: 'PUT', body: JSON.stringify(body) }),
     delete: (path) => request(path, { method: 'DELETE' }),
-    escapeHtml
+    escapeHtml,
+    // Convenience helpers for landing page content
+    getLandingPage: () => request('/landingpage/home', { method: 'GET' }),
+    saveLandingPage: (payload) => request('/landingpage/home', { method: 'PUT', body: JSON.stringify(payload) })
   };
   
   // Also expose to window for easier access in other scripts

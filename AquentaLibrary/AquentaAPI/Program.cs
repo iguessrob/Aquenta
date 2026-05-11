@@ -93,6 +93,7 @@ app.Use(async (context, next) =>
         "user/forgot-password", 
         "user/reset-password",
         "contact",
+        "landingpage",
         "health",
         "swagger"
     };
