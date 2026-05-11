@@ -71,6 +71,53 @@
     }
   }
 
+  function mapApiSettingsToEditor(settings) {
+    return {
+      officeName: settings && (settings.officeName || settings.OfficeName) ? (settings.officeName || settings.OfficeName) : '',
+      addressLine1: settings && (settings.addressLine1 || settings.Address) ? (settings.addressLine1 || settings.Address) : '',
+      officeHoursWeekdays: settings && (settings.officeHoursWeekdays || settings.OfficeHours) ? (settings.officeHoursWeekdays || settings.OfficeHours) : '',
+      landlineNumber: settings && (settings.landlineNumber || settings.LandlineNumber) ? (settings.landlineNumber || settings.LandlineNumber) : '',
+      emailAddress: settings && (settings.emailAddress || settings.EmailAddress) ? (settings.emailAddress || settings.EmailAddress) : '',
+      googleMapsEmbedUrl: settings && (settings.googleMapsEmbedUrl || settings.googleMapsEmbedCode || settings.GoogleMapsEmbedCode)
+        ? (settings.googleMapsEmbedUrl || settings.googleMapsEmbedCode || settings.GoogleMapsEmbedCode)
+        : ''
+    };
+  }
+
+  function mapEditorSettingsToApi(settings) {
+    return {
+      LandingPageSettingsID: settings && settings.landingPageSettingsID ? settings.landingPageSettingsID : 0,
+      OfficeName: (settings && settings.officeName ? settings.officeName : '').trim(),
+      Address: (settings && settings.addressLine1 ? settings.addressLine1 : '').trim(),
+      OfficeHours: (settings && settings.officeHoursWeekdays ? settings.officeHoursWeekdays : '').trim(),
+      LandlineNumber: (settings && settings.landlineNumber ? settings.landlineNumber : '').trim(),
+      EmailAddress: (settings && settings.emailAddress ? settings.emailAddress : '').trim(),
+      GoogleMapsEmbedCode: (settings && settings.googleMapsEmbedUrl ? settings.googleMapsEmbedUrl : '').trim()
+    };
+  }
+
+  function mapFaqsToEditor(faqs) {
+    return Array.isArray(faqs)
+      ? faqs.map((faq, index) => ({
+          landingPageFaqID: faq && (faq.landingPageFaqID || faq.LandingPageFaqID) ? (faq.landingPageFaqID || faq.LandingPageFaqID) : 0,
+          question: faq && (faq.question || faq.Question) ? (faq.question || faq.Question) : '',
+          answer: faq && (faq.answer || faq.Answer) ? (faq.answer || faq.Answer) : '',
+          sortOrder: faq && (faq.sortOrder || faq.SortOrder) ? (faq.sortOrder || faq.SortOrder) : index + 1
+        }))
+      : [];
+  }
+
+  function mapFaqsToApi(faqs) {
+    return Array.isArray(faqs)
+      ? faqs.map((faq, index) => ({
+          LandingPageFaqID: faq && faq.landingPageFaqID ? faq.landingPageFaqID : 0,
+          Question: (faq && faq.question ? faq.question : '').trim(),
+          Answer: (faq && faq.answer ? faq.answer : '').trim(),
+          SortOrder: index + 1
+        })).filter((faq) => faq.Question || faq.Answer)
+      : [];
+  }
+
   function getSettingsFromForm() {
     return {
       officeName: document.getElementById('officeNameField').value.trim(),
@@ -163,9 +210,10 @@
   }
 
   function applyState(nextState) {
+    const editorSettings = mapApiSettingsToEditor(nextState && nextState.settings ? nextState.settings : null);
     state = {
-      settings: { ...clone(defaultState).settings, ...(nextState && nextState.settings ? nextState.settings : {}) },
-      faqs: Array.isArray(nextState && nextState.faqs) && nextState.faqs.length ? nextState.faqs : clone(defaultState).faqs
+      settings: { ...clone(defaultState).settings, ...editorSettings },
+      faqs: Array.isArray(nextState && nextState.faqs) && nextState.faqs.length ? mapFaqsToEditor(nextState.faqs) : clone(defaultState).faqs
     };
 
     document.getElementById('officeNameField').value = state.settings.officeName || '';
@@ -218,7 +266,10 @@
         const payload = await window.AquentaApiClient.getLandingPage();
         if (payload) {
           applyState(payload);
-          persistDraft(payload);
+          persistDraft({
+            settings: mapApiSettingsToEditor(payload.settings || payload.Settings || {}),
+            faqs: mapFaqsToEditor(payload.faqs || payload.Faqs || [])
+          });
           setStatus('Loaded landing-page content from the API.', 'success');
           return;
         }
@@ -233,25 +284,27 @@
   }
 
   async function saveContent() {
+    const settings = getSettingsFromForm();
+    const faqs = getFaqsFromForm();
     const payload = {
-      settings: getSettingsFromForm(),
-      faqs: getFaqsFromForm()
+      settings: mapEditorSettingsToApi(settings),
+      faqs: mapFaqsToApi(faqs)
     };
 
     if (window.AquentaApiClient && typeof window.AquentaApiClient.saveLandingPage === 'function') {
       try {
         await window.AquentaApiClient.saveLandingPage(payload);
-        persistDraft(payload);
+        persistDraft({ settings, faqs });
         setStatus('Landing-page content saved to the API.', 'success');
         return;
       } catch (error) {
-        persistDraft(payload);
+        persistDraft({ settings, faqs });
         setStatus('Saved as a local draft because the API is not ready yet.', 'warning');
         return;
       }
     }
 
-    persistDraft(payload);
+    persistDraft({ settings, faqs });
     setStatus('Saved as a local draft.', 'warning');
   }
 
