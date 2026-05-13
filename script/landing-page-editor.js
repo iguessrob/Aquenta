@@ -101,6 +101,20 @@
       : [];
   }
 
+  function extractIframeSrc(embedCode) {
+    if (!embedCode) return '';
+
+    const temp = document.createElement('div');
+    temp.innerHTML = embedCode;
+    const iframe = temp.querySelector('iframe');
+    if (iframe && iframe.getAttribute('src')) {
+      return iframe.getAttribute('src');
+    }
+
+    const srcMatch = String(embedCode).match(/src=["']([^"']+)["']/i);
+    return srcMatch ? srcMatch[1] : '';
+  }
+
   function mapFaqRowsToState() {
     // No longer used - FAQs are now managed via modals and state object
     // Kept for backward compatibility
@@ -313,19 +327,18 @@
     syncStateFromForm();
     const formSettings = state.settings;
 
-    if (els.previewMap && formSettings.googleMapsEmbedUrl) {
-      try {
-        els.previewMap.srcdoc = formSettings.googleMapsEmbedUrl;
-      } catch (e) {
-        // if srcdoc fails, try to extract src from iframe
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = formSettings.googleMapsEmbedUrl;
-        const iframe = tempDiv.querySelector('iframe');
-        if (iframe && iframe.src) {
-          els.previewMap.src = iframe.src;
-          els.previewMap.srcdoc = '';
-        }
-      }
+    if (!els.previewMap) {
+      return;
+    }
+
+    const mapSrc = extractIframeSrc(formSettings.googleMapsEmbedUrl || '');
+
+    if (mapSrc) {
+      els.previewMap.src = mapSrc;
+      els.previewMap.removeAttribute('srcdoc');
+    } else {
+      els.previewMap.src = '';
+      els.previewMap.removeAttribute('srcdoc');
     }
   }
 
