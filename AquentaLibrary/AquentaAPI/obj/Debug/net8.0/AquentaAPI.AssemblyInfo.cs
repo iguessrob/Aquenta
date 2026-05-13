@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AquentaAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2ddbf15c311a27887a3e9e4b32641384159d6f88")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+665e3a4363ec090dbbe782b66740164c99890526")]
 [assembly: System.Reflection.AssemblyProductAttribute("AquentaAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AquentaAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
