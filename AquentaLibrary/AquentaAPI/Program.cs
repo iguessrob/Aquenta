@@ -89,19 +89,19 @@ app.UseSwaggerUI(c =>
 app.Use(async (context, next) =>
 {
     var path = context.Request.Path.Value?.ToLower() ?? "";
-    
-    // Define public endpoints that don't need a token
-    var publicPaths = new[] { 
-        "user/login", 
-        "user/forgot-password", 
-        "user/reset-password",
-        "contact",
-        "landingpage",
-        "health",
-        "swagger"
-    };
 
-    if (publicPaths.Any(p => path.Contains(p.ToLower())))
+    // Define public endpoints that don't need a token.
+    // Use exact/anchored checks to avoid accidental auth blocking in production.
+    var isPublicEndpoint =
+        path.StartsWith("/api/user/login", StringComparison.OrdinalIgnoreCase) ||
+        path.StartsWith("/api/user/forgot-password", StringComparison.OrdinalIgnoreCase) ||
+        path.StartsWith("/api/user/reset-password", StringComparison.OrdinalIgnoreCase) ||
+        path.StartsWith("/api/contact", StringComparison.OrdinalIgnoreCase) ||
+        path.StartsWith("/api/landingpage/home", StringComparison.OrdinalIgnoreCase) ||
+        path.StartsWith("/health", StringComparison.OrdinalIgnoreCase) ||
+        path.StartsWith("/swagger", StringComparison.OrdinalIgnoreCase);
+
+    if (isPublicEndpoint)
     {
         await next();
         return;
