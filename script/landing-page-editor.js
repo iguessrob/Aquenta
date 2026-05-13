@@ -329,18 +329,36 @@
     }
   }
 
-  async function loadContent() {
-    if (window.AquentaApiClient && typeof window.AquentaApiClient.getLandingPage === 'function') {
+  async function fetchLandingPageWithRetry(maxAttempts = 4, delayMs = 600) {
+    if (!(window.AquentaApiClient && typeof window.AquentaApiClient.getLandingPage === 'function')) {
+      throw new Error('API client is not available.');
+    }
+
+    let lastError = null;
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
       try {
-        const payload = await window.AquentaApiClient.getLandingPage();
-        if (payload) {
-          applyState(payload);
-          setStatus('Loaded landing-page content from the API.', 'success');
-          return;
-        }
+        return await window.AquentaApiClient.getLandingPage();
       } catch (error) {
-        console.error('Failed to load landing page content from API:', error);
+        lastError = error;
+        if (attempt < maxAttempts) {
+          await new Promise((resolve) => setTimeout(resolve, delayMs));
+        }
       }
+    }
+
+    throw lastError || new Error('Failed to load landing page content.');
+  }
+
+  async function loadContent() {
+    try {
+      const payload = await fetchLandingPageWithRetry();
+      if (payload) {
+        applyState(payload);
+        setStatus('Loaded landing-page content from the API.', 'success');
+        return;
+      }
+    } catch (error) {
+      console.error('Failed to load landing page content from API:', error);
     }
 
     applyState(blankState);
