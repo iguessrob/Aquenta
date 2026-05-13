@@ -66,6 +66,11 @@
   }
 
   function redirectToAuth() {
+    if (window.location.protocol === 'file:') {
+      window.location.replace('auth.html');
+      return;
+    }
+
     window.location.replace('/auth');
   }
 

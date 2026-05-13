@@ -1,42 +1,16 @@
 (function () {
-  const STORAGE_KEY = 'aquentaLandingPageDraft';
   const API_PATH = '/landingpage/home';
 
-  const defaultState = {
+  const blankState = {
     settings: {
-      officeName: 'St. Joseph Water Billing Cooperative',
-      addressLine1: 'San Jose Sto. Tomas City Batangas',
-      officeHoursWeekdays: 'Monday - Saturday: 8:00AM - 5:00PM\nSunday & Holidays: Closed',
-      landlineNumber: '0433329827',
-      emailAddress: 'stjosephstb@gmail.com',
+      officeName: '',
+      addressLine1: '',
+      officeHoursWeekdays: '',
+      landlineNumber: '',
+      emailAddress: '',
       googleMapsEmbedUrl: ''
     },
-    faqs: [
-      {
-        question: 'Can I update my personal information online?',
-        answer: 'Basic account details may be viewable online, but major changes (like name or address) must be requested at the cooperative office for verification.'
-      },
-      {
-        question: 'What happens if I miss a payment?',
-        answer: 'Late payments may incur additional charges. Please contact our office immediately if you anticipate difficulty meeting a payment deadline to discuss possible arrangements.'
-      },
-      {
-        question: 'I forgot my password. What should I do?',
-        answer: 'Click on the "Forgot Password" link on the login page. You\'ll receive instructions via email to reset your password securely.'
-      },
-      {
-        question: 'Why was a penalty added to my bill?',
-        answer: 'Penalties are typically added for late payments or missed payment deadlines. Check your billing statement for specific details or contact our office for clarification.'
-      },
-      {
-        question: 'Is my personal and billing information secure?',
-        answer: 'Yes, we use industry-standard encryption and security measures to protect all customer data. Your information is stored securely and is only accessible to authorized personnel.'
-      },
-      {
-        question: 'What if I cannot log in to my account?',
-        answer: 'First, try resetting your password. If issues persist, contact our support team with your account number and we\'ll help you regain access to your account.'
-      }
-    ]
+    faqs: []
   };
 
   const els = {
@@ -55,7 +29,7 @@
     confirmDeleteBtn: document.getElementById('confirmDeleteBtn')
   };
 
-  let state = clone(defaultState);
+  let state = clone(blankState);
   let editingFaqIndex = -1;
   let deletingFaqIndex = -1;
 
@@ -320,8 +294,8 @@
   function applyState(nextState) {
     const editorSettings = mapApiSettingsToEditor(nextState && nextState.settings ? nextState.settings : null);
     state = {
-      settings: { ...clone(defaultState).settings, ...editorSettings },
-      faqs: Array.isArray(nextState && nextState.faqs) && nextState.faqs.length ? mapFaqsToEditor(nextState.faqs) : clone(defaultState).faqs
+      settings: { ...clone(blankState).settings, ...editorSettings },
+      faqs: Array.isArray(nextState && nextState.faqs) && nextState.faqs.length ? mapFaqsToEditor(nextState.faqs) : clone(blankState).faqs
     };
 
     document.getElementById('officeNameField').value = state.settings.officeName || '';
@@ -355,40 +329,22 @@
     }
   }
 
-  function getPersistedDraft() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : null;
-    } catch (error) {
-      return null;
-    }
-  }
-
-  function persistDraft(payload) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-  }
-
   async function loadContent() {
     if (window.AquentaApiClient && typeof window.AquentaApiClient.getLandingPage === 'function') {
       try {
         const payload = await window.AquentaApiClient.getLandingPage();
         if (payload) {
           applyState(payload);
-          persistDraft({
-            settings: mapApiSettingsToEditor(payload.settings || payload.Settings || {}),
-            faqs: mapFaqsToEditor(payload.faqs || payload.Faqs || [])
-          });
           setStatus('Loaded landing-page content from the API.', 'success');
           return;
         }
       } catch (error) {
-        // fall through to draft/default state
+        console.error('Failed to load landing page content from API:', error);
       }
     }
 
-    const draft = getPersistedDraft();
-    applyState(draft || defaultState);
-    setStatus(draft ? 'Loaded local draft because the API is not available yet.' : 'Loaded default content. Save to create your first draft.', 'warning');
+    applyState(blankState);
+    setStatus('Unable to load landing-page content from the API.', 'warning');
   }
 
   async function saveContent() {
@@ -402,25 +358,22 @@
     if (window.AquentaApiClient && typeof window.AquentaApiClient.saveLandingPage === 'function') {
       try {
         await window.AquentaApiClient.saveLandingPage(payload);
-        persistDraft({ settings, faqs });
         await loadContent();
         setStatus('Landing-page content saved to the API.', 'success');
         return;
       } catch (error) {
-        persistDraft({ settings, faqs });
-        setStatus('Saved as a local draft because the API is not ready yet.', 'warning');
+        console.error('Failed to save landing page content to API:', error);
+        setStatus('Unable to save landing-page content to the API.', 'warning');
         return;
       }
     }
 
-    persistDraft({ settings, faqs });
-    setStatus('Saved as a local draft.', 'warning');
+    setStatus('API client is not available.', 'warning');
   }
 
   function resetContent() {
-    localStorage.removeItem(STORAGE_KEY);
-    applyState(defaultState);
-    setStatus('Reset to the default editor template.', 'info');
+    applyState(blankState);
+    setStatus('Reset to blank fields.', 'info');
   }
 
   function bindFormEvents() {

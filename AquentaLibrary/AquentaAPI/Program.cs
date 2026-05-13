@@ -13,7 +13,10 @@ builder.Services.AddCors(options =>
         {
             // In Development: allow localhost for local testing
             policy.SetIsOriginAllowed(origin =>
-                    origin.Contains("localhost") || origin.Contains("127.0.0.1"))
+                    string.IsNullOrWhiteSpace(origin) ||
+                    origin == "null" ||
+                    origin.Contains("localhost") ||
+                    origin.Contains("127.0.0.1"))
                 .AllowAnyHeader()
                 .AllowAnyMethod();
         }
