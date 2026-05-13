@@ -22,7 +22,7 @@ namespace AquentaLibrary.Services
         {
             // Basic sanitization/trimming could be applied here if desired
             var ok = _repo.UpsertSettings(settings);
-            _repo.ReplaceFaqs(faqs ?? new List<LandingPageFaqModel>());
+            _repo.SyncFaqs(faqs ?? new List<LandingPageFaqModel>());
             return ok;
         }
     }

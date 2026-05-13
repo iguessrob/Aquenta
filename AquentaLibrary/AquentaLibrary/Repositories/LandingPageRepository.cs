@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -53,23 +54,52 @@ GoogleMapsEmbedCode = @GoogleMapsEmbedCode";
             return affected >= 1;
         }
 
-        public void ReplaceFaqs(IEnumerable<LandingPageFaqModel> faqs)
+        public void SyncFaqs(IEnumerable<LandingPageFaqModel> faqs)
         {
+            var orderedFaqs = (faqs ?? Enumerable.Empty<LandingPageFaqModel>())
+                .Where(faq => faq != null)
+                .Select((faq, index) => new LandingPageFaqModel
+                {
+                    LandingPageFaqID = faq.LandingPageFaqID,
+                    Question = faq.Question,
+                    Answer = faq.Answer,
+                    SortOrder = index + 1
+                })
+                .ToList();
+
             using var db = CreateConnection();
             using var tran = db.BeginTransaction();
             try
             {
-                db.Execute("DELETE FROM dbo.tbl_LandingPageFaq", transaction: tran);
+                var existingFaqIds = db.Query<int>("SELECT LandingPageFaqID FROM dbo.tbl_LandingPageFaq", transaction: tran).ToHashSet();
+                var incomingFaqIds = orderedFaqs.Where(faq => faq.LandingPageFaqID > 0).Select(faq => faq.LandingPageFaqID).ToHashSet();
 
-                const string insert = @"INSERT INTO dbo.tbl_LandingPageFaq (Question, Answer, SortOrder)
-VALUES (@Question, @Answer, @SortOrder);";
-
-                int order = 1;
-                foreach (var f in faqs.OrderBy(f => f.SortOrder))
+                var idsToDelete = existingFaqIds.Except(incomingFaqIds).ToList();
+                if (idsToDelete.Count > 0)
                 {
-                    var param = new { Question = f.Question, Answer = f.Answer, SortOrder = order };
-                    db.Execute(insert, param, transaction: tran);
-                    order++;
+                    db.Execute(
+                        "DELETE FROM dbo.tbl_LandingPageFaq WHERE LandingPageFaqID IN @Ids",
+                        new { Ids = idsToDelete },
+                        transaction: tran);
+                }
+
+                foreach (var faq in orderedFaqs)
+                {
+                    if (faq.LandingPageFaqID > 0 && existingFaqIds.Contains(faq.LandingPageFaqID))
+                    {
+                        db.Execute(@"UPDATE dbo.tbl_LandingPageFaq
+SET Question = @Question,
+    Answer = @Answer,
+    SortOrder = @SortOrder
+WHERE LandingPageFaqID = @LandingPageFaqID;", faq, transaction: tran);
+                    }
+                    else
+                    {
+                        var newId = db.ExecuteScalar<int>(@"INSERT INTO dbo.tbl_LandingPageFaq (Question, Answer, SortOrder)
+VALUES (@Question, @Answer, @SortOrder);
+SELECT CAST(SCOPE_IDENTITY() AS int);", faq, transaction: tran);
+                        faq.LandingPageFaqID = newId;
+                    }
                 }
 
                 tran.Commit();

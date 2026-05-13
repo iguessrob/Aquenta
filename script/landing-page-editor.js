@@ -113,9 +113,18 @@
           LandingPageFaqID: faq && faq.landingPageFaqID ? faq.landingPageFaqID : 0,
           Question: (faq && faq.question ? faq.question : '').trim(),
           Answer: (faq && faq.answer ? faq.answer : '').trim(),
-          SortOrder: index + 1
+          SortOrder: faq && faq.sortOrder ? faq.sortOrder : index + 1
         })).filter((faq) => faq.Question || faq.Answer)
       : [];
+  }
+
+  function mapFaqRowsToState() {
+    return Array.from(els.faqList.querySelectorAll('.faq-editor-row')).map((row, index) => ({
+      landingPageFaqID: Number(row.dataset.faqId || 0),
+      question: row.querySelector('[data-field="question"]').value.trim(),
+      answer: row.querySelector('[data-field="answer"]').value.trim(),
+      sortOrder: index + 1
+    }));
   }
 
   function getSettingsFromForm() {
@@ -130,27 +139,19 @@
   }
 
   function getFaqsFromForm() {
-    const rows = Array.from(els.faqList.querySelectorAll('.faq-editor-row'));
-
-    return rows.map((row) => ({
-      question: row.querySelector('[data-field="question"]').value.trim(),
-      answer: row.querySelector('[data-field="answer"]').value.trim()
-    })).filter((item) => item.question || item.answer);
+    return mapFaqRowsToState().filter((item) => item.question || item.answer);
   }
 
   function syncStateFromForm() {
     state.settings = getSettingsFromForm();
-    state.faqs = Array.from(els.faqList.querySelectorAll('.faq-editor-row')).map((row) => ({
-      question: row.querySelector('[data-field="question"]').value.trim(),
-      answer: row.querySelector('[data-field="answer"]').value.trim()
-    }));
+    state.faqs = mapFaqRowsToState();
   }
 
   function renderFaqRows() {
     if (!els.faqList) return;
 
     els.faqList.innerHTML = state.faqs.length ? state.faqs.map((faq, index) => `
-      <article class="faq-editor-row" data-index="${index}">
+      <article class="faq-editor-row" data-index="${index}" data-faq-id="${faq.landingPageFaqID || 0}">
         <div class="faq-editor-row-header">
           <strong>FAQ ${index + 1}</strong>
           <div class="faq-row-actions">
@@ -204,7 +205,7 @@
 
   function addFaq() {
     syncStateFromForm();
-    state.faqs.push({ question: '', answer: '' });
+    state.faqs.push({ landingPageFaqID: 0, question: '', answer: '', sortOrder: state.faqs.length + 1 });
     renderFaqRows();
     updatePreview();
   }
@@ -295,6 +296,7 @@
       try {
         await window.AquentaApiClient.saveLandingPage(payload);
         persistDraft({ settings, faqs });
+        await loadContent();
         setStatus('Landing-page content saved to the API.', 'success');
         return;
       } catch (error) {
