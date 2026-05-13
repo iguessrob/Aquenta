@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AQUENTA - Landing Page Editor</title>
   <link rel="stylesheet" href="styles/global.css">
+  <link rel="stylesheet" href="styles/map-shared.css">
   <link rel="stylesheet" href="styles/topbar-global.css">
   <link rel="icon" type="image/png" href="assets/images/Aquenta_logo.png">
   <style>
@@ -308,27 +309,6 @@
       min-height: 200px;
       font-family: 'Courier New', monospace;
       font-size: 12px;
-    }
-
-    .map-preview-container {
-      margin-top: 16px;
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(12px);
-      border-radius: 16px;
-      overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      padding: 0.5rem;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.12);
-    }
-
-    .preview-map {
-      width: 100%;
-      height: 450px;
-      border: 0;
-      background: #f1f5f9;
-      margin: 0;
-      display: block;
-      pointer-events: auto;
     }
 
     .preview-block {
@@ -695,8 +675,10 @@
 
                 <button type="button" class="primary-btn" style="margin-top: 16px;" id="updateMapBtn">Update Map</button>
 
-                <div class="map-preview-container" style="margin-top: 20px;">
-                  <iframe id="previewMapFrame" class="preview-map" title="Map preview" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                <div class="map-section" style="margin-top: 20px;">
+                  <div class="map-wrapper">
+                    <iframe id="previewMapFrame" title="Map preview" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                  </div>
                 </div>
 
                 <p style="font-size: 13px; color: #64748b; margin-top: 12px; text-align: center;">Paste your Google Maps embed code above and click "Update Map" to change the location</p>
