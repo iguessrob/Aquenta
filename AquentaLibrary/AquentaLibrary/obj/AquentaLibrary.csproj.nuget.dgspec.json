@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Geline\\OneDrive\\Desktop\\Gelines_Github\\git-hub-ni-geline\\Aquenta\\AquentaLibrary\\AquentaLibrary\\AquentaLibrary.csproj": {}
+    "c:\\Users\\Geline\\OneDrive\\Desktop\\Gelines_Github\\git-hub-ni-geline\\Aquenta\\AquentaLibrary\\AquentaLibrary\\AquentaLibrary.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Geline\\OneDrive\\Desktop\\Gelines_Github\\git-hub-ni-geline\\Aquenta\\AquentaLibrary\\AquentaLibrary\\AquentaLibrary.csproj": {
+    "c:\\Users\\Geline\\OneDrive\\Desktop\\Gelines_Github\\git-hub-ni-geline\\Aquenta\\AquentaLibrary\\AquentaLibrary\\AquentaLibrary.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Geline\\OneDrive\\Desktop\\Gelines_Github\\git-hub-ni-geline\\Aquenta\\AquentaLibrary\\AquentaLibrary\\AquentaLibrary.csproj",
+        "projectUniqueName": "c:\\Users\\Geline\\OneDrive\\Desktop\\Gelines_Github\\git-hub-ni-geline\\Aquenta\\AquentaLibrary\\AquentaLibrary\\AquentaLibrary.csproj",
         "projectName": "AquentaLibrary",
-        "projectPath": "C:\\Users\\Geline\\OneDrive\\Desktop\\Gelines_Github\\git-hub-ni-geline\\Aquenta\\AquentaLibrary\\AquentaLibrary\\AquentaLibrary.csproj",
+        "projectPath": "c:\\Users\\Geline\\OneDrive\\Desktop\\Gelines_Github\\git-hub-ni-geline\\Aquenta\\AquentaLibrary\\AquentaLibrary\\AquentaLibrary.csproj",
         "packagesPath": "C:\\Users\\Geline\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Geline\\OneDrive\\Desktop\\Gelines_Github\\git-hub-ni-geline\\Aquenta\\AquentaLibrary\\AquentaLibrary\\obj\\",
+        "outputPath": "c:\\Users\\Geline\\OneDrive\\Desktop\\Gelines_Github\\git-hub-ni-geline\\Aquenta\\AquentaLibrary\\AquentaLibrary\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

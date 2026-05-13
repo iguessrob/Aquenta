@@ -345,6 +345,136 @@
       }
     }
 
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.visible {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      animation: slideUp 0.3s ease-out;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .modal-title {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 28px;
+      color: #94a3b8;
+      cursor: pointer;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s ease;
+    }
+
+    .modal-close:hover {
+      color: #64748b;
+    }
+
+    .modal-body {
+      padding: 24px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .modal-footer {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      padding: 20px 24px;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .modal-btn {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 20px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 14px;
+    }
+
+    .modal-btn.cancel {
+      background: #f0f4f8;
+      color: #0f172a;
+    }
+
+    .modal-btn.cancel:hover {
+      background: #e2e8f0;
+    }
+
+    .modal-btn.primary {
+      background: linear-gradient(135deg, #0052a3, #0066cc);
+      color: white;
+    }
+
+    .modal-btn.primary:hover {
+      background: linear-gradient(135deg, #003d7a, #004fa3);
+    }
+
+    .modal-btn.danger {
+      background: #dc2626;
+      color: white;
+    }
+
+    .modal-btn.danger:hover {
+      background: #b91c1c;
+    }
+
+    .confirm-delete-text {
+      color: #64748b;
+      font-size: 16px;
+      line-height: 1.5;
+      margin: 0;
+    }
+
     @media (max-width: 720px) {
       .content {
         padding: 16px;
@@ -370,6 +500,10 @@
       .card-header {
         flex-direction: column;
         align-items: stretch;
+      }
+
+      .modal-content {
+        width: 95%;
       }
     }
   </style>
@@ -564,6 +698,75 @@
           </div>
         </div>
       </main>
+    </div>
+  </div>
+
+  <!-- Add FAQ Modal -->
+  <div id="addFaqModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Add New FAQ</h2>
+        <button type="button" class="modal-close" data-modal-close="addFaqModal">✕</button>
+      </div>
+      <form id="addFaqForm">
+        <div class="modal-body">
+          <div>
+            <label class="field-label" for="addFaqQuestion">Question</label>
+            <input type="text" id="addFaqQuestion" class="field-input" maxlength="300" placeholder="Enter the question" required>
+          </div>
+          <div>
+            <label class="field-label" for="addFaqAnswer">Answer</label>
+            <textarea id="addFaqAnswer" class="field-textarea" rows="5" maxlength="2000" placeholder="Enter the answer" required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="modal-btn cancel" data-modal-close="addFaqModal">Cancel</button>
+          <button type="submit" class="modal-btn primary">Add FAQ</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit FAQ Modal -->
+  <div id="editFaqModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Edit FAQ</h2>
+        <button type="button" class="modal-close" data-modal-close="editFaqModal">✕</button>
+      </div>
+      <form id="editFaqForm">
+        <div class="modal-body">
+          <div>
+            <label class="field-label" for="editFaqQuestion">Question</label>
+            <input type="text" id="editFaqQuestion" class="field-input" maxlength="300" placeholder="Enter the question" required>
+          </div>
+          <div>
+            <label class="field-label" for="editFaqAnswer">Answer</label>
+            <textarea id="editFaqAnswer" class="field-textarea" rows="5" maxlength="2000" placeholder="Enter the answer" required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="modal-btn cancel" data-modal-close="editFaqModal">Cancel</button>
+          <button type="submit" class="modal-btn primary">Update FAQ</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete FAQ Modal -->
+  <div id="deleteFaqModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title" style="color: #dc2626;">Confirm Delete</h2>
+        <button type="button" class="modal-close" data-modal-close="deleteFaqModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="confirm-delete-text">Are you sure you want to delete this FAQ? This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="modal-btn cancel" data-modal-close="deleteFaqModal">Cancel</button>
+        <button type="button" class="modal-btn danger" id="confirmDeleteBtn">Delete</button>
+      </div>
     </div>
   </div>
 

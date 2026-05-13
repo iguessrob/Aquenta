@@ -45,10 +45,19 @@
     addFaqBtn: document.getElementById('addFaqBtn'),
     saveContactBtn: document.getElementById('saveContactBtn'),
     updateMapBtn: document.getElementById('updateMapBtn'),
-    previewMap: document.getElementById('previewMapFrame')
+    previewMap: document.getElementById('previewMapFrame'),
+    // Modals
+    addFaqModal: document.getElementById('addFaqModal'),
+    addFaqForm: document.getElementById('addFaqForm'),
+    editFaqModal: document.getElementById('editFaqModal'),
+    editFaqForm: document.getElementById('editFaqForm'),
+    deleteFaqModal: document.getElementById('deleteFaqModal'),
+    confirmDeleteBtn: document.getElementById('confirmDeleteBtn')
   };
 
   let state = clone(defaultState);
+  let editingFaqIndex = -1;
+  let deletingFaqIndex = -1;
 
   function clone(value) {
     return JSON.parse(JSON.stringify(value));
@@ -119,12 +128,9 @@
   }
 
   function mapFaqRowsToState() {
-    return Array.from(els.faqList.querySelectorAll('.faq-editor-row')).map((row, index) => ({
-      landingPageFaqID: Number(row.dataset.faqId || 0),
-      question: row.querySelector('[data-field="question"]').value.trim(),
-      answer: row.querySelector('[data-field="answer"]').value.trim(),
-      sortOrder: index + 1
-    }));
+    // No longer used - FAQs are now managed via modals and state object
+    // Kept for backward compatibility
+    return state.faqs;
   }
 
   function getSettingsFromForm() {
@@ -139,12 +145,14 @@
   }
 
   function getFaqsFromForm() {
-    return mapFaqRowsToState().filter((item) => item.question || item.answer);
+    // FAQs are now managed via modals and stored in state.faqs
+    return state.faqs.filter((item) => item.question || item.answer);
   }
 
   function syncStateFromForm() {
+    // Sync only settings (not FAQs) since FAQs are managed via modals
     state.settings = getSettingsFromForm();
-    state.faqs = mapFaqRowsToState();
+    // state.faqs is already managed by modal handlers
   }
 
   function renderFaqRows() {
@@ -157,13 +165,14 @@
           <div class="faq-row-actions">
             <button type="button" class="icon-btn" data-action="move-up" aria-label="Move FAQ up">↑</button>
             <button type="button" class="icon-btn" data-action="move-down" aria-label="Move FAQ down">↓</button>
-            <button type="button" class="icon-btn danger" data-action="remove" aria-label="Delete FAQ">×</button>
+            <button type="button" class="icon-btn" data-action="edit" aria-label="Edit FAQ">✎</button>
+            <button type="button" class="icon-btn danger" data-action="delete" aria-label="Delete FAQ">×</button>
           </div>
         </div>
-        <label class="field-label">Question</label>
-        <input type="text" class="field-input" data-field="question" value="${escape(faq.question)}" maxlength="300" placeholder="Enter the question">
-        <label class="field-label">Answer</label>
-        <textarea class="field-textarea" data-field="answer" rows="3" maxlength="1000" placeholder="Enter the answer">${escape(faq.answer)}</textarea>
+        <div class="preview-block">
+          <strong>Q: ${escape(faq.question)}</strong>
+          <p style="margin: 8px 0 0; white-space: pre-wrap;">${escape(faq.answer)}</p>
+        </div>
       </article>
     `).join('') : `
       <div class="empty-state">
@@ -176,9 +185,8 @@
 
       row.querySelector('[data-action="move-up"]').addEventListener('click', () => moveFaq(index, -1));
       row.querySelector('[data-action="move-down"]').addEventListener('click', () => moveFaq(index, 1));
-      row.querySelector('[data-action="remove"]').addEventListener('click', () => removeFaq(index));
-      row.querySelector('[data-field="question"]').addEventListener('input', updatePreview);
-      row.querySelector('[data-field="answer"]').addEventListener('input', updatePreview);
+      row.querySelector('[data-action="edit"]').addEventListener('click', () => showEditFaqModal(index));
+      row.querySelector('[data-action="delete"]').addEventListener('click', () => showDeleteConfirmModal(index));
     });
   }
 
@@ -208,6 +216,105 @@
     state.faqs.push({ landingPageFaqID: 0, question: '', answer: '', sortOrder: state.faqs.length + 1 });
     renderFaqRows();
     updatePreview();
+  }
+
+  // Modal Management Functions
+  function showModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      modal.classList.add('visible');
+    }
+  }
+
+  function hideModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      modal.classList.remove('visible');
+    }
+  }
+
+  function showAddFaqModal() {
+    document.getElementById('addFaqQuestion').value = '';
+    document.getElementById('addFaqAnswer').value = '';
+    editingFaqIndex = -1;
+    showModal('addFaqModal');
+  }
+
+  function showEditFaqModal(index) {
+    const faq = state.faqs[index];
+    if (!faq) return;
+
+    document.getElementById('editFaqQuestion').value = faq.question || '';
+    document.getElementById('editFaqAnswer').value = faq.answer || '';
+    editingFaqIndex = index;
+    showModal('editFaqModal');
+  }
+
+  function showDeleteConfirmModal(index) {
+    deletingFaqIndex = index;
+    showModal('deleteFaqModal');
+  }
+
+  function handleAddFaq(event) {
+    event.preventDefault();
+    const question = document.getElementById('addFaqQuestion').value.trim();
+    const answer = document.getElementById('addFaqAnswer').value.trim();
+
+    if (!question || !answer) {
+      setStatus('Question and Answer are required', 'error');
+      return;
+    }
+
+    syncStateFromForm();
+    state.faqs.push({
+      landingPageFaqID: 0,
+      question,
+      answer,
+      sortOrder: state.faqs.length + 1
+    });
+
+    renderFaqRows();
+    updatePreview();
+    hideModal('addFaqModal');
+    setStatus('FAQ added', 'success');
+  }
+
+  function handleEditFaq(event) {
+    event.preventDefault();
+    if (editingFaqIndex < 0) return;
+
+    const question = document.getElementById('editFaqQuestion').value.trim();
+    const answer = document.getElementById('editFaqAnswer').value.trim();
+
+    if (!question || !answer) {
+      setStatus('Question and Answer are required', 'error');
+      return;
+    }
+
+    syncStateFromForm();
+    state.faqs[editingFaqIndex] = {
+      ...state.faqs[editingFaqIndex],
+      question,
+      answer
+    };
+
+    renderFaqRows();
+    updatePreview();
+    hideModal('editFaqModal');
+    setStatus('FAQ updated', 'success');
+    editingFaqIndex = -1;
+  }
+
+  function handleDeleteFaq() {
+    if (deletingFaqIndex < 0) return;
+
+    syncStateFromForm();
+    state.faqs.splice(deletingFaqIndex, 1);
+    renderFaqRows();
+    updatePreview();
+    hideModal('deleteFaqModal');
+    setStatus('FAQ deleted', 'success');
+    deletingFaqIndex = -1;
   }
 
   function applyState(nextState) {
@@ -330,20 +437,52 @@
       }
     });
 
-    els.addFaqBtn.addEventListener('click', addFaq);
+    // Add FAQ button
+    els.addFaqBtn.addEventListener('click', showAddFaqModal);
+
+    // Add FAQ form submission
+    els.addFaqForm.addEventListener('submit', handleAddFaq);
+
+    // Edit FAQ form submission
+    els.editFaqForm.addEventListener('submit', handleEditFaq);
+
+    // Delete confirmation
+    els.confirmDeleteBtn.addEventListener('click', handleDeleteFaq);
+
+    // Save contact button
     els.saveContactBtn.addEventListener('click', (e) => {
       e.preventDefault();
       saveContent();
     });
+
+    // Update map button
     els.updateMapBtn.addEventListener('click', (e) => {
       e.preventDefault();
       updatePreview();
       setStatus('Map preview updated', 'success');
     });
 
+    // Form submission
     els.form.addEventListener('submit', (event) => {
       event.preventDefault();
       saveContent();
+    });
+
+    // Modal close buttons and overlay clicks
+    document.querySelectorAll('[data-modal-close]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        const modalId = e.target.dataset.modalClose;
+        hideModal(modalId);
+      });
+    });
+
+    // Close modal when clicking overlay
+    document.querySelectorAll('.modal-overlay').forEach((overlay) => {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+          hideModal(overlay.id);
+        }
+      });
     });
   }
 
