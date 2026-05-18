@@ -443,7 +443,7 @@
     els.updateMapBtn.addEventListener('click', (e) => {
       e.preventDefault();
       updatePreview();
-      setStatus('Map preview updated', 'success');
+      saveContent();
     });
 
     // Form submission

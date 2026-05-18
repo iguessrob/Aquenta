@@ -89,15 +89,17 @@ app.UseSwaggerUI(c =>
 app.Use(async (context, next) =>
 {
     var path = context.Request.Path.Value?.ToLower() ?? "";
+    var method = context.Request.Method.ToUpper();
 
     // Define public endpoints that don't need a token.
     // Use exact/anchored checks to avoid accidental auth blocking in production.
+    // Note: GET /api/landingpage/home is public (read); PUT requires Auth (write)
     var isPublicEndpoint =
         path.StartsWith("/api/user/login", StringComparison.OrdinalIgnoreCase) ||
         path.StartsWith("/api/user/forgot-password", StringComparison.OrdinalIgnoreCase) ||
         path.StartsWith("/api/user/reset-password", StringComparison.OrdinalIgnoreCase) ||
         path.StartsWith("/api/contact", StringComparison.OrdinalIgnoreCase) ||
-        path.StartsWith("/api/landingpage/home", StringComparison.OrdinalIgnoreCase) ||
+        (path.StartsWith("/api/landingpage/home", StringComparison.OrdinalIgnoreCase) && method == "GET") ||
         path.StartsWith("/health", StringComparison.OrdinalIgnoreCase) ||
         path.StartsWith("/swagger", StringComparison.OrdinalIgnoreCase);
 
