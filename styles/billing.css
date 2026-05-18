@@ -583,15 +583,12 @@ body {
 }
 
 .billing-table th:nth-child(3),
-.billing-table td:nth-child(3) {
-  width: 16%;
-  padding-right: 28px;
-}
-
+.billing-table td:nth-child(3),
 .billing-table th:nth-child(4),
 .billing-table td:nth-child(4) {
-  width: 11%;
-  padding-left: 28px;
+  width: 14%;
+  padding-left: 12px;
+  padding-right: 12px;
 }
 
 .billing-table th:nth-child(5),
