@@ -20,6 +20,10 @@
     saveContactBtn: document.getElementById('saveContactBtn'),
     updateMapBtn: document.getElementById('updateMapBtn'),
     previewMap: document.getElementById('previewMapFrame'),
+    sidebar: document.getElementById('sidebar'),
+    mobileOverlay: document.getElementById('mobileOverlay'),
+    menuBtn: document.getElementById('menuBtn'),
+    closeSidebarBtn: document.getElementById('closeSidebar'),
     // Modals
     addFaqModal: document.getElementById('addFaqModal'),
     addFaqForm: document.getElementById('addFaqForm'),
@@ -32,6 +36,18 @@
   let state = clone(blankState);
   let editingFaqIndex = -1;
   let deletingFaqIndex = -1;
+
+  function openSidebar() {
+    if (!els.sidebar || !els.mobileOverlay) return;
+    els.sidebar.classList.add('open');
+    els.mobileOverlay.classList.add('active');
+  }
+
+  function closeSidebar() {
+    if (!els.sidebar || !els.mobileOverlay) return;
+    els.sidebar.classList.remove('open');
+    els.mobileOverlay.classList.remove('active');
+  }
 
   function clone(value) {
     return JSON.parse(JSON.stringify(value));
@@ -471,7 +487,28 @@
     });
   }
 
+  function bindSidebarControls() {
+    if (els.menuBtn) {
+      els.menuBtn.addEventListener('click', openSidebar);
+    }
+
+    if (els.closeSidebarBtn) {
+      els.closeSidebarBtn.addEventListener('click', closeSidebar);
+    }
+
+    if (els.mobileOverlay) {
+      els.mobileOverlay.addEventListener('click', closeSidebar);
+    }
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth >= 1024) {
+        closeSidebar();
+      }
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
+    bindSidebarControls();
     bindFormEvents();
     loadContent();
   });
