@@ -57,12 +57,12 @@
   function mapApiSettingsToEditor(settings) {
     return {
       officeName: settings && (settings.officeName || settings.OfficeName) ? (settings.officeName || settings.OfficeName) : '',
-      addressLine1: settings && (settings.addressLine1 || settings.Address) ? (settings.addressLine1 || settings.Address) : '',
-      officeHoursWeekdays: settings && (settings.officeHoursWeekdays || settings.OfficeHours) ? (settings.officeHoursWeekdays || settings.OfficeHours) : '',
+      addressLine1: settings && (settings.addressLine1 || settings.Address || settings.address) ? (settings.addressLine1 || settings.Address || settings.address) : '',
+      officeHoursWeekdays: settings && (settings.officeHoursWeekdays || settings.OfficeHours || settings.officeHours) ? (settings.officeHoursWeekdays || settings.OfficeHours || settings.officeHours) : '',
       landlineNumber: settings && (settings.landlineNumber || settings.LandlineNumber) ? (settings.landlineNumber || settings.LandlineNumber) : '',
       emailAddress: settings && (settings.emailAddress || settings.EmailAddress) ? (settings.emailAddress || settings.EmailAddress) : '',
-      googleMapsEmbedUrl: settings && (settings.googleMapsEmbedUrl || settings.googleMapsEmbedCode || settings.GoogleMapsEmbedCode)
-        ? (settings.googleMapsEmbedUrl || settings.googleMapsEmbedCode || settings.GoogleMapsEmbedCode)
+      googleMapsEmbedUrl: settings && (settings.googleMapsEmbedUrl || settings.googleMapsEmbedCode || settings.GoogleMapsEmbedCode || settings.googleMapsEmbed)
+        ? (settings.googleMapsEmbedUrl || settings.googleMapsEmbedCode || settings.GoogleMapsEmbedCode || settings.googleMaps_embed || settings.googleMapsEmbed)
         : ''
     };
   }
