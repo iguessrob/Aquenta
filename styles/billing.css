@@ -682,6 +682,30 @@ body {
   -moz-appearance: textfield;
 }
 
+/* Ensure previous-input visually matches present reading inputs */
+.previous-input {
+  width: 132px;
+  height: 40px;
+  border: 0.9px solid #6b7280;
+  border-radius: 12px;
+  padding: 0 12px;
+  font-size: 14px;
+  color: #374151;
+  background: #fff;
+}
+
+.previous-input[readonly] {
+  background: #f3f4f6;
+  color: #111827;
+  cursor: default;
+}
+
+.previous-input.is-editing {
+  background: #f3f4f6;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
 .table-actions {
   display: inline-flex;
   align-items: center;

@@ -681,7 +681,7 @@ function renderBillingRows(rows) {
         <td>
           <input
             type="number"
-            class="reading-input previous-input"
+            class="reading-input previous-input${item.isEditing ? ' is-editing' : ''}"
             data-role="previous-reading"
             data-row-key="${item.rowKey}"
             data-initial-value="${item.previous || ''}"
