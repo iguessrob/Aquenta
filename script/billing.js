@@ -681,11 +681,13 @@ function renderBillingRows(rows) {
         <td>
           <input
             type="number"
-            class="previous-input"
+            class="reading-input previous-input"
             data-role="previous-reading"
             data-row-key="${item.rowKey}"
+            data-initial-value="${item.previous || ''}"
             value="${item.previous || ''}"
             min="0"
+            ${item.hasExistingBilling && !item.isEditing && String(item.previous || '').trim() !== '' ? 'readonly' : ''}
             inputmode="numeric"
           />
         </td>
@@ -841,6 +843,28 @@ function setupTableRowActions() {
         amountCell.textContent = canCompute ? formatPeso(computedAmount) : '--';
       }
 
+      // Ensure previous input has a max equal to present (if present exists)
+      try {
+        const prevInputEl = row.querySelector('.previous-input[data-row-key="' + rowKey + '"]');
+        if (prevInputEl) {
+          if (validation.hasValue) {
+            prevInputEl.setAttribute('max', String(present));
+            // Clamp previous if it exceeds present
+            const prevVal = prevInputEl.value ? toNumber(prevInputEl.value, 0) : 0;
+            if (prevVal > present) {
+              prevInputEl.value = String(present);
+              rowData.previous = present;
+              if (consumptionCell) consumptionCell.textContent = '0';
+              if (amountCell) amountCell.textContent = formatPeso(getTariffAmount(rowData.categoryId, 0));
+            }
+          } else {
+            prevInputEl.removeAttribute('max');
+          }
+        }
+      } catch (e) {
+        // ignore
+      }
+
       if (actionsWrap && rowData.hasExistingBilling) {
         actionsWrap.innerHTML = canCompute
           ? `
@@ -876,10 +900,23 @@ function setupTableRowActions() {
 
       // Update previous in memory
       const newPrevRaw = String(prevInput.value || '').trim();
-      rowData.previous = newPrevRaw === '' ? 0 : toNumber(newPrevRaw, 0);
+      let newPrev = newPrevRaw === '' ? 0 : toNumber(newPrevRaw, 0);
+
+      // Enforce previous <= present (if present exists)
+      const presentInputEl = prevInput.closest('tr')?.querySelector('.reading-input[data-role="current-reading"]');
+      const presentVal = presentInputEl ? toNumber(String(presentInputEl.value || '').trim(), 0) : 0;
+      if (presentInputEl && String(presentInputEl.value || '').trim() !== '') {
+        if (newPrev > presentVal) {
+          // clamp to present
+          newPrev = presentVal;
+          prevInput.value = String(presentVal);
+          showNotification('Previous reading cannot be greater than Present reading. Value adjusted.', 'info');
+        }
+      }
+
+      rowData.previous = newPrev;
 
       // Re-validate present and recompute
-      const presentInputEl = prevInput.closest('tr')?.querySelector('.reading-input[data-role="current-reading"]');
       const presentValue = presentInputEl ? String(presentInputEl.value || '').trim() : '';
       const validation = validatePresentReading(rowData, presentValue);
       if (presentInputEl) setReadingValidationState(presentInputEl, validation);
