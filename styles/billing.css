@@ -613,7 +613,9 @@ body {
 }
 
 .reading-input {
-  width: 132px;
+  width: 100%;
+  max-width: 140px;
+  box-sizing: border-box;
   height: 40px;
   border: 0.9px solid #6b7280;
   border-radius: 12px;
@@ -681,14 +683,9 @@ body {
 
 /* Ensure previous-input visually matches present reading inputs */
 .previous-input {
-  width: 132px;
-  height: 40px;
-  border: 0.9px solid #6b7280;
-  border-radius: 12px;
-  padding: 0 12px;
-  font-size: 14px;
-  color: #374151;
-  background: #fff;
+  width: 100%;
+  max-width: 140px;
+  box-sizing: border-box;
 }
 
 .previous-input[readonly] {
