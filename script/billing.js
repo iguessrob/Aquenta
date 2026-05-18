@@ -678,7 +678,17 @@ function renderBillingRows(rows) {
             title="${inputTitle}"
           />
         </td>
-        <td>${item.previous}</td>
+        <td>
+          <input
+            type="number"
+            class="previous-input"
+            data-role="previous-reading"
+            data-row-key="${item.rowKey}"
+            value="${item.previous || ''}"
+            min="0"
+            inputmode="numeric"
+          />
+        </td>
         <td data-role="consumption">${consumptionText}</td>
         <td data-role="amount">${amountText}</td>
         <td>
@@ -799,77 +809,167 @@ function setupTableRowActions() {
   });
 
   content.addEventListener('input', (event) => {
-    const input = event.target.closest('.reading-input[data-role="current-reading"]');
-    if (!input) return;
+    // Present reading input
+    const presentInput = event.target.closest('.reading-input[data-role="current-reading"]');
+    if (presentInput) {
+      const rowKey = toNumber(presentInput.getAttribute('data-row-key'), 0);
+      const rowData = filteredBilling.find((row) => row.rowKey === rowKey);
+      if (!rowData) return;
 
-    const rowKey = toNumber(input.getAttribute('data-row-key'), 0);
-    const rowData = filteredBilling.find((row) => row.rowKey === rowKey);
-    if (!rowData) return;
+      rowData.draftPresent = String(presentInput.value || '').trim();
 
-    rowData.draftPresent = String(input.value || '').trim();
+      const validation = validatePresentReading(rowData, presentInput.value);
+      setReadingValidationState(presentInput, validation);
 
-    const validation = validatePresentReading(rowData, input.value);
-    setReadingValidationState(input, validation);
+      const present = validation.reading;
+      const canCompute = validation.hasValue && validation.isValid;
+      const consumption = canCompute ? Math.max(0, present - rowData.previous) : 0;
+      const computedAmount = canCompute ? getTariffAmount(rowData.categoryId, consumption) : 0;
 
-    const present = validation.reading;
-    const canCompute = validation.hasValue && validation.isValid;
-    const consumption = canCompute ? Math.max(0, present - rowData.previous) : 0;
-    const computedAmount = canCompute ? getTariffAmount(rowData.categoryId, consumption) : 0;
+      const row = presentInput.closest('tr');
+      if (!row) return;
 
-    const row = input.closest('tr');
-    if (!row) return;
+      const consumptionCell = row.querySelector('[data-role="consumption"]');
+      const amountCell = row.querySelector('[data-role="amount"]');
+      const actionsWrap = row.querySelector('.table-actions');
 
-    const consumptionCell = row.querySelector('[data-role="consumption"]');
-    const amountCell = row.querySelector('[data-role="amount"]');
-    const actionsWrap = row.querySelector('.table-actions');
+      if (consumptionCell) {
+        consumptionCell.textContent = canCompute ? String(consumption) : '--';
+      }
 
-    if (consumptionCell) {
-      consumptionCell.textContent = canCompute ? String(consumption) : '--';
+      if (amountCell) {
+        amountCell.textContent = canCompute ? formatPeso(computedAmount) : '--';
+      }
+
+      if (actionsWrap && rowData.hasExistingBilling) {
+        actionsWrap.innerHTML = canCompute
+          ? `
+            <button class="table-action-btn edit-btn" data-role="edit-reading" data-row-key="${rowData.rowKey}" title="Edit reading" aria-label="Edit reading">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 20h9"></path>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"></path>
+              </svg>
+            </button>
+            <button class="table-action-btn delete-btn" data-role="clear-reading" data-row-key="${rowData.rowKey}" title="Clear reading" aria-label="Clear reading">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6l-1 14H6L5 6"></path>
+                <path d="M10 11v6"></path>
+                <path d="M14 11v6"></path>
+                <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+              </svg>
+            </button>
+          `
+          : '<span class="table-actions-empty">--</span>';
+      }
+
+      updateSaveButtonCount();
+      return;
     }
 
-    if (amountCell) {
-      amountCell.textContent = canCompute ? formatPeso(computedAmount) : '--';
-    }
+    // Previous reading input
+    const prevInput = event.target.closest('.previous-input[data-role="previous-reading"]');
+    if (prevInput) {
+      const rowKey = toNumber(prevInput.getAttribute('data-row-key'), 0);
+      const rowData = filteredBilling.find((row) => row.rowKey === rowKey);
+      if (!rowData) return;
 
-    if (actionsWrap && rowData.hasExistingBilling) {
-      actionsWrap.innerHTML = canCompute
-        ? `
-          <button class="table-action-btn edit-btn" data-role="edit-reading" data-row-key="${rowData.rowKey}" title="Edit reading" aria-label="Edit reading">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 20h9"></path>
-              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"></path>
-            </svg>
-          </button>
-          <button class="table-action-btn delete-btn" data-role="clear-reading" data-row-key="${rowData.rowKey}" title="Clear reading" aria-label="Clear reading">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="3 6 5 6 21 6"></polyline>
-              <path d="M19 6l-1 14H6L5 6"></path>
-              <path d="M10 11v6"></path>
-              <path d="M14 11v6"></path>
-              <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
-            </svg>
-          </button>
-        `
-        : '<span class="table-actions-empty">--</span>';
-    }
+      // Update previous in memory
+      const newPrevRaw = String(prevInput.value || '').trim();
+      rowData.previous = newPrevRaw === '' ? 0 : toNumber(newPrevRaw, 0);
 
-    updateSaveButtonCount();
+      // Re-validate present and recompute
+      const presentInputEl = prevInput.closest('tr')?.querySelector('.reading-input[data-role="current-reading"]');
+      const presentValue = presentInputEl ? String(presentInputEl.value || '').trim() : '';
+      const validation = validatePresentReading(rowData, presentValue);
+      if (presentInputEl) setReadingValidationState(presentInputEl, validation);
+
+      const canCompute = validation.hasValue && validation.isValid;
+      const consumption = canCompute ? Math.max(0, validation.reading - rowData.previous) : 0;
+      const computedAmount = canCompute ? getTariffAmount(rowData.categoryId, consumption) : 0;
+
+      const row = prevInput.closest('tr');
+      if (!row) return;
+      const consumptionCell = row.querySelector('[data-role="consumption"]');
+      const amountCell = row.querySelector('[data-role="amount"]');
+      if (consumptionCell) consumptionCell.textContent = canCompute ? String(consumption) : '--';
+      if (amountCell) amountCell.textContent = canCompute ? formatPeso(computedAmount) : '--';
+
+      updateSaveButtonCount();
+    }
   });
 
   content.addEventListener('keydown', (event) => {
-    const input = event.target.closest('.reading-input[data-role="current-reading"]');
-    if (!input || event.key !== 'Enter') return;
-
-    event.preventDefault();
-    setTimeout(() => input.blur(), 0);
+    const presentInput = event.target.closest('.reading-input[data-role="current-reading"]');
+    const prevInput = event.target.closest('.previous-input[data-role="previous-reading"]');
+    if ((presentInput || prevInput) && event.key === 'Enter') {
+      event.preventDefault();
+      setTimeout(() => {
+        (presentInput || prevInput).blur();
+      }, 0);
+    }
   });
 
   content.addEventListener('blur', async (event) => {
-    const input = event.target.closest('.reading-input[data-role="current-reading"]');
-    if (!input) return;
+    const presentInput = event.target.closest('.reading-input[data-role="current-reading"]');
+    if (presentInput) {
+      await saveReadingFromInput(presentInput);
+      return;
+    }
 
-    await saveReadingFromInput(input);
+    const prevInput = event.target.closest('.previous-input[data-role="previous-reading"]');
+    if (prevInput) {
+      await savePreviousFromInput(prevInput);
+    }
   }, true);
+
+  async function savePreviousFromInput(prevInput) {
+    if (!prevInput) return;
+
+    const rowKey = toNumber(prevInput.getAttribute('data-row-key'), 0);
+    if (rowKey <= 0 || savingRows.has(rowKey)) return;
+
+    const rowData = filteredBilling.find((row) => row.rowKey === rowKey);
+    if (!rowData) return;
+
+    const newPrevRaw = String(prevInput.value || '').trim();
+    const newPrev = newPrevRaw === '' ? 0 : toNumber(newPrevRaw, 0);
+    rowData.previous = newPrev;
+
+    const presentStr = String(rowData.draftPresent ?? (rowData.present > 0 ? rowData.present : '')).trim();
+
+    // If there's no present value and no existing billing, don't persist (nothing to save)
+    if (!presentStr && !rowData.hasExistingBilling) {
+      renderBillingRows(filteredBilling);
+      return;
+    }
+
+    // If there is a present value, validate it against the new previous
+    if (presentStr) {
+      const validation = validatePresentReading(rowData, presentStr);
+      const presentInputEl = prevInput.closest('tr')?.querySelector('.reading-input[data-role="current-reading"]');
+      if (presentInputEl) setReadingValidationState(presentInputEl, validation);
+      if (!validation.isValid) {
+        showNotification(validation.message, 'error');
+        return;
+      }
+    }
+
+    savingRows.add(rowKey);
+    prevInput.disabled = true;
+
+    try {
+      const currentReading = toNumber(presentStr || rowData.present, 0);
+      await persistRowReading(rowData, currentReading);
+      await loadBilling();
+      showNotification('Previous reading saved successfully.', 'success', 2200);
+    } catch (error) {
+      console.error(error);
+      showNotification(error.message || 'Failed to save previous reading.', 'error');
+    } finally {
+      savingRows.delete(rowKey);
+    }
+  }
 }
 
 function setupPaginationActions() {
