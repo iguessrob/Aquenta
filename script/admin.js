@@ -471,13 +471,25 @@ async function loadDashboardData() {
     ? cardMetrics.waterConsumed
     : toNumber(latestMonthWaterConsumed);
 
+  // Total Active Concessioners: compute locally excluding mother meter concessioners to ensure accuracy
   const activeMembersElement = document.querySelector('.summary-card:nth-of-type(1) .card-value');
-  if (activeMembersElement) {
-    activeMembersElement.textContent = activeMembersCount.toLocaleString();
+  try {
+    const concessionerList = Array.isArray(concessioners) ? concessioners : [];
+    const activeExcludingMother = concessionerList.filter((c) => {
+      const status = String(c.status ?? c.Status ?? '').trim().toLowerCase();
+      const isActive = status === '' || status === 'active';
+      return isActive && !isMotherMeterConcessioner(c);
+    }).length;
+    if (activeMembersElement) {
+      activeMembersElement.textContent = String(activeExcludingMother.toLocaleString());
+    }
+  } catch (e) {
+    if (activeMembersElement) activeMembersElement.textContent = activeMembersCount.toLocaleString();
   }
 
+  // Pending Collections: prefer locally computed value which excludes mother meters
   const pendingCollectionsElement = document.querySelector('.summary-card:nth-of-type(2) .card-value');
-  const pendingCollections = toNumber(latestMonthPendingCollections);
+  const pendingCollections = toNumber(cardMetrics.pendingCollections ?? latestMonthPendingCollections);
   if (pendingCollectionsElement) {
     pendingCollectionsElement.textContent = `₱${pendingCollections.toLocaleString()}`;
   }
