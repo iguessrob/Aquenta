@@ -1137,8 +1137,18 @@ window.addEventListener('resize', () => {
 });
 
 
-// Initialize chart on page load
-initChart();
+// Initialize chart on page load when the chart library is available.
+// The dashboard metrics should still load even if Chart.js is blocked by CSP.
+if (typeof window.Chart !== 'undefined') {
+  try {
+    initChart();
+    updateChartWidth();
+  } catch (error) {
+    console.error('Failed to initialize dashboard chart:', error);
+  }
+} else {
+  console.warn('Chart.js is unavailable; loading dashboard metrics without charts.');
+}
 
 const currentUser = ensureLoggedIn();
 if (currentUser) {
