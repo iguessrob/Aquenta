@@ -393,8 +393,9 @@
         setStatus('Landing-page content saved to the API.', 'success');
         return;
       } catch (error) {
+        const errorMessage = error && error.message ? error.message : String(error);
         console.error('Failed to save landing page content to API:', error);
-        setStatus('Unable to save landing-page content to the API.', 'warning');
+        setStatus(`Unable to save: ${errorMessage}`, 'warning');
         return;
       }
     }

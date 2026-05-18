@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "KNTB5tkMiis=",
+  "dgSpecHash": "yL9ugfFJFc8=",
   "success": true,
-  "projectFilePath": "c:\\Users\\Geline\\OneDrive\\Desktop\\Gelines_Github\\git-hub-ni-geline\\Aquenta\\AquentaLibrary\\AquentaAPI\\AquentaAPI.csproj",
+  "projectFilePath": "C:\\Users\\Geline\\OneDrive\\Desktop\\Gelines_Github\\git-hub-ni-geline\\Aquenta\\AquentaLibrary\\AquentaAPI\\AquentaAPI.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Geline\\.nuget\\packages\\azure.core\\1.50.0\\azure.core.1.50.0.nupkg.sha512",
     "C:\\Users\\Geline\\.nuget\\packages\\azure.identity\\1.17.1\\azure.identity.1.17.1.nupkg.sha512",
