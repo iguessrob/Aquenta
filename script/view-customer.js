@@ -23,6 +23,10 @@
   const transactionSearchInput = document.getElementById('transactionSearchInput');
   const summaryTotalBilling = document.getElementById('summaryTotalBilling');
   const summaryTotalBalance = document.getElementById('summaryTotalBalance');
+  const BILLING_MONTHS = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
 
   function pick(obj, keys, fallback = '') {
     for (const key of keys) {
@@ -40,12 +44,49 @@
     return `₱ ${toNumber(val).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
 
+  function formatPesoDash(val, hasValue = true) {
+    return hasValue ? formatPeso(val) : '₱ -';
+  }
+
   function formatDate(val) {
     if (!val) return '--';
     const d = new Date(val);
     // Handle invalid dates or default "0001-01-01" (Year 1) dates
     if (isNaN(d.getTime()) || d.getFullYear() <= 1) return '--';
     return d.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+  }
+
+  function getBillPeriodStart(bill) {
+    const periodId = pick(bill, ['periodId', 'PeriodId', 'periodID', 'PeriodID']);
+    const period = periodCache.find(p => pick(p, ['periodId', 'PeriodId']) === periodId);
+    if (!period) return null;
+    const start = new Date(pick(period, ['periodStart', 'PeriodStart']));
+    return isNaN(start.getTime()) ? null : start;
+  }
+
+  function getDisplayYear() {
+    const selectedYear = billingYearSelect?.value || 'ALL';
+    if (selectedYear !== 'ALL') return toNumber(selectedYear, new Date().getFullYear());
+
+    const years = filteredBillings
+      .map(getBillPeriodStart)
+      .filter(Boolean)
+      .map(d => d.getFullYear());
+
+    if (years.length > 0) return Math.max(...years);
+
+    const cacheYears = billingCache
+      .map(getBillPeriodStart)
+      .filter(Boolean)
+      .map(d => d.getFullYear());
+
+    return cacheYears.length > 0 ? Math.max(...cacheYears) : new Date().getFullYear();
+  }
+
+  function toDisplayNumber(val) {
+    if (val === null || typeof val === 'undefined' || val === '') return '';
+    const n = Number(val);
+    return isNaN(n) ? '' : n;
   }
 
   async function loadHistory() {
@@ -135,7 +176,7 @@
 
   function showLoading() {
     const loadingHtml = '<tr><td colspan="10" style="text-align:center; padding: 3rem;"><div class="loading-spinner"></div><div style="margin-top: 10px; color: #64748b; font-size: 14px;">Loading data...</div></td></tr>';
-    if (billingTableBody) billingTableBody.innerHTML = loadingHtml;
+    if (billingDetailTableBody) billingDetailTableBody.innerHTML = loadingHtml;
     if (paymentTableBody) paymentTableBody.innerHTML = loadingHtml;
     if (transactionTableBody) transactionTableBody.innerHTML = loadingHtml;
   }
@@ -151,42 +192,76 @@
     if (!billingDetailTableBody) return;
     billingDetailTableBody.innerHTML = '';
 
-    if (filteredBillings.length === 0) {
+    const displayYear = getDisplayYear();
+    const searchTerm = (billingSearchInput?.value || '').trim().toLowerCase();
+    const monthRows = BILLING_MONTHS
+      .map((label, monthIndex) => ({ label, monthIndex }))
+      .filter(month => !searchTerm || month.label.toLowerCase().includes(searchTerm));
+
+    if (monthRows.length === 0) {
       billingDetailTableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 2rem; color: #64748b;">No billing records found.</td></tr>';
       return;
     }
 
-    filteredBillings.forEach(bill => {
-      const bId = pick(bill, ['billingId', 'BillingId']);
-      const periodId = pick(bill, ['periodId', 'PeriodId', 'periodID', 'PeriodID']);
-      const period = periodCache.find(p => pick(p, ['periodId', 'PeriodId']) === periodId);
-      const periodLabel = period ? formatDate(pick(period, ['periodStart', 'PeriodStart'])) : 'Period ' + periodId;
+    const billByMonth = new Map();
+    filteredBillings.forEach((bill) => {
+      const periodStart = getBillPeriodStart(bill);
+      if (!periodStart || periodStart.getFullYear() !== displayYear) return;
 
-      const present = toNumber(pick(bill, ['currentReading', 'CurrentReading'], 0));
-      const previous = toNumber(pick(bill, ['prevReading', 'PrevReading'], 0));
-      const consumption = Math.max(0, present - previous);
-      
+      const monthIndex = periodStart.getMonth();
+      const current = billByMonth.get(monthIndex);
+      const billId = toNumber(pick(bill, ['billingId', 'BillingId']), 0);
+      const currentBillId = current ? toNumber(pick(current, ['billingId', 'BillingId']), 0) : -1;
+      if (!current || billId > currentBillId) {
+        billByMonth.set(monthIndex, bill);
+      }
+    });
+
+    monthRows.forEach(({ label, monthIndex }) => {
+      const bill = billByMonth.get(monthIndex);
+      const tr = document.createElement('tr');
+
+      if (!bill) {
+        tr.innerHTML = `
+          <td>${label}</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td>${formatPesoDash(0, false)}</td>
+          <td>${formatPesoDash(0, false)}</td>
+          <td></td>
+          <td>${formatPesoDash(0, false)}</td>
+        `;
+        billingDetailTableBody.appendChild(tr);
+        return;
+      }
+
+      const bId = pick(bill, ['billingId', 'BillingId']);
+      const present = toDisplayNumber(pick(bill, ['currentReading', 'CurrentReading']));
+      const previous = toDisplayNumber(pick(bill, ['prevReading', 'PrevReading']));
+      const consumption = (present === '' || previous === '') ? '' : Math.max(0, present - previous);
+
       const billAmount = toNumber(pick(bill, ['billAmount', 'BillAmount'], 0));
       const penalty = toNumber(pick(bill, ['penalty', 'Penalty'], 0));
       const totalBill = billAmount + penalty;
 
-      // Calculate collection (payments for this billing)
-      const payments = paymentCache.filter(p => toNumber(pick(p, ['billingId', 'BillingId'])) === bId);
+      const payments = paymentCache.filter(p => toNumber(pick(p, ['billingId', 'BillingId'])) === toNumber(bId, 0));
       const collection = payments.reduce((sum, p) => sum + toNumber(pick(p, ['amountPaid', 'AmountPaid'], 0)), 0);
-      const datePaid = payments.length > 0 ? formatDate(pick(payments[0], ['datePaid', 'DatePaid'])) : '--';
-
+      const hasCollection = payments.length > 0;
+      const datePaid = hasCollection ? formatDate(pick(payments[0], ['datePaid', 'DatePaid'])) : '';
       const balance = Math.max(0, totalBill - collection);
+      const balanceDisplay = balance > 0 ? formatPeso(balance) : '-';
+      const balanceClass = balance > 0 ? 'billing-balance-due' : '';
 
-      const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td>${periodLabel}</td>
+        <td>${label}</td>
         <td>${present}</td>
         <td>${previous}</td>
         <td>${consumption}</td>
         <td>${formatPeso(totalBill)}</td>
-        <td>${formatPeso(collection)}</td>
+        <td>${formatPesoDash(collection, hasCollection)}</td>
         <td>${datePaid}</td>
-        <td>${formatPeso(balance)}</td>
+        <td class="${balanceClass}">${balanceDisplay}</td>
       `;
       billingDetailTableBody.appendChild(tr);
     });

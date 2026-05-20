@@ -409,6 +409,11 @@ body[data-page="view-customer"] .summary-card-value {
   font-size: 14px;
 }
 
+.billing-detail-table .billing-balance-due {
+  color: #ef4444;
+  font-weight: 700;
+}
+
 .billing-detail-table tbody tr:hover {
   background: #f8fbff;
 }
