@@ -247,7 +247,9 @@ body[data-page="view-customer"] .profile-actions {
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
-  width: 100%;
+  justify-content: flex-end;
+  width: auto;
+  margin-left: auto;
 }
 
 body[data-page="view-customer"] .profile-actions .profile-action-btn {
@@ -290,6 +292,15 @@ body[data-page="view-customer"] .profile-actions .profile-action-delete:hover {
   background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
   border-color: #991b1b;
   box-shadow: 0 12px 24px rgba(185, 28, 28, 0.24);
+}
+
+/* Visual ordering: show Delete before Reset on the right */
+body[data-page="view-customer"] .profile-actions .profile-action-delete {
+  order: 1;
+}
+
+body[data-page="view-customer"] .profile-actions .profile-action-reset {
+  order: 2;
 }
 
 body[data-page="view-customer"] .modal-footer .btn-danger {

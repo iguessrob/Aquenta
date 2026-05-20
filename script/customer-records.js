@@ -684,11 +684,13 @@
     if (addressEl) addressEl.textContent = customer.address || '';
 
     if (rateClassPill) {
-      rateClassPill.textContent = customer.rateClassification || '';
+      // Show connection status in the pill (green when active)
+      rateClassPill.textContent = customer.connectionStatus || '';
       rateClassPill.className = `status-pill ${formatStatusClass(customer.connectionStatus)}`;
     }
 
-    if (statusValueEl) statusValueEl.textContent = customer.connectionStatus || '';
+    // Display the rate classification in the small labeled field (was previously labeled "Status")
+    if (statusValueEl) statusValueEl.textContent = customer.rateClassification || '';
     if (districtValueEl) districtValueEl.textContent = customer.district || '';
     if (phoneEl) phoneEl.textContent = customer.contactNumber || '';
     if (emailEl) emailEl.textContent = customer.email || '';
