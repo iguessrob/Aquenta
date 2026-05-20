@@ -302,23 +302,25 @@ body[data-page="view-customer"] .profile-actions .profile-action-delete:hover {
 }
 
 .summary-cards-container {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-wrap: wrap;
   gap: 20px;
 }
 
 .summary-card {
-  border-radius: 16px;
-  padding: 28px 24px;
-  text-align: center;
+  border-radius: 24px;
+  padding: 20px 32px;
+  text-align: left;
   color: #ffffff;
   font-weight: 700;
   box-shadow: 0 8px 20px rgba(17, 24, 39, 0.15);
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  flex-direction: row;
+  justify-content: flex-start;
   align-items: center;
-  min-height: 140px;
+  gap: 8px;
+  flex: 1;
+  min-width: 300px;
 }
 
 .summary-card-billing,
@@ -327,16 +329,17 @@ body[data-page="view-customer"] .profile-actions .profile-action-delete:hover {
 }
 
 .summary-card-label {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
   opacity: 0.95;
-  margin-bottom: 12px;
   letter-spacing: 0.3px;
+  white-space: nowrap;
 }
 
 .summary-card-value {
-  font-size: 28px;
+  font-size: 18px;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 /* Billing Filter Bar */
@@ -424,21 +427,21 @@ body[data-page="view-customer"] .profile-actions .profile-action-delete:hover {
 /* Responsive Design */
 @media (max-width: 768px) {
   .summary-cards-container {
-    grid-template-columns: 1fr;
+    flex-direction: column;
     gap: 16px;
   }
 
   .summary-card {
-    min-height: 120px;
-    padding: 20px 16px;
+    padding: 20px 24px;
+    min-width: 100%;
   }
 
   .summary-card-value {
-    font-size: 24px;
+    font-size: 16px;
   }
 
   .summary-card-label {
-    font-size: 14px;
+    font-size: 16px;
   }
 
   .billing-filter-bar {
@@ -458,12 +461,13 @@ body[data-page="view-customer"] .profile-actions .profile-action-delete:hover {
 
 @media (max-width: 480px) {
   .summary-card {
-    min-height: 110px;
-    padding: 16px 12px;
+    padding: 16px 20px;
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .summary-card-value {
-    font-size: 20px;
+    font-size: 16px;
   }
 
   .summary-card-label {
