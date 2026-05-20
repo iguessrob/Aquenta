@@ -250,7 +250,7 @@
       const hasCollection = payments.length > 0;
       const datePaid = hasCollection ? formatDate(pick(payments[0], ['datePaid', 'DatePaid'])) : '';
       const balance = Math.max(0, totalBill - collection);
-      const balanceDisplay = balance > 0 ? formatPeso(balance) : '-';
+      const balanceDisplay = formatPeso(balance);
       const balanceClass = balance > 0 ? 'billing-balance-due' : '';
 
       tr.innerHTML = `
