@@ -175,7 +175,7 @@
               </div>
             </div>
             <div class="profile-actions">
-              <button id="resetPasswordBtn" class="btn-secondary btn-compact">Reset Password</button>
+              <button id="resetPasswordBtn" class="profile-action-btn profile-action-reset btn-compact" type="button">Reset Password</button>
             </div>
           </div>
 
@@ -360,6 +360,30 @@
       <div class="modal-footer" style="padding: 16px 24px; border-top: 1px solid #e5e7eb; display: flex; gap: 12px; justify-content: flex-end;">
         <button id="cancelResetBtn" class="btn-secondary">Cancel</button>
         <button id="confirmResetBtn" class="btn-primary" style="background: #ef4444; border-color: #ef4444; color: white;">Confirm Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Concessioner Modal -->
+  <div id="deleteConcessionerModal" class="modal">
+    <div class="modal-content" style="max-width: 460px;">
+      <div class="modal-header">
+        <h2 class="modal-title" style="color: #b91c1c;">Delete Concessioner</h2>
+        <button id="closeDeleteModalBtn" class="modal-close" aria-label="Close">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-description" id="deleteConcessionerDescription" style="margin-bottom: 0;">
+          Are you sure you want to delete this concessioner? This action will hide the record from all lists.
+        </p>
+      </div>
+      <div class="modal-footer" style="padding: 16px 24px; border-top: 1px solid #e5e7eb; display: flex; gap: 12px; justify-content: flex-end;">
+        <button id="cancelDeleteBtn" class="btn-secondary" type="button">Cancel</button>
+        <button id="confirmDeleteBtn" class="btn-danger" type="button">Delete Concessioner</button>
       </div>
     </div>
   </div>

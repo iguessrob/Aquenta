@@ -702,8 +702,7 @@
         const resetBtn = document.createElement('button');
         resetBtn.id = 'resetPasswordBtn';
         resetBtn.type = 'button';
-        resetBtn.className = 'btn-danger btn-compact';
-        resetBtn.style.marginLeft = '8px';
+        resetBtn.className = 'profile-action-btn profile-action-reset btn-compact';
         resetBtn.textContent = 'Reset Password';
         resetBtn.addEventListener('click', async () => {
           const confirmMsg = `Are you sure you want to reset ${customer.fullName || 'this customer'}'s password?`;
@@ -744,35 +743,17 @@
         const deleteBtn = document.createElement('button');
         deleteBtn.id = 'deleteConcessionerBtn';
         deleteBtn.type = 'button';
-        deleteBtn.className = 'btn-danger btn-compact';
-        deleteBtn.style.marginLeft = '8px';
-        deleteBtn.style.backgroundColor = '#ef4444'; // Red for delete
+        deleteBtn.className = 'profile-action-btn profile-action-delete btn-compact';
+        deleteBtn.dataset.customerName = customer.fullName || `${customer.firstName || ''} ${customer.lastName || ''}`.trim() || 'this concessioner';
         deleteBtn.textContent = 'Delete Concessioner';
-        deleteBtn.addEventListener('click', async () => {
-          const confirmMsg = `Are you sure you want to delete ${customer.fullName || 'this concessioner'}? This action is reversible but will hide the record from all lists.`;
-          if (window.confirm(confirmMsg)) {
-            try {
-              const api = getApi();
-              await api.delete(`/Concessioner?id=${customer.concessionerId}`);
-              
-              if (window.showNotification) {
-                window.showNotification('Concessioner has been successfully deleted.', 'success');
-              } else {
-                window.alert('Concessioner has been successfully deleted.');
-              }
-              
-              // Redirect to list after a short delay
-              setTimeout(() => {
-                window.location.href = 'customer-record.html';
-              }, 1500);
-            } catch (error) {
-              console.error('Delete concessioner failed:', error);
-              if (window.showNotification) {
-                window.showNotification('Failed to delete concessioner: ' + (error.message || 'Unknown error'), 'error');
-              } else {
-                window.alert('Failed to delete concessioner: ' + (error.message || 'Unknown error'));
-              }
-            }
+        deleteBtn.addEventListener('click', () => {
+          const deleteModal = document.getElementById('deleteConcessionerModal');
+          const deleteDescription = document.getElementById('deleteConcessionerDescription');
+          if (deleteDescription) {
+            deleteDescription.textContent = `Are you sure you want to delete ${deleteBtn.dataset.customerName || 'this concessioner'}? This action will hide the record from all lists.`;
+          }
+          if (deleteModal) {
+            deleteModal.classList.add('active');
           }
         });
         profileActions.appendChild(deleteBtn);

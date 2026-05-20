@@ -316,9 +316,17 @@
   const closeResetModalBtn = document.getElementById('closeResetModalBtn');
   const cancelResetBtn = document.getElementById('cancelResetBtn');
   const confirmResetBtn = document.getElementById('confirmResetBtn');
+  const deleteBtn = document.getElementById('deleteConcessionerBtn');
+  const deleteModal = document.getElementById('deleteConcessionerModal');
+  const closeDeleteModalBtn = document.getElementById('closeDeleteModalBtn');
+  const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+  const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+  const deleteDescription = document.getElementById('deleteConcessionerDescription');
 
   const openResetModal = () => resetModal && resetModal.classList.add('active');
   const closeResetModal = () => resetModal && resetModal.classList.remove('active');
+  const openDeleteModal = () => deleteModal && deleteModal.classList.add('active');
+  const closeDeleteModal = () => deleteModal && deleteModal.classList.remove('active');
 
   if (resetBtn) resetBtn.addEventListener('click', openResetModal);
   if (closeResetModalBtn) closeResetModalBtn.addEventListener('click', closeResetModal);
@@ -332,11 +340,59 @@
     });
   }
 
+  if (deleteBtn) {
+    deleteBtn.addEventListener('click', () => {
+      if (deleteDescription) {
+        deleteDescription.textContent = `Are you sure you want to delete ${deleteBtn.dataset.customerName || 'this concessioner'}? This action will hide the record from all lists.`;
+      }
+      openDeleteModal();
+    });
+  }
+
+  if (closeDeleteModalBtn) closeDeleteModalBtn.addEventListener('click', closeDeleteModal);
+  if (cancelDeleteBtn) cancelDeleteBtn.addEventListener('click', closeDeleteModal);
+
+  if (confirmDeleteBtn) {
+    confirmDeleteBtn.addEventListener('click', async () => {
+      closeDeleteModal();
+
+      try {
+        const api = window.AquentaApiClient;
+        await api.delete(`/Concessioner?id=${concessionerId}`);
+
+        if (window.showNotification) {
+          window.showNotification('Concessioner has been successfully deleted.', 'success');
+        } else {
+          window.alert('Concessioner has been successfully deleted.');
+        }
+
+        setTimeout(() => {
+          window.location.href = 'customer-record.html';
+        }, 1500);
+      } catch (error) {
+        console.error('Delete concessioner failed:', error);
+        if (window.showNotification) {
+          window.showNotification('Failed to delete concessioner: ' + (error.message || 'Unknown error'), 'error');
+        } else {
+          window.alert('Failed to delete concessioner: ' + (error.message || 'Unknown error'));
+        }
+      }
+    });
+  }
+
   // Close modal when clicking outside
   if (resetModal) {
     resetModal.addEventListener('click', (e) => {
       if (e.target === resetModal) {
         closeResetModal();
+      }
+    });
+  }
+
+  if (deleteModal) {
+    deleteModal.addEventListener('click', (e) => {
+      if (e.target === deleteModal) {
+        closeDeleteModal();
       }
     });
   }

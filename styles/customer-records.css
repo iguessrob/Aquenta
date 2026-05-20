@@ -242,6 +242,75 @@ body[data-page="customer-list"] .customer-table td:nth-child(6) {
   width: 12%;
 }
 
+body[data-page="view-customer"] .profile-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+body[data-page="view-customer"] .profile-actions .profile-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  font-weight: 600;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+body[data-page="view-customer"] .profile-actions .profile-action-btn:hover {
+  transform: translateY(-1px);
+}
+
+body[data-page="view-customer"] .profile-actions .profile-action-reset {
+  background: #ffffff;
+  color: #334155;
+  border-color: #cbd5e1;
+}
+
+body[data-page="view-customer"] .profile-actions .profile-action-reset:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #1e293b;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+}
+
+body[data-page="view-customer"] .profile-actions .profile-action-delete {
+  background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+  color: #ffffff;
+  border-color: #dc2626;
+  box-shadow: 0 10px 20px rgba(220, 38, 38, 0.18);
+}
+
+body[data-page="view-customer"] .profile-actions .profile-action-delete:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+  border-color: #991b1b;
+  box-shadow: 0 12px 24px rgba(185, 28, 28, 0.24);
+}
+
+body[data-page="view-customer"] .modal-footer .btn-danger {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+  border: 1px solid #dc2626;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s, transform 0.15s ease, box-shadow 0.2s;
+}
+
+body[data-page="view-customer"] .modal-footer .btn-danger:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+  border-color: #991b1b;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 18px rgba(185, 28, 28, 0.22);
+}
+
 .status-pill {
   display: inline-flex;
   align-items: center;
@@ -790,6 +859,25 @@ body[data-page="view-customer"] .profile-toolbar {
   margin-bottom: 16px;
 }
 
+body[data-page="customer-list"] .customer-table td:nth-child(3) {
+  width: 16%;
+}
+
+body[data-page="customer-list"] .customer-table th:nth-child(4),
+body[data-page="customer-list"] .customer-table td:nth-child(4) {
+  width: 14%;
+}
+
+body[data-page="customer-list"] .customer-table th:nth-child(5),
+body[data-page="customer-list"] .customer-table td:nth-child(5) {
+  width: 13%;
+}
+
+body[data-page="customer-list"] .customer-table th:nth-child(6),
+body[data-page="customer-list"] .customer-table td:nth-child(6) {
+  width: 12%;
+}
+
 @media (max-width: 768px) {
   body[data-page="add-concessioner"] .content,
   body[data-page="edit-concessioner"] .content,
@@ -834,7 +922,7 @@ body[data-page="view-customer"] .profile-toolbar {
     width: 100%;
   }
 
-  body[data-page="view-customer"] .profile-actions .btn-compact {
+  body[data-page="view-customer"] .profile-actions .profile-action-btn {
     width: 100%;
   }
 
