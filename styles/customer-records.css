@@ -769,7 +769,7 @@ body[data-page="view-customer"] .modal-footer .btn-danger:hover {
   justify-content: space-between;
   align-items: flex-start;
   gap: 24px;
-  padding-bottom: 20px;
+  padding-bottom: 0;
   border-bottom: none;
   margin-bottom: 20px;
 }
@@ -781,9 +781,9 @@ body[data-page="view-customer"] .modal-footer .btn-danger:hover {
   flex: 1;
 }
 
-.profile-header-top {
+.profile-account-status-row {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   gap: 16px;
 }
@@ -801,7 +801,7 @@ body[data-page="view-customer"] .modal-footer .btn-danger:hover {
 }
 
 .profile-account {
-  font-size: 15px;
+  font-size: 13px;
   color: #4b5563;
 }
 
@@ -819,7 +819,7 @@ body[data-page="view-customer"] .modal-footer .btn-danger:hover {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  font-size: 15px;
+  font-size: 13px;
   color: #374151;
 }
 
@@ -832,7 +832,7 @@ body[data-page="view-customer"] .modal-footer .btn-danger:hover {
 }
 
 .profile-contact {
-  font-size: 15px;
+  font-size: 13px;
   color: #4b5563;
 }
 
