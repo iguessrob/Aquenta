@@ -294,12 +294,12 @@ body[data-page="view-customer"] .profile-actions .profile-action-delete:hover {
   box-shadow: 0 12px 24px rgba(185, 28, 28, 0.24);
 }
 
-/* Visual ordering: show Delete before Reset on the right */
-body[data-page="view-customer"] .profile-actions .profile-action-delete {
+/* Visual ordering: show Reset before Delete on the right */
+body[data-page="view-customer"] .profile-actions .profile-action-reset {
   order: 1;
 }
 
-body[data-page="view-customer"] .profile-actions .profile-action-reset {
+body[data-page="view-customer"] .profile-actions .profile-action-delete {
   order: 2;
 }
 

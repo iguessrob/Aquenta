@@ -203,7 +203,9 @@ function updateSaveButtonCount() {
 async function persistRowReading(row, readingValue) {
   const api = getApi();
   const currentReading = toNumber(readingValue, 0);
-  const billAmount = getTariffAmount(row.categoryId, Math.max(0, currentReading - row.previous));
+  const billAmount = row.isMotherMeter
+    ? 0
+    : getTariffAmount(row.categoryId, Math.max(0, currentReading - row.previous));
 
   const payload = {
     billingId: row.billingId,
@@ -370,6 +372,18 @@ function getTariffAmount(categoryId, consumption) {
   return rates[rates.length - 1].amount;
 }
 
+function isMotherMeterConcessioner(concessioner, user = null) {
+  const firstName = String(pick(user, ['firstName', 'FirstName'], '')).trim().toUpperCase();
+  const fullName = String(getConcessionerDisplayName(concessioner, user)).trim().toUpperCase();
+  const accountNumber = String(pick(concessioner, ['accountNumber', 'AccountNumber'], '')).trim().toUpperCase();
+  const meterNumber = String(pick(concessioner, ['meterNumber', 'MeterNumber'], '')).trim().toUpperCase();
+
+  return firstName === 'MOTHER METER'
+    || fullName.includes('MOTHER METER')
+    || accountNumber.includes('MOTHER')
+    || meterNumber.includes('MOTHER');
+}
+
 function escapeHtml(value) {
   return String(value ?? '')
     .replace(/&/g, '&amp;')
@@ -534,6 +548,7 @@ function buildNormalizedRows() {
     const userId = toNumber(pick(concessioner, ['userId', 'UserId', 'userID', 'UserID'], 0), 0);
     const user = userMap.get(userId) || null;
     const billings = billingByConcessioner.get(concessionerId) || [];
+    const isMotherMeter = isMotherMeterConcessioner(concessioner, user);
 
     const selectedBilling = billings.find((billing) => {
       const periodId = toNumber(pick(billing, ['periodId', 'PeriodId', 'periodID', 'PeriodID'], 0), 0);
@@ -564,9 +579,11 @@ function buildNormalizedRows() {
 
     const hasReading = present > 0;
     const catId = toNumber(pick(concessioner, ['categoryId', 'CategoryId'], 0), 0);
-    const amount = (selectedBilling && selectedBilling.billStatus === 'Paid') 
-      ? toNumber(pick(selectedBilling, ['billAmount', 'BillAmount'], 0), 0) 
-      : (hasReading ? getTariffAmount(catId, Math.max(0, present - previous)) : 0);
+    const amount = isMotherMeter
+      ? 0
+      : ((selectedBilling && selectedBilling.billStatus === 'Paid')
+        ? toNumber(pick(selectedBilling, ['billAmount', 'BillAmount'], 0), 0)
+        : (hasReading ? getTariffAmount(catId, Math.max(0, present - previous)) : 0));
 
     return {
       rowKey: concessionerId,
@@ -585,6 +602,7 @@ function buildNormalizedRows() {
       isEditing: false,
       consumption: hasReading ? Math.max(0, present - previous) : 0,
       amount,
+      isMotherMeter,
       hasExistingBilling: !!selectedBilling,
       billStatus: selectedBilling ? String(pick(selectedBilling, ['billStatus', 'BillStatus'], 'Unpaid')) : 'Unpaid',
       penalty: selectedBilling ? toNumber(pick(selectedBilling, ['penalty', 'Penalty'], 0), 0) : 0,
@@ -625,9 +643,11 @@ function renderBillingRows(rows) {
     const initialValidation = validatePresentReading(item, displayValue);
     const hasReading = initialValidation.hasValue && initialValidation.isValid;
     const previewConsumption = hasReading ? Math.max(0, toNumber(displayValue, 0) - item.previous) : 0;
-    const previewAmount = (item.hasExistingBilling && !item.isEditing && item.billStatus === 'Paid')
-      ? item.amount
-      : (hasReading ? getTariffAmount(item.categoryId, previewConsumption) : 0);
+    const previewAmount = item.isMotherMeter
+      ? 0
+      : ((item.hasExistingBilling && !item.isEditing && item.billStatus === 'Paid')
+        ? item.amount
+        : (hasReading ? getTariffAmount(item.categoryId, previewConsumption) : 0));
     const account = escapeHtml(item.accountNumber || `#${item.concessionerId}`);
     const name = escapeHtml(item.concessionerName || 'Unknown');
     const presentValue = displayValue;
@@ -826,7 +846,7 @@ function setupTableRowActions() {
       const present = validation.reading;
       const canCompute = validation.hasValue && validation.isValid;
       const consumption = canCompute ? Math.max(0, present - rowData.previous) : 0;
-      const computedAmount = canCompute ? getTariffAmount(rowData.categoryId, consumption) : 0;
+      const computedAmount = rowData.isMotherMeter ? 0 : (canCompute ? getTariffAmount(rowData.categoryId, consumption) : 0);
 
       const row = presentInput.closest('tr');
       if (!row) return;
@@ -923,7 +943,7 @@ function setupTableRowActions() {
 
       const canCompute = validation.hasValue && validation.isValid;
       const consumption = canCompute ? Math.max(0, validation.reading - rowData.previous) : 0;
-      const computedAmount = canCompute ? getTariffAmount(rowData.categoryId, consumption) : 0;
+      const computedAmount = rowData.isMotherMeter ? 0 : (canCompute ? getTariffAmount(rowData.categoryId, consumption) : 0);
 
       const row = prevInput.closest('tr');
       if (!row) return;
