@@ -511,7 +511,7 @@
         membership: String(formData.get('membership') || '').trim(),
       };
 
-      const requiredFields = ['accountNumber', 'firstName', 'lastName', 'meterNumber', 'district', 'districtSequence', 'rateClassification', 'connectionStatus', 'membership'];
+      const requiredFields = ['accountNumber', 'firstName', 'lastName', 'district', 'districtSequence', 'rateClassification', 'connectionStatus', 'membership'];
       const missing = requiredFields.filter((key) => !data[key]);
       if (missing.length > 0) {
         window.showNotification('Please fill in all required fields.', 'warning');
@@ -615,7 +615,7 @@
         membership: String(formData.get('membership') || '').trim(),
       };
 
-      const requiredFields = ['accountNumber', 'firstName', 'lastName', 'meterNumber', 'district', 'districtSequence', 'rateClassification', 'connectionStatus', 'membership'];
+      const requiredFields = ['accountNumber', 'firstName', 'lastName', 'district', 'districtSequence', 'rateClassification', 'connectionStatus', 'membership'];
       const missing = requiredFields.filter((key) => !updates[key]);
       if (missing.length > 0) {
         window.showNotification('Please fill in all required fields.', 'warning');
