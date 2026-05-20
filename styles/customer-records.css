@@ -382,9 +382,15 @@ body[data-page="view-customer"] .summary-card-value {
 }
 
 .billing-detail-table {
-  width: 100%;
+  width: max-content;
+  min-width: 100%;
   border-collapse: collapse;
-  table-layout: fixed;
+  table-layout: auto;
+}
+
+.billing-details-card .customer-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .billing-detail-table thead {
@@ -397,8 +403,10 @@ body[data-page="view-customer"] .summary-card-value {
   font-size: 13px;
   font-weight: 700;
   color: #2d3748;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  text-transform: none;
+  letter-spacing: normal;
+  white-space: nowrap;
+  overflow-wrap: normal;
   border-bottom: 1px solid #e4e9f0;
 }
 
@@ -407,6 +415,7 @@ body[data-page="view-customer"] .summary-card-value {
   border-bottom: 1px solid #e4e9f0;
   color: #0f172a;
   font-size: 14px;
+  white-space: nowrap;
 }
 
 .billing-detail-table .billing-balance-due {
