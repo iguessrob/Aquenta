@@ -181,7 +181,7 @@
     paymentTableBody.innerHTML = '';
 
     if (filteredPayments.length === 0) {
-      paymentTableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 2rem; color: #64748b;">No payment records found.</td></tr>';
+      paymentTableBody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 2rem; color: #64748b;">No payment records found.</td></tr>';
       return;
     }
 
@@ -197,9 +197,6 @@
         <td>${formatDate(pick(pay, ['datePaid', 'DatePaid']))}</td>
         <td>${periodLabel}</td>
         <td>${formatPeso(pick(pay, ['amountPaid', 'AmountPaid'], 0))}</td>
-        <td>Cash</td>
-        <td>--</td>
-        <td>Admin</td>
       `;
       paymentTableBody.appendChild(tr);
     });
