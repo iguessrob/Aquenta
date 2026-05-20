@@ -147,8 +147,8 @@
           </div>
         </section>
 
+        <!-- Profile header section -->
         <section class="customer-table-card customer-profile-card">
-          <!-- Profile header -->
           <div class="customer-profile-header">
             <div class="profile-main">
               <div class="profile-info">
@@ -176,162 +176,175 @@
             </div>
             <div class="profile-actions">
               <button id="resetPasswordBtn" class="profile-action-btn profile-action-reset btn-compact" type="button">Reset Password</button>
+              <button id="deleteConcessionerBtn" class="profile-action-btn profile-action-delete btn-compact" type="button">Delete Connection</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Summary Cards Section -->
+        <section class="billing-summary-section">
+          <div class="summary-cards-container">
+            <div class="summary-card summary-card-billing">
+              <div class="summary-card-label">Total Billing</div>
+              <div class="summary-card-value" id="summaryTotalBilling">₱ 0.00</div>
+            </div>
+            <div class="summary-card summary-card-balance">
+              <div class="summary-card-label">Total Balance</div>
+              <div class="summary-card-value" id="summaryTotalBalance">₱ 0.00</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Billing Details Section -->
+        <section class="customer-table-card billing-details-card">
+          <!-- Filter Bar -->
+          <div class="billing-filter-bar">
+            <div class="filter-pill" id="billingYearFilter">
+              <span>Year:</span>
+              <select id="billingYearSelect" class="filter-select">
+                <option value="ALL">All</option>
+              </select>
+            </div>
+            <div class="profile-toolbar-right">
+              <div class="customer-search profile-search-small">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="7"></circle>
+                  <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
+                </svg>
+                <input
+                  type="text"
+                  id="billingSearchInput"
+                  class="customer-search-input"
+                  placeholder="Search by Billing Period..."
+                />
+              </div>
             </div>
           </div>
 
-          <!-- Tabs -->
-          <div class="profile-tabs">
-            <button class="profile-tab active" data-tab="billing">Billing History</button>
-            <button class="profile-tab" data-tab="payments">Payment History</button>
-            <button class="profile-tab" data-tab="transactions">Transactions</button>
+          <!-- Billing Table -->
+          <div class="customer-table-wrapper">
+            <table class="customer-table billing-detail-table">
+              <thead>
+                <tr>
+                  <th>BILLING PERIOD</th>
+                  <th>PRESENT</th>
+                  <th>PREVIOUS</th>
+                  <th>CONSUMPTION</th>
+                  <th>BILLING</th>
+                  <th>COLLECTION</th>
+                  <th>DATE PAID</th>
+                  <th>BALANCE</th>
+                </tr>
+              </thead>
+              <tbody id="billingDetailTableBody">
+                <!-- Data will be loaded dynamically -->
+              </tbody>
+            </table>
           </div>
+        </section>
 
-          <!-- Billing History -->
-          <div class="profile-tab-panel" id="tab-billing">
-            <div class="profile-toolbar">
-              <div class="filter-pill" id="billingStatusFilter">
-                <span>Status:</span>
-                <select id="billingStatusSelect" class="filter-select">
-                  <option value="ALL">All</option>
-                  <option value="PAID">Paid</option>
-                  <option value="UNPAID">Unpaid</option>
-                </select>
-              </div>
-              <div class="profile-toolbar-right">
-                <div class="customer-search profile-search-small">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="11" cy="11" r="7"></circle>
-                    <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
-                  </svg>
-                  <input
-                    type="text"
-                    id="billingSearchInput"
-                    class="customer-search-input"
-                    placeholder="Search by Billing Period..."
-                  />
-                </div>
-              </div>
+        <!-- Tabs for other history views (hidden by default) -->
+        <div class="profile-tabs hidden">
+          <button class="profile-tab" data-tab="payments">Payment History</button>
+          <button class="profile-tab" data-tab="transactions">Transactions</button>
+        </div>
+
+        <!-- Payment History (hidden) -->
+        <section class="customer-table-card customer-profile-card hidden" id="tab-payments">
+          <div class="profile-toolbar">
+            <div class="filter-pill" id="paymentMethodFilter">
+              <span>Payment Method:</span>
+              <select id="paymentMethodSelect" class="filter-select">
+                <option value="ALL">All</option>
+                <option value="CASH">Cash</option>
+                <option value="ONLINE">Online Transfer</option>
+                <option value="CHECK">Check</option>
+              </select>
             </div>
-
-            <div class="customer-table-wrapper">
-              <table class="customer-table">
-                <thead>
-                  <tr>
-                    <th>Billing Period</th>
-                    <th>Meter Reading</th>
-                    <th>Consumption (Litre)</th>
-                    <th>Bill Amount</th>
-                    <th>Penalty</th>
-                    <th>Total</th>
-                    <th>Status</th>
-                    <th>Due Date</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <!-- Data will be loaded dynamically -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- Payment History -->
-          <div class="profile-tab-panel hidden" id="tab-payments">
-            <div class="profile-toolbar">
-              <div class="filter-pill" id="paymentMethodFilter">
-                <span>Payment Method:</span>
-                <select id="paymentMethodSelect" class="filter-select">
-                  <option value="ALL">All</option>
-                  <option value="CASH">Cash</option>
-                  <option value="ONLINE">Online Transfer</option>
-                  <option value="CHECK">Check</option>
-                </select>
+            <div class="profile-toolbar-right">
+              <div class="customer-search profile-search-small">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="7"></circle>
+                  <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
+                </svg>
+                <input
+                  type="text"
+                  id="paymentSearchInput"
+                  class="customer-search-input"
+                  placeholder="Search by Date..."
+                />
               </div>
-              <div class="profile-toolbar-right">
-                <div class="customer-search profile-search-small">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="11" cy="11" r="7"></circle>
-                    <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
-                  </svg>
-                  <input
-                    type="text"
-                    id="paymentSearchInput"
-                    class="customer-search-input"
-                    placeholder="Search by Date..."
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div class="customer-table-wrapper">
-              <table class="customer-table">
-                <thead>
-                  <tr>
-                    <th>Payment Date</th>
-                    <th>Billing Period</th>
-                    <th>Amount Paid</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <!-- Data will be loaded dynamically -->
-                </tbody>
-              </table>
             </div>
           </div>
 
-          <!-- Transactions (Ledger) -->
-          <div class="profile-tab-panel hidden" id="tab-transactions">
-            <div class="profile-toolbar">
-              <div class="filter-pill">
-                <span>Year:</span>
-                <select id="transactionYearSelect" class="filter-select">
-                  <option value="ALL">All Years</option>
-                </select>
-              </div>
-              <div class="profile-toolbar-right">
-                <div class="customer-search profile-search-small">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="11" cy="11" r="7"></circle>
-                    <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
-                  </svg>
-                  <input
-                    type="text"
-                    id="transactionSearchInput"
-                    class="customer-search-input"
-                    placeholder="Search transactions..."
-                  />
-                </div>
-              </div>
-            </div>
+          <div class="customer-table-wrapper">
+            <table class="customer-table">
+              <thead>
+                <tr>
+                  <th>Payment Date</th>
+                  <th>Billing Period</th>
+                  <th>Amount Paid</th>
+                </tr>
+              </thead>
+              <tbody id="paymentTableBody">
+                <!-- Data will be loaded dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </section>
 
-            <div class="customer-table-wrapper">
-              <table class="customer-table transaction-table">
-                <thead>
-                  <tr>
-                    <th>PERIOD</th>
-                    <th>PRESENT</th>
-                    <th>PREVIOUS</th>
-                    <th>CONSUMPTION</th>
-                    <th>BILLING</th>
-                    <th>COLLECTION</th>
-                    <th>DATE PAID</th>
-                    <th>BALANCE</th>
-                  </tr>
-                </thead>
-                <tbody id="transactionTableBody">
-                  <!-- Data will be loaded dynamically -->
-                </tbody>
-                <tfoot>
-                  <tr class="total-row">
-                    <td colspan="4" style="text-align: right; font-weight: 700;">TOTAL</td>
-                    <td id="totalBillingValue" class="total-value">₱ 0.00</td>
-                    <td id="totalCollectionValue" class="total-value">₱ 0.00</td>
-                    <td></td>
-                    <td id="totalBalanceValue" class="total-value">₱ 0.00</td>
-                  </tr>
-                </tfoot>
-              </table>
+        <!-- Transactions (Ledger) (hidden) -->
+        <section class="customer-table-card customer-profile-card hidden" id="tab-transactions">
+          <div class="profile-toolbar">
+            <div class="filter-pill">
+              <span>Year:</span>
+              <select id="transactionYearSelect" class="filter-select">
+                <option value="ALL">All Years</option>
+              </select>
             </div>
+            <div class="profile-toolbar-right">
+              <div class="customer-search profile-search-small">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="7"></circle>
+                  <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
+                </svg>
+                <input
+                  type="text"
+                  id="transactionSearchInput"
+                  class="customer-search-input"
+                  placeholder="Search transactions..."
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="customer-table-wrapper">
+            <table class="customer-table transaction-table">
+              <thead>
+                <tr>
+                  <th>PERIOD</th>
+                  <th>PRESENT</th>
+                  <th>PREVIOUS</th>
+                  <th>CONSUMPTION</th>
+                  <th>BILLING</th>
+                  <th>COLLECTION</th>
+                  <th>DATE PAID</th>
+                  <th>BALANCE</th>
+                </tr>
+              </thead>
+              <tbody id="transactionTableBody">
+                <!-- Data will be loaded dynamically -->
+              </tbody>
+              <tfoot>
+                <tr class="total-row">
+                  <td colspan="4" style="text-align: right; font-weight: 700;">TOTAL</td>
+                  <td id="totalBillingValue" class="total-value">₱ 0.00</td>
+                  <td id="totalCollectionValue" class="total-value">₱ 0.00</td>
+                  <td></td>
+                  <td id="totalBalanceValue" class="total-value">₱ 0.00</td>
+                </tr>
+              </tfoot>
+            </table>
           </div>
         </section>
       </main>
