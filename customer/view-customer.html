@@ -148,35 +148,38 @@
         </section>
 
         <!-- Profile header section -->
-        <section class="customer-table-card customer-profile-card">
+        <section class="customer-table-card customer-profile-card profile-card-no-border">
           <div class="customer-profile-header">
             <div class="profile-main">
-              <div class="profile-info">
+              <div class="profile-header-top">
                 <h3 class="profile-name" id="customerName"></h3>
-                <p class="profile-meta">
-                  <span>Account No. <strong id="customerAccountNumber"></strong></span>
-                  <span id="customerAddress"></span>
-                </p>
-                <div class="profile-tags-row">
-                  <span class="status-pill status-active" id="customerRateClassPill"></span>
-                  <span class="profile-field" id="customerStatusText">
+                <span class="status-pill status-active" id="customerRateClassPill"></span>
+              </div>
+              <div class="profile-info">
+                <div class="profile-row">
+                  <span class="profile-account">Account No. <strong id="customerAccountNumber"></strong></span>
+                  <span class="profile-address" id="customerAddress"></span>
+                </div>
+                <div class="profile-row">
+                  <span class="profile-field">
                     <span class="profile-label">Rate Class:</span>
                     <span id="customerStatusValue"></span>
                   </span>
-                  <span class="profile-field" id="customerDistrictText">
+                </div>
+                <div class="profile-row">
+                  <span class="profile-field">
                     <span class="profile-label">District:</span>
                     <span id="customerDistrictValue"></span>
                   </span>
                 </div>
-                <div class="profile-contact-row">
-                  <span id="customerPhone"></span>
-                  <span id="customerEmail"></span>
+                <div class="profile-row">
+                  <span class="profile-contact">Contact Number: <span id="customerPhone"></span></span>
                 </div>
               </div>
             </div>
             <div class="profile-actions">
+              <button id="deleteConcessionerBtn" class="profile-action-btn profile-action-delete btn-compact" type="button">Delete Concessioner</button>
               <button id="resetPasswordBtn" class="profile-action-btn profile-action-reset btn-compact" type="button">Reset Password</button>
-              <button id="deleteConcessionerBtn" class="profile-action-btn profile-action-delete btn-compact" type="button">Delete Connection</button>
             </div>
           </div>
         </section>
@@ -388,7 +391,7 @@
       </div>
       <div class="modal-body">
         <p class="modal-description" id="deleteConcessionerDescription" style="margin-bottom: 0;">
-          Are you sure you want to delete this concessioner? This action will hide the record from all lists.
+          Are you sure you want to delete this concessioner? This action cannot be undone.
         </p>
       </div>
       <div class="modal-footer" style="padding: 16px 24px; border-top: 1px solid #e5e7eb; display: flex; gap: 12px; justify-content: flex-end;">

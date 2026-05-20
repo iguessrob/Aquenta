@@ -272,6 +272,7 @@ body[data-page="view-customer"] .profile-actions .profile-action-reset {
   background: #ffffff;
   color: #334155;
   border-color: #cbd5e1;
+  order: 2;
 }
 
 body[data-page="view-customer"] .profile-actions .profile-action-reset:hover {
@@ -286,21 +287,13 @@ body[data-page="view-customer"] .profile-actions .profile-action-delete {
   color: #ffffff;
   border-color: #dc2626;
   box-shadow: 0 10px 20px rgba(220, 38, 38, 0.18);
+  order: 1;
 }
 
 body[data-page="view-customer"] .profile-actions .profile-action-delete:hover {
   background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
   border-color: #991b1b;
   box-shadow: 0 12px 24px rgba(185, 28, 28, 0.24);
-}
-
-/* Visual ordering: show Reset before Delete on the right */
-body[data-page="view-customer"] .profile-actions .profile-action-reset {
-  order: 1;
-}
-
-body[data-page="view-customer"] .profile-actions .profile-action-delete {
-  order: 2;
 }
 
 /* Billing Summary Section */
@@ -767,67 +760,80 @@ body[data-page="view-customer"] .modal-footer .btn-danger:hover {
   margin-top: 4px;
 }
 
+.customer-profile-card.profile-card-no-border {
+  border-bottom: none;
+}
+
 .customer-profile-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   gap: 24px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #e5e7eb;
-  margin-bottom: 16px;
+  padding-bottom: 20px;
+  border-bottom: none;
+  margin-bottom: 20px;
 }
 
 .profile-main {
   display: flex;
-  gap: 16px;
-  align-items: center;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1;
 }
 
-.profile-avatar-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 999px;
-  background-color: #e5f0ff;
+.profile-header-top {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  color: #1d4ed8;
+  gap: 16px;
 }
 
 .profile-info {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 12px;
 }
 
-.profile-name {
-  font-size: 20px;
+.profile-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profile-account {
+  font-size: 15px;
+  color: #4b5563;
+}
+
+.profile-account strong {
   font-weight: 600;
   color: #111827;
 }
 
-.profile-meta {
-  font-size: 13px;
-  color: #4b5563;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.profile-tags-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
-  font-size: 12px;
+.profile-address {
+  font-size: 14px;
+  color: #64748b;
 }
 
 .profile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 15px;
   color: #374151;
 }
 
 .profile-label {
   font-weight: 500;
+  color: #64748b;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.profile-contact {
+  font-size: 15px;
+  color: #4b5563;
 }
 
 .profile-contact-row {
@@ -840,7 +846,10 @@ body[data-page="view-customer"] .modal-footer .btn-danger:hover {
 
 .profile-actions {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .btn-compact {
