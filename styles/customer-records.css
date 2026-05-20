@@ -427,7 +427,7 @@ body[data-page="view-customer"] .summary-card-value {
 
   body[data-page="view-customer"] .summary-card {
     padding: 20px 24px;
-    justify-content: flex-start;
+    justify-content: center;
   }
 
   body[data-page="view-customer"] .summary-card-value {
@@ -456,16 +456,19 @@ body[data-page="view-customer"] .summary-card-value {
 @media (max-width: 480px) {
   body[data-page="view-customer"] .summary-card {
     padding: 16px 20px;
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
   }
 
   body[data-page="view-customer"] .summary-card-value {
     font-size: 16px;
+    white-space: nowrap;
   }
 
   body[data-page="view-customer"] .summary-card-label {
-    font-size: 13px;
+    font-size: 16px;
+    white-space: nowrap;
   }
 
   .billing-detail-table th,
