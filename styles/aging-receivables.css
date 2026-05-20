@@ -223,6 +223,7 @@
 
 .filters-row select option {
   color: #111827;
+  font-size: 13px;
 }
 
 .table-shell {
