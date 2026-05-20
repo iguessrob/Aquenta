@@ -178,12 +178,14 @@
 .search-box {
   display: flex;
   align-items: center;
-  gap: 10px;
-  border: 1px solid #d1d5db;
-  border-radius: 12px;
-  padding: 10px 14px;
-  background: #f9fafb;
-  color: #94a3b8;
+  gap: 8px;
+  flex: 1 1 auto;
+  min-width: 260px;
+  border: 1px solid #d6dbe3;
+  border-radius: 6px;
+  padding: 8px 10px;
+  background: #f8fafc;
+  color: #8a94a7;
 }
 
 .search-box input {
@@ -191,19 +193,38 @@
   background: transparent;
   outline: none;
   width: 100%;
-  font-size: 16px;
+  font-size: 14px;
   font-family: inherit;
-  color: #334155;
+  color: #2d3748;
 }
 
 .disconnection-filters select {
-  border: 1px solid #d1d5db;
-  border-radius: 12px;
-  background: #f9fafb;
-  color: #0f172a;
-  padding: 10px 12px;
-  font-size: 16px;
+  border: 1px solid #d6dbe3;
+  border-radius: 6px;
+  background: #fbfcfe;
+  color: #4a5568;
+  padding: 0 12px;
+  height: 38px;
+  font-size: 13px;
   font-family: inherit;
+  outline: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.disconnection-filters select:hover {
+  border-color: #d6dbe3;
+}
+
+.disconnection-filters select:focus {
+  border-color: #2f72cf;
+  box-shadow: 0 0 0 2px rgba(47, 114, 207, 0.15);
+}
+
+.disconnection-filters select option {
+  color: #111827;
 }
 
 .table-wrapper {
