@@ -301,42 +301,31 @@ body[data-page="view-customer"] .profile-actions .profile-action-delete:hover {
   margin: 24px 0;
 }
 
-.summary-cards-container {
-  display: flex;
-  flex-wrap: wrap;
+body[data-page="view-customer"] .summary-cards-container {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 20px;
 }
 
-.summary-card {
-  border-radius: 24px;
-  padding: 20px 32px;
-  text-align: left;
+body[data-page="view-customer"] .summary-card {
+  background: linear-gradient(180deg, #1f5fae 0%, #1d3f8d 100%);
+  border-radius: 18px;
+  padding: 22px 20px;
+  text-align: center;
   color: #ffffff;
+  font-size: 18px;
   font-weight: 700;
   box-shadow: 0 8px 20px rgba(17, 24, 39, 0.15);
   display: flex;
   flex-direction: row;
-  justify-content: flex-start;
+  justify-content: center;
   align-items: center;
   gap: 8px;
-  flex: 1;
-  min-width: 300px;
 }
 
-.summary-card-billing,
-.summary-card-balance {
-  background: linear-gradient(180deg, #1f5fae 0%, #1d3f8d 100%);
-}
-
-.summary-card-label {
-  font-size: 18px;
-  font-weight: 600;
-  opacity: 0.95;
-  letter-spacing: 0.3px;
-  white-space: nowrap;
-}
-
-.summary-card-value {
+body[data-page="view-customer"] .summary-card-label,
+body[data-page="view-customer"] .summary-card-value {
+  color: #ffffff;
   font-size: 18px;
   font-weight: 700;
   white-space: nowrap;
@@ -426,21 +415,21 @@ body[data-page="view-customer"] .profile-actions .profile-action-delete:hover {
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .summary-cards-container {
-    flex-direction: column;
+  body[data-page="view-customer"] .summary-cards-container {
+    grid-template-columns: 1fr;
     gap: 16px;
   }
 
-  .summary-card {
+  body[data-page="view-customer"] .summary-card {
     padding: 20px 24px;
-    min-width: 100%;
+    justify-content: flex-start;
   }
 
-  .summary-card-value {
+  body[data-page="view-customer"] .summary-card-value {
     font-size: 16px;
   }
 
-  .summary-card-label {
+  body[data-page="view-customer"] .summary-card-label {
     font-size: 16px;
   }
 
@@ -460,17 +449,17 @@ body[data-page="view-customer"] .profile-actions .profile-action-delete:hover {
 }
 
 @media (max-width: 480px) {
-  .summary-card {
+  body[data-page="view-customer"] .summary-card {
     padding: 16px 20px;
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .summary-card-value {
+  body[data-page="view-customer"] .summary-card-value {
     font-size: 16px;
   }
 
-  .summary-card-label {
+  body[data-page="view-customer"] .summary-card-label {
     font-size: 13px;
   }
 
@@ -1032,13 +1021,32 @@ body[data-page="edit-concessioner"] .concessioner-footer .btn-secondary:hover {
 }
 
 body[data-page="view-customer"] .customer-profile-header {
-  padding-bottom: 20px;
-  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 0;
+  border-bottom: none;
   margin-bottom: 20px;
 }
 
 body[data-page="view-customer"] .profile-main {
   gap: 20px;
+  width: 100%;
+}
+
+body[data-page="view-customer"] .profile-name,
+body[data-page="view-customer"] .profile-account-status-row,
+body[data-page="view-customer"] .profile-info {
+  width: 100%;
+}
+
+body[data-page="view-customer"] .profile-account-status-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+body[data-page="view-customer"] .profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 body[data-page="view-customer"] .profile-avatar-icon {
