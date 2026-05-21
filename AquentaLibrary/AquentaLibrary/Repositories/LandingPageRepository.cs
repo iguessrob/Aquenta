@@ -68,6 +68,7 @@ GoogleMapsEmbedCode = @GoogleMapsEmbedCode";
                 .ToList();
 
             using var db = CreateConnection();
+            db.Open();
             using var tran = db.BeginTransaction();
             try
             {

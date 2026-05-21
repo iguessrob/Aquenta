@@ -127,10 +127,9 @@ namespace AquentaAPI.Controllers
         private static string? SanitizeText(string? input, int maxLength)
         {
             if (string.IsNullOrWhiteSpace(input)) return string.Empty;
-            var sanitized = Regex.Replace(input, @"<[^>]*>", string.Empty)
-                .Replace("\r", " ")
-                .Replace("\n", " ")
-                .Trim();
+            
+            // Basic tag stripping
+            var sanitized = Regex.Replace(input, @"<[^>]*>", string.Empty).Trim();
 
             return sanitized.Length > maxLength ? sanitized[..maxLength] : sanitized;
         }

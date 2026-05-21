@@ -81,15 +81,22 @@ function extractIframeSrc(embedCode) {
 
 function renderFaqSection(faqs) {
     const container = document.getElementById('landingPageFaqList');
-    if (!container || !Array.isArray(faqs) || !faqs.length) {
+    if (!container) return;
+
+    if (!Array.isArray(faqs) || !faqs.length) {
+        container.innerHTML = '<div class="empty-state">No FAQs available at the moment.</div>';
         return;
     }
 
     const escapeHtml = getEscapeHtml();
-    container.innerHTML = faqs.map((faq, index) => `
+    container.innerHTML = faqs.map((faq, index) => {
+        const question = faq.question || faq.Question || '';
+        const answer = faq.answer || faq.Answer || '';
+
+        return `
         <div class="faq-item">
             <button class="faq-question" onclick="toggleFAQ(${index})">
-                <span class="faq-question-text">${escapeHtml(faq.question || '')}</span>
+                <span class="faq-question-text">${escapeHtml(question)}</span>
                 <div class="faq-toggle" id="toggle-${index}">
                     <svg viewBox="0 0 24 24">
                         <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -98,10 +105,11 @@ function renderFaqSection(faqs) {
                 </div>
             </button>
             <div class="faq-answer" id="answer-${index}">
-                <p class="faq-answer-text">${escapeHtml(faq.answer || '')}</p>
+                <p class="faq-answer-text">${escapeHtml(answer)}</p>
             </div>
         </div>
-    `).join('');
+    `;
+    }).join('');
 
     currentOpenIndex = null;
 }
@@ -109,12 +117,12 @@ function renderFaqSection(faqs) {
 function renderContactInfo(settings) {
     if (!settings) return;
 
-    const officeName = settings.officeName || '';
-    const address = settings.address || '';
-    const officeHours = settings.officeHours || '';
-    const landlineNumber = settings.landlineNumber || '';
-    const emailAddress = settings.emailAddress || '';
-    const mapEmbedCode = settings.googleMapsEmbedCode || '';
+    const officeName = settings.officeName || settings.OfficeName || '';
+    const address = settings.address || settings.Address || '';
+    const officeHours = settings.officeHours || settings.OfficeHours || '';
+    const landlineNumber = settings.landlineNumber || settings.LandlineNumber || '';
+    const emailAddress = settings.emailAddress || settings.EmailAddress || '';
+    const mapEmbedCode = settings.googleMapsEmbedCode || settings.GoogleMapsEmbedCode || '';
 
     const addressEl = document.getElementById('landingPageAddress');
     if (addressEl) {
