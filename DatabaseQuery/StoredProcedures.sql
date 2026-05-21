@@ -14,7 +14,7 @@ GO
 -- ============================================================================
 
 -- Get All Districts
-CREATE PROCEDURE SP_GetAllDistrict
+CREATE OR ALTER PROCEDURE SP_GetAllDistrict
 AS
 BEGIN
 	SELECT 
@@ -26,7 +26,7 @@ END
 GO
 
 -- Get District By ID
-CREATE PROCEDURE SP_GetDistrictById
+CREATE OR ALTER PROCEDURE SP_GetDistrictById
 	@DistrictID INT
 AS
 BEGIN
@@ -39,7 +39,7 @@ END
 GO
 
 -- Insert District
-CREATE PROCEDURE SP_InsertDistrict
+CREATE OR ALTER PROCEDURE SP_InsertDistrict
 	@DistrictName NVARCHAR(50)
 AS
 BEGIN
@@ -51,7 +51,7 @@ END
 GO
 
 -- Update District
-CREATE PROCEDURE SP_UpdateDistrict
+CREATE OR ALTER PROCEDURE SP_UpdateDistrict
 	@DistrictID INT,
 	@DistrictName NVARCHAR(50)
 AS
@@ -65,7 +65,7 @@ END
 GO
 
 -- Delete District
-CREATE PROCEDURE SP_DeleteDistrict
+CREATE OR ALTER PROCEDURE SP_DeleteDistrict
 	@DistrictID INT
 AS
 BEGIN
@@ -81,7 +81,7 @@ GO
 -- ============================================================================
 
 -- Get All Memberships
-CREATE PROCEDURE SP_GetAllMembership
+CREATE OR ALTER PROCEDURE SP_GetAllMembership
 AS
 BEGIN
 	SELECT 
@@ -94,7 +94,7 @@ END
 GO
 
 -- Get Membership By ID
-CREATE PROCEDURE SP_GetMembershipById
+CREATE OR ALTER PROCEDURE SP_GetMembershipById
 	@MembershipID INT
 AS
 BEGIN
@@ -108,7 +108,7 @@ END
 GO
 
 -- Insert Membership
-CREATE PROCEDURE SP_InsertMembership
+CREATE OR ALTER PROCEDURE SP_InsertMembership
 	@MembershipName NVARCHAR(20),
 	@DiscountRate DECIMAL(5,2)
 AS
@@ -121,7 +121,7 @@ END
 GO
 
 -- Update Membership
-CREATE PROCEDURE SP_UpdateMembership
+CREATE OR ALTER PROCEDURE SP_UpdateMembership
 	@MembershipID INT,
 	@MembershipName NVARCHAR(20),
 	@DiscountRate DECIMAL(5,2)
@@ -137,7 +137,7 @@ END
 GO
 
 -- Delete Membership
-CREATE PROCEDURE SP_DeleteMembership
+CREATE OR ALTER PROCEDURE SP_DeleteMembership
 	@MembershipID INT
 AS
 BEGIN
@@ -153,7 +153,7 @@ GO
 -- ============================================================================
 
 -- Get All Categories
-CREATE PROCEDURE SP_GetAllCategory
+CREATE OR ALTER PROCEDURE SP_GetAllCategory
 AS
 BEGIN
 	SELECT 
@@ -165,7 +165,7 @@ END
 GO
 
 -- Get Category By ID
-CREATE PROCEDURE SP_GetCategoryById
+CREATE OR ALTER PROCEDURE SP_GetCategoryById
 	@CategoryID INT
 AS
 BEGIN
@@ -178,7 +178,7 @@ END
 GO
 
 -- Insert Category
-CREATE PROCEDURE SP_InsertCategory
+CREATE OR ALTER PROCEDURE SP_InsertCategory
 	@CategoryName NVARCHAR(20)
 AS
 BEGIN
@@ -190,7 +190,7 @@ END
 GO
 
 -- Update Category
-CREATE PROCEDURE SP_UpdateCategory
+CREATE OR ALTER PROCEDURE SP_UpdateCategory
 	@CategoryID INT,
 	@CategoryName NVARCHAR(20)
 AS
@@ -204,7 +204,7 @@ END
 GO
 
 -- Delete Category
-CREATE PROCEDURE SP_DeleteCategory
+CREATE OR ALTER PROCEDURE SP_DeleteCategory
 	@CategoryID INT
 AS
 BEGIN
@@ -492,7 +492,7 @@ GO
 -- ============================================================================
 
 -- Get All Users
-CREATE PROCEDURE SP_GetAllUser
+CREATE OR ALTER PROCEDURE SP_GetAllUser
 AS
 BEGIN
 	SELECT 
@@ -510,7 +510,7 @@ END
 GO
 
 -- Get User By ID
-CREATE PROCEDURE SP_GetUserById
+CREATE OR ALTER PROCEDURE SP_GetUserById
 	@UserID INT
 AS
 BEGIN
@@ -529,7 +529,7 @@ END
 GO
 
 -- Get User By Username
-CREATE PROCEDURE SP_GetUserByUsername
+CREATE OR ALTER PROCEDURE SP_GetUserByUsername
 	@Username VARCHAR(50)
 AS
 BEGIN
@@ -548,7 +548,7 @@ END
 GO
 
 -- Insert User
-CREATE PROCEDURE SP_InsertUser
+CREATE OR ALTER PROCEDURE SP_InsertUser
 	@Username VARCHAR(50),
 	@Pass VARCHAR(255),
 	@FirstName VARCHAR(50),
@@ -564,7 +564,7 @@ END
 GO
 
 -- Update User
-CREATE PROCEDURE SP_UpdateUser
+CREATE OR ALTER PROCEDURE SP_UpdateUser
 	@UserID INT,
 	@Username VARCHAR(50),
 	@Pass VARCHAR(255),
@@ -586,7 +586,7 @@ END
 GO
 
 -- Soft Delete User (Update IsDeleted flag)
-CREATE PROCEDURE SP_DeleteUser
+CREATE OR ALTER PROCEDURE SP_DeleteUser
 	@UserID INT
 AS
 BEGIN
@@ -599,7 +599,7 @@ END
 GO
 
 -- Permanently Delete User
-CREATE PROCEDURE SP_DeleteUserPermanent
+CREATE OR ALTER PROCEDURE SP_DeleteUserPermanent
 	@UserID INT
 AS
 BEGIN
@@ -615,7 +615,7 @@ GO
 -- ============================================================================
 
 -- Get All Concessioners
-CREATE PROCEDURE SP_GetAllConcessioner
+CREATE OR ALTER PROCEDURE SP_GetAllConcessioner
 AS
 BEGIN
 	SELECT 
@@ -647,7 +647,7 @@ END
 GO
 
 -- Get All Active Concessioners
-CREATE PROCEDURE SP_GetAllActiveConcessioner
+CREATE OR ALTER PROCEDURE SP_GetAllActiveConcessioner
 AS
 BEGIN
 	SELECT 
@@ -679,7 +679,7 @@ END
 GO
 
 -- Get Concessioner By ID
-CREATE PROCEDURE SP_GetConcessionerById
+CREATE OR ALTER PROCEDURE SP_GetConcessionerById
 	@ConcessionerID INT
 AS
 BEGIN
@@ -703,7 +703,7 @@ END
 GO
 
 -- Get Concessioners By Status
-CREATE PROCEDURE SP_GetConcessionerByStatus
+CREATE OR ALTER PROCEDURE SP_GetConcessionerByStatus
 	@Status NVARCHAR(20)
 AS
 BEGIN
@@ -736,7 +736,7 @@ END
 GO
 
 -- Get Concessioners By District ID
-CREATE PROCEDURE SP_GetConcessionerByDistrictId
+CREATE OR ALTER PROCEDURE SP_GetConcessionerByDistrictId
 	@DistrictID INT
 AS
 BEGIN
@@ -761,7 +761,7 @@ END
 GO
 
 -- Get Concessioners By User ID
-CREATE PROCEDURE SP_GetConcessionerByUserId
+CREATE OR ALTER PROCEDURE SP_GetConcessionerByUserId
 	@UserID INT
 AS
 BEGIN
@@ -794,7 +794,7 @@ END
 GO
 
 -- Insert Concessioner
-CREATE PROCEDURE SP_InsertConcessioner
+CREATE OR ALTER PROCEDURE SP_InsertConcessioner
 	@UserID INT,
 	@CategoryID INT,
 	@MembershipID INT,
@@ -840,7 +840,7 @@ END
 GO
 
 -- Update Concessioner
-CREATE PROCEDURE SP_UpdateConcessioner
+CREATE OR ALTER PROCEDURE SP_UpdateConcessioner
 	@ConcessionerID INT,
 	@UserID INT,
 	@CategoryID INT,
@@ -874,7 +874,7 @@ END
 GO
 
 -- Soft Delete Concessioner
-CREATE PROCEDURE SP_DeleteConcessioner
+CREATE OR ALTER PROCEDURE SP_DeleteConcessioner
 	@ConcessionerID INT
 AS
 BEGIN
@@ -891,7 +891,7 @@ GO
 -- ============================================================================
 
 -- Get All Periods
-CREATE PROCEDURE SP_GetAllPeriod
+CREATE OR ALTER PROCEDURE SP_GetAllPeriod
 AS
 BEGIN
 	SELECT 
@@ -904,7 +904,7 @@ END
 GO
 
 -- Get Period By ID
-CREATE PROCEDURE SP_GetPeriodById
+CREATE OR ALTER PROCEDURE SP_GetPeriodById
 	@PeriodID INT
 AS
 BEGIN
@@ -918,7 +918,7 @@ END
 GO
 
 -- Get Latest Period
-CREATE PROCEDURE SP_GetLatestPeriod
+CREATE OR ALTER PROCEDURE SP_GetLatestPeriod
 AS
 BEGIN
 	SELECT TOP 1
@@ -931,7 +931,7 @@ END
 GO
 
 -- Insert Period
-CREATE PROCEDURE SP_InsertPeriod
+CREATE OR ALTER PROCEDURE SP_InsertPeriod
 	@PeriodStart DATETIME,
 	@PeriodEnd DATETIME
 AS
@@ -944,7 +944,7 @@ END
 GO
 
 -- Update Period
-CREATE PROCEDURE SP_UpdatePeriod
+CREATE OR ALTER PROCEDURE SP_UpdatePeriod
 	@PeriodID INT,
 	@PeriodStart DATETIME,
 	@PeriodEnd DATETIME
@@ -960,7 +960,7 @@ END
 GO
 
 -- Delete Period
-CREATE PROCEDURE SP_DeletePeriod
+CREATE OR ALTER PROCEDURE SP_DeletePeriod
 	@PeriodID INT
 AS
 BEGIN
@@ -976,48 +976,54 @@ GO
 -- ============================================================================
 
 -- Get All Billings
-CREATE PROCEDURE SP_GetAllBilling
+CREATE OR ALTER PROCEDURE SP_GetAllBilling
 AS
 BEGIN
 	SELECT 
-		BillingID,
-		ConcessionerID,
-		UserID,
-		PeriodID,
-		PrevReading,
-		CurrentReading,
-		BillAmount,
-		Penalty,
-		BillStatus,
-		CreatedAt
-	FROM tbl_Billing
-	ORDER BY BillingID DESC;
+		b.BillingID,
+		b.ConcessionerID,
+		b.UserID,
+		b.PeriodID,
+		b.PrevReading,
+		b.CurrentReading,
+		b.BillAmount,
+		b.Penalty,
+		b.BillStatus,
+		b.CreatedAt,
+		p.PeriodStart,
+		p.PeriodEnd
+	FROM tbl_Billing b
+	LEFT JOIN tbl_Period p ON b.PeriodID = p.PeriodID
+	ORDER BY b.BillingID DESC;
 END
 GO
 
 -- Get Billing By ID
-CREATE PROCEDURE SP_GetBillingById
+CREATE OR ALTER PROCEDURE SP_GetBillingById
 	@BillingID INT
 AS
 BEGIN
 	SELECT 
-		BillingID,
-		ConcessionerID,
-		UserID,
-		PeriodID,
-		PrevReading,
-		CurrentReading,
-		BillAmount,
-		Penalty,
-		BillStatus,
-		CreatedAt
-	FROM tbl_Billing
-	WHERE BillingID = @BillingID;
+		b.BillingID,
+		b.ConcessionerID,
+		b.UserID,
+		b.PeriodID,
+		b.PrevReading,
+		b.CurrentReading,
+		b.BillAmount,
+		b.Penalty,
+		b.BillStatus,
+		b.CreatedAt,
+		p.PeriodStart,
+		p.PeriodEnd
+	FROM tbl_Billing b
+	LEFT JOIN tbl_Period p ON b.PeriodID = p.PeriodID
+	WHERE b.BillingID = @BillingID;
 END
 GO
 
 -- Get Billings By Concessioner ID
-CREATE PROCEDURE SP_GetBillingByConcessionerId
+CREATE OR ALTER PROCEDURE SP_GetBillingByConcessionerId
 	@ConcessionerID INT
 AS
 BEGIN
@@ -1042,29 +1048,32 @@ END
 GO
 
 -- Get Billings By Status
-CREATE PROCEDURE SP_GetBillingByStatus
+CREATE OR ALTER PROCEDURE SP_GetBillingByStatus
 	@BillStatus NVARCHAR(50)
 AS
 BEGIN
 	SELECT 
-		BillingID,
-		ConcessionerID,
-		UserID,
-		PeriodID,
-		PrevReading,
-		CurrentReading,
-		BillAmount,
-		Penalty,
-		BillStatus,
-		CreatedAt
-	FROM tbl_Billing
-	WHERE BillStatus = @BillStatus
-	ORDER BY CreatedAt DESC;
+		b.BillingID,
+		b.ConcessionerID,
+		b.UserID,
+		b.PeriodID,
+		b.PrevReading,
+		b.CurrentReading,
+		b.BillAmount,
+		b.Penalty,
+		b.BillStatus,
+		b.CreatedAt,
+		p.PeriodStart,
+		p.PeriodEnd
+	FROM tbl_Billing b
+	LEFT JOIN tbl_Period p ON b.PeriodID = p.PeriodID
+	WHERE b.BillStatus = @BillStatus
+	ORDER BY b.CreatedAt DESC;
 END
 GO
 
 -- Insert Billing
-CREATE PROCEDURE SP_InsertBilling
+CREATE OR ALTER PROCEDURE SP_InsertBilling
 	@ConcessionerID INT,
 	@UserID INT,
 	@PeriodID INT,
@@ -1084,7 +1093,7 @@ END
 GO
 
 -- Update Billing
-CREATE PROCEDURE SP_UpdateBilling
+CREATE OR ALTER PROCEDURE SP_UpdateBilling
 	@BillingID INT,
 	@ConcessionerID INT,
 	@UserID INT,
@@ -1114,7 +1123,7 @@ END
 GO
 
 -- Delete Billing
-CREATE PROCEDURE SP_DeleteBilling
+CREATE OR ALTER PROCEDURE SP_DeleteBilling
 	@BillingID INT
 AS
 BEGIN
@@ -1130,7 +1139,7 @@ GO
 -- ============================================================================
 
 -- Get All Payments
-CREATE PROCEDURE SP_GetAllPayment
+CREATE OR ALTER PROCEDURE SP_GetAllPayment
 AS
 BEGIN
 	SELECT 
@@ -1168,7 +1177,7 @@ END
 GO
 
 -- Get Payment By ID
-CREATE PROCEDURE SP_GetPaymentById
+CREATE OR ALTER PROCEDURE SP_GetPaymentById
 	@PaymentID INT
 AS
 BEGIN
@@ -1183,7 +1192,7 @@ END
 GO
 
 -- Get Payments By Billing ID
-CREATE PROCEDURE SP_GetPaymentByBillingId
+CREATE OR ALTER PROCEDURE SP_GetPaymentByBillingId
 	@BillingID INT
 AS
 BEGIN
@@ -1199,7 +1208,7 @@ END
 GO
 
 -- Insert Payment
-CREATE PROCEDURE SP_InsertPayment
+CREATE OR ALTER PROCEDURE SP_InsertPayment
 	@BillingID INT,
 	@AmountPaid DECIMAL(10,2),
 	@DatePaid DATETIME = NULL
@@ -1213,7 +1222,7 @@ END
 GO
 
 -- Update Payment
-CREATE PROCEDURE SP_UpdatePayment
+CREATE OR ALTER PROCEDURE SP_UpdatePayment
 	@PaymentID INT,
 	@BillingID INT,
 	@AmountPaid DECIMAL(10,2),
@@ -1231,7 +1240,7 @@ END
 GO
 
 -- Delete Payment
-CREATE PROCEDURE SP_DeletePayment
+CREATE OR ALTER PROCEDURE SP_DeletePayment
 	@PaymentID INT
 AS
 BEGIN
@@ -1247,18 +1256,18 @@ GO
 -- ============================================================================
 
 -- Show Total Active Concessioners
-CREATE PROCEDURE SP_ShowTotalActiveConcessioners
+CREATE OR ALTER PROCEDURE SP_ShowTotalActiveConcessioners
 	@Status VARCHAR(50)
 AS
 BEGIN
 	SELECT COUNT(ConcessionerID) AS TotalActiveConcessioners
 	FROM tbl_Concessioner 
-	WHERE Status = @Status;
+	WHERE Status = @Status AND AccountNumber NOT LIKE '%MOTHER%';
 END
 GO
 
 -- Get Monthly Water Consumption (Latest Month or by Date Range)
-CREATE PROCEDURE SP_GetMonthlyWaterConsumption
+CREATE OR ALTER PROCEDURE SP_GetMonthlyWaterConsumption
 	@StartDate DATETIME,
 	@EndDate DATETIME
 AS 
@@ -1273,7 +1282,7 @@ END
 GO
 
 -- Show Sum Amount of Pending Concessioner (Unpaid Bills)
-CREATE PROCEDURE SP_ShowSumAmountofPendingConcessioner
+CREATE OR ALTER PROCEDURE SP_ShowSumAmountofPendingConcessioner
 	@BillStatus VARCHAR(50)
 AS
 BEGIN
@@ -1288,7 +1297,7 @@ END
 GO
 
 -- Count Total Concessioners
-CREATE PROCEDURE SP_GetTotalConcessioners
+CREATE OR ALTER PROCEDURE SP_GetTotalConcessioners
 AS
 BEGIN
 	SELECT COUNT(ConcessionerID) AS TotalConcessioners
@@ -1297,7 +1306,7 @@ END
 GO
 
 -- Get Total Billing Amount by Period
-CREATE PROCEDURE SP_GetTotalBillingByPeriod
+CREATE OR ALTER PROCEDURE SP_GetTotalBillingByPeriod
 	@PeriodID INT
 AS
 BEGIN
@@ -1311,7 +1320,7 @@ END
 GO
 
 -- Get Total Payment Collections
-CREATE PROCEDURE SP_GetTotalPaymentCollections
+CREATE OR ALTER PROCEDURE SP_GetTotalPaymentCollections
 	@StartDate DATETIME,
 	@EndDate DATETIME
 AS
@@ -1325,7 +1334,7 @@ END
 GO
 
 -- Get Unpaid Bills Count and Amount
-CREATE PROCEDURE SP_GetUnpaidBillsSummary
+CREATE OR ALTER PROCEDURE SP_GetUnpaidBillsSummary
 AS
 BEGIN
 	SELECT 
@@ -1337,7 +1346,7 @@ END
 GO
 
 -- Get Overdue Bills Summary
-CREATE PROCEDURE SP_GetOverdueBillsSummary
+CREATE OR ALTER PROCEDURE SP_GetOverdueBillsSummary
 AS
 BEGIN
 	SELECT 
@@ -1354,7 +1363,7 @@ GO
 
 -- District Water Consumption Summary by Latest Period
 -- Purpose: Identifies districts with the highest water usage
-CREATE PROCEDURE SP_GetDistrictConsumptionSummary
+CREATE OR ALTER PROCEDURE SP_GetDistrictConsumptionSummary
 AS
 BEGIN
 	SELECT 
@@ -1382,7 +1391,7 @@ GO
 
 -- Comprehensive Billing Report with Payment Details
 -- Purpose: Shows all customer bills with their payment status and billing history
-CREATE PROCEDURE SP_GetBillingWithPaymentSummary
+CREATE OR ALTER PROCEDURE SP_GetBillingWithPaymentSummary
 AS
 BEGIN
 	SELECT 
@@ -1410,7 +1419,7 @@ GO
 
 -- Active Customers with Debt and Water Usage Summary
 -- Purpose: Provides a financial and usage summary for all Active customers
-CREATE PROCEDURE SP_GetActiveCustomerDebtAndUsageSummary
+CREATE OR ALTER PROCEDURE SP_GetActiveCustomerDebtAndUsageSummary
 AS
 BEGIN
 	SELECT 
@@ -1436,7 +1445,7 @@ GO
 
 -- Arrear Summary Report
 -- Purpose: Shows unpaid and overdue balances (including current month) and penalties.
-CREATE PROCEDURE SP_GetArrearSummaryReport
+CREATE OR ALTER PROCEDURE SP_GetArrearSummaryReport
 AS
 BEGIN
 	;WITH PaymentTotals AS
@@ -1494,7 +1503,7 @@ GO
 
 -- Delinquent Customers Report
 -- Purpose: Shows customers with delinquent status and their outstanding debts
-CREATE PROCEDURE SP_GetDelinquentCustomersReport
+CREATE OR ALTER PROCEDURE SP_GetDelinquentCustomersReport
 AS
 BEGIN
 	SELECT 
@@ -1520,7 +1529,7 @@ GO
 
 -- Collection Performance Summary by User (Admin/Collector)
 -- Purpose: Shows payment collections by each admin/collector
-CREATE PROCEDURE SP_GetCollectionPerformanceSummary
+CREATE OR ALTER PROCEDURE SP_GetCollectionPerformanceSummary
 	@StartDate DATETIME,
 	@EndDate DATETIME
 AS
@@ -1542,7 +1551,7 @@ GO
 
 -- Monthly Revenue Report
 -- Purpose: Shows monthly billing and payment trends
-CREATE PROCEDURE SP_GetMonthlyRevenueReport
+CREATE OR ALTER PROCEDURE SP_GetMonthlyRevenueReport
 	@Year INT
 AS
 BEGIN
@@ -1563,7 +1572,7 @@ GO
 
 -- Monthly Consumption Report
 -- Purpose: Shows monthly water consumption trends
-CREATE PROCEDURE SP_GetMonthlyConsumptionReport
+CREATE OR ALTER PROCEDURE SP_GetMonthlyConsumptionReport
 	@Year INT
 AS
 BEGIN
@@ -1579,7 +1588,7 @@ GO
 
 -- Customer Account Status Detail Report
 -- Purpose: Detailed account status with contact and billing information
-CREATE PROCEDURE SP_GetCustomerAccountDetailReport
+CREATE OR ALTER PROCEDURE SP_GetCustomerAccountDetailReport
 	@ConcessionerID INT
 AS
 BEGIN
@@ -1617,7 +1626,7 @@ GO
 -- Monthly Mother Meter vs Concessioner Consumption Report
 -- Purpose: Returns monthly mother meter consumption, concessioner consumption,
 --          and water loss where WaterLoss = MotherMeterConsumption - ConcessionerConsumption
-CREATE PROCEDURE SP_GetMonthlyMotherMeterWaterLossReport
+CREATE OR ALTER PROCEDURE SP_GetMonthlyMotherMeterWaterLossReport
 	@Year INT,
 	@MotherFirstName NVARCHAR(100) = N'MOTHER METER',
 	@MotherAccountNumber NVARCHAR(20) = N'ACC-MOTHER-0001',
@@ -1671,7 +1680,7 @@ GO
 -- ============================================================================
 
 -- Distribute Payment (Arrears-First Waterfall Logic)
-CREATE PROCEDURE SP_DistributePayment
+CREATE OR ALTER PROCEDURE SP_DistributePayment
 	@ConcessionerID INT,
 	@TotalAmountPaid DECIMAL(10,2),
 	@CurrentBillingID INT
@@ -1769,7 +1778,7 @@ END
 GO
 
 -- Reverse Payment Distribution
-CREATE PROCEDURE SP_ReverseDistribution
+CREATE OR ALTER PROCEDURE SP_ReverseDistribution
 	@ConcessionerID INT
 AS
 BEGIN

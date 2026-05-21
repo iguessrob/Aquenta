@@ -4,6 +4,7 @@ SELECT
     Status,
     COUNT(ConcessionerID) AS TotalConcessioners
 FROM tbl_Concessioner
+WHERE AccountNumber NOT LIKE '%MOTHER%'
 GROUP BY Status;
 
 

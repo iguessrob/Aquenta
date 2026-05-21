@@ -51,16 +51,43 @@
     });
 
     if (!response.ok) {
-      let message = `Request failed (${response.status})`;
+      let friendlyMessage = '';
       try {
         const errorText = await response.text();
         if (errorText) {
-          message = errorText;
+          try {
+            const errorObj = JSON.parse(errorText);
+            if (errorObj && errorObj.message) {
+              friendlyMessage = errorObj.message;
+            } else if (errorObj && errorObj.error) {
+              friendlyMessage = errorObj.error;
+            }
+          } catch (e) {
+            // Not a JSON, maybe a short plain text (less than 200 chars and doesn't look like server HTML error)
+            if (errorText.length < 200 && !errorText.toLowerCase().includes('<html>') && !errorText.toLowerCase().includes('<!doctype') && !errorText.includes('stack trace')) {
+              friendlyMessage = errorText;
+            }
+          }
         }
       } catch (err) {
         // no-op
       }
-      throw new Error(message);
+
+      if (!friendlyMessage) {
+        if (response.status === 400) {
+          friendlyMessage = "Invalid request. Please check your inputs.";
+        } else if (response.status === 401 || response.status === 403) {
+          friendlyMessage = "You do not have permission to perform this action.";
+        } else if (response.status === 404) {
+          friendlyMessage = "The requested resource was not found.";
+        } else if (response.status >= 500) {
+          friendlyMessage = "A system error occurred. Please try again later.";
+        } else {
+          friendlyMessage = `An unexpected error occurred (Status: ${response.status}).`;
+        }
+      }
+
+      throw new Error(friendlyMessage);
     }
 
     if (response.status === 204) {

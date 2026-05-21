@@ -45,5 +45,48 @@ namespace AquentaLibrary.Models
 
         [NotMapped]
         public DateTime PeriodEnd { get; set; }
+
+        [NotMapped]
+        public string DisplayStatus
+        {
+            get
+            {
+                if (string.Equals(BillStatus, "Paid", StringComparison.OrdinalIgnoreCase))
+                {
+                    return "Paid";
+                }
+
+                // Determine reference billing date
+                DateTime billingDate = (PeriodEnd != default(DateTime) && PeriodEnd.Year > 1900) ? PeriodEnd : CreatedAt;
+                if (billingDate == default(DateTime) || billingDate.Year <= 1900)
+                {
+                    billingDate = DateTime.Now;
+                }
+
+                // 20th of the following month
+                int nextMonth = billingDate.Month + 1;
+                int nextYear = billingDate.Year;
+                if (nextMonth > 12)
+                {
+                    nextMonth = 1;
+                    nextYear += 1;
+                }
+
+                DateTime thresholdDate = new DateTime(nextYear, nextMonth, 20, 0, 0, 0, DateTimeKind.Unspecified);
+
+                if (DateTime.Now < thresholdDate)
+                {
+                    return "Pending";
+                }
+                else
+                {
+                    return "Unpaid";
+                }
+            }
+            set
+            {
+                // Setter required for serialization/deserialization or mapping compatibility
+            }
+        }
     }
 }

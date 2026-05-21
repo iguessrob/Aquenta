@@ -39,7 +39,7 @@ function filterBillings() {
   var statusVal = document.getElementById('statusFilter').value;
   if (statusVal === 'ALL') return allBillings;
   return allBillings.filter(function (b) {
-    var s = (b.billStatus || b.BillStatus || '').toLowerCase();
+    var s = (b.displayStatus || b.DisplayStatus || b.billStatus || b.BillStatus || '').toLowerCase();
     return s === statusVal.toLowerCase();
   });
 }
@@ -65,7 +65,7 @@ function renderBillings(bills) {
     const amount = parseFloat(b.billAmount || b.BillAmount || 0);
     const penalty = parseFloat(b.penalty || b.Penalty || 0);
     const total = amount + penalty;
-    const status = b.billStatus || b.BillStatus || '--';
+    const status = b.displayStatus || b.DisplayStatus || b.billStatus || b.BillStatus || '--';
     const badgeClass = 'badge-' + status.toLowerCase();
 
     const start = b.periodStart || b.PeriodStart;

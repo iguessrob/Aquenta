@@ -374,7 +374,7 @@ function buildPaymentRows(periodFilter = 0) {
 
       const amountPaid = payment ? toNumber(pick(payment, ['amountPaid', 'AmountPaid'], 0), 0) : 0;
       const balance = Math.max(0, total - amountPaid);
-      const status = billing ? normalizeBillStatus(pick(billing, ['billStatus', 'BillStatus'], deriveStatus(amountPaid, total))) : 'unpaid';
+      const status = billing ? normalizeBillStatus(pick(billing, ['displayStatus', 'DisplayStatus', 'billStatus', 'BillStatus'], deriveStatus(amountPaid, total))) : 'unpaid';
       const isEditing = payment ? Boolean(pick(payment, ['isEditing', 'IsEditing'], false)) : false;
       const draftAmountPaid = payment ? pick(payment, ['draftAmountPaid', 'DraftAmountPaid'], '') : '';
 

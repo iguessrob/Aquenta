@@ -613,7 +613,7 @@ function buildInvoiceRows() {
     // If a customer was unpaid last month and is still unpaid by the 20th of the current month
     const now = new Date();
     const currentDay = now.getDate();
-    if (currentDay >= 20 && selectedBilling && selectedBilling.billStatus === 'Unpaid' && penalty === 0) {
+    if (currentDay >= 20 && selectedBilling && (pick(selectedBilling, ['displayStatus', 'DisplayStatus'], null) || selectedBilling.billStatus) === 'Unpaid' && penalty === 0) {
       // Check if there was a previous month's unpaid bill
       const previousBilling = billings
         .filter((b) => {
@@ -627,7 +627,7 @@ function buildInvoiceRows() {
           return (periodOrder.get(pb) || 0) - (periodOrder.get(pa) || 0);
         })[0];
 
-      if (previousBilling && previousBilling.billStatus === 'Unpaid') {
+      if (previousBilling && (pick(previousBilling, ['displayStatus', 'DisplayStatus'], null) || previousBilling.billStatus) === 'Unpaid') {
         penalty = 200;
         // In a real app, we might call an API here to persist this penalty
       }

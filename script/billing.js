@@ -206,6 +206,7 @@ async function persistRowReading(row, readingValue) {
   const billAmount = row.isMotherMeter
     ? 0
     : getTariffAmount(row.categoryId, Math.max(0, currentReading - row.previous));
+  const penalty = row.isMotherMeter ? 0 : row.penalty;
 
   const payload = {
     billingId: row.billingId,
@@ -215,7 +216,7 @@ async function persistRowReading(row, readingValue) {
     prevReading: row.previous,
     currentReading,
     billAmount,
-    penalty: row.penalty,
+    penalty,
     billStatus: row.billStatus,
     createdAt: row.createdAt || new Date().toISOString(),
   };
@@ -605,7 +606,7 @@ function buildNormalizedRows() {
       isMotherMeter,
       hasExistingBilling: !!selectedBilling,
       billStatus: selectedBilling ? String(pick(selectedBilling, ['billStatus', 'BillStatus'], 'Unpaid')) : 'Unpaid',
-      penalty: selectedBilling ? toNumber(pick(selectedBilling, ['penalty', 'Penalty'], 0), 0) : 0,
+      penalty: isMotherMeter ? 0 : (selectedBilling ? toNumber(pick(selectedBilling, ['penalty', 'Penalty'], 0), 0) : 0),
       createdAt: selectedBilling ? pick(selectedBilling, ['createdAt', 'CreatedAt', 'billDate', 'BillDate'], new Date().toISOString()) : new Date().toISOString(),
     };
   });

@@ -66,7 +66,7 @@ async function loadDashboardData(concessionerId, userId, existingConcessioner) {
 
       // 4. Filter for unpaid/overdue bills (for alerts)
       const unpaidBills = billings.filter(b => {
-        const s = (b.billStatus || b.BillStatus || '').toLowerCase();
+        const s = (b.displayStatus || b.DisplayStatus || b.billStatus || b.BillStatus || '').toLowerCase();
         return s === 'unpaid' || s === 'overdue';
       });
 
@@ -102,7 +102,7 @@ function updateDashboardStats(billings, concessioner) {
   // B. Latest Bill & Consumption Cards
   if (billings && billings.length > 0) {
     const latest = billings[0];
-    const billStatus = (latest.billStatus || latest.BillStatus || '--').toLowerCase();
+    const billStatus = (latest.displayStatus || latest.DisplayStatus || latest.billStatus || latest.BillStatus || '--').toLowerCase();
     const amount = parseFloat(latest.billAmount || latest.BillAmount || 0) + parseFloat(latest.penalty || latest.Penalty || 0);
     const prev = latest.prevReading || latest.PrevReading || 0;
     const curr = latest.currentReading || latest.CurrentReading || 0;
@@ -134,7 +134,7 @@ function updateDashboardStats(billings, concessioner) {
 
   // C. Total Unpaid Card
   const unpaidBills = (billings || []).filter(b => {
-    const s = (b.billStatus || b.BillStatus || '').toLowerCase();
+    const s = (b.displayStatus || b.DisplayStatus || b.billStatus || b.BillStatus || '').toLowerCase();
     return s === 'unpaid' || s === 'overdue';
   });
 
@@ -154,7 +154,7 @@ function updateDashboardStats(billings, concessioner) {
   let latestBillAmount = 0;
   if (billings && billings.length > 0) {
     const latest = billings[0];
-    const status = (latest.billStatus || latest.BillStatus || '').toLowerCase();
+    const status = (latest.displayStatus || latest.DisplayStatus || latest.billStatus || latest.BillStatus || '').toLowerCase();
     // Only add it if it is actually unpaid
     if (status === 'unpaid' || status === 'overdue') {
       latestBillAmount = parseFloat(latest.billAmount || latest.BillAmount || 0) + parseFloat(latest.penalty || latest.Penalty || 0);
@@ -291,7 +291,7 @@ function renderRecentBills(bills) {
     const amount = parseFloat(b.billAmount || b.BillAmount || 0);
     const penalty = parseFloat(b.penalty || b.Penalty || 0);
     const total = amount + penalty;
-    const status = b.billStatus || b.BillStatus || '--';
+    const status = b.displayStatus || b.DisplayStatus || b.billStatus || b.BillStatus || '--';
     const badgeClass = 'badge-' + status.toLowerCase();
 
     const start = b.periodStart || b.PeriodStart;

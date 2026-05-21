@@ -141,7 +141,7 @@
 
       const editorLink = document.createElement('a');
       editorLink.className = 'profile-dropdown-item';
-      editorLink.href = '/landing-page-editor';
+      editorLink.href = 'landing-page-editor.html';
       editorLink.dataset.adminLink = 'landing-page-editor';
       editorLink.innerHTML = `
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
