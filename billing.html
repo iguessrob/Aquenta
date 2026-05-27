@@ -214,6 +214,40 @@
     </div>
   </div>
 
+  <div id="billingEditModal" class="billing-edit-modal" aria-hidden="true">
+    <div class="billing-edit-backdrop" data-role="billing-edit-close"></div>
+    <div class="billing-edit-dialog" role="dialog" aria-modal="true" aria-labelledby="billingEditTitle">
+      <button type="button" class="billing-edit-close" data-role="billing-edit-close" aria-label="Close edit dialog">×</button>
+      <h3 id="billingEditTitle" class="billing-edit-title">Edit Reading</h3>
+      <p class="billing-edit-subtitle" id="billingEditSubtitle"></p>
+
+      <form id="billingEditForm" class="billing-edit-form">
+        <div class="billing-edit-grid">
+          <div class="billing-edit-field">
+            <label for="billingEditPrevious">Previous Reading</label>
+            <input id="billingEditPrevious" type="number" min="0" inputmode="numeric" />
+          </div>
+          <div class="billing-edit-field">
+            <label for="billingEditPresent">Present Reading</label>
+            <input id="billingEditPresent" type="number" min="0" inputmode="numeric" />
+          </div>
+        </div>
+
+        <div id="billingEditError" class="billing-edit-error" aria-live="polite"></div>
+
+        <div class="billing-edit-summary">
+          <div><span>Consumption:</span> <strong id="billingEditConsumption">0</strong></div>
+          <div><span>Amount:</span> <strong id="billingEditAmount">PHP 0.00</strong></div>
+        </div>
+
+        <div class="billing-edit-actions">
+          <button type="button" class="btn btn-secondary" data-role="billing-edit-close">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- SECURITY GUARD: Validate session before rendering page content -->
   <script src="script/admin-security-guard.js"></script>
   <script src="script/api-client.js"></script>

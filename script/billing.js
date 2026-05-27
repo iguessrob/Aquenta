@@ -12,6 +12,7 @@ let districtCache = [];
 let filteredBilling = [];
 let currentBillingPage = 1;
 const savingRows = new Set();
+let billingEditRowKey = null;
 
 const BILLING_PAGE_SIZE = 25;
 
@@ -198,6 +199,120 @@ function updateSaveButtonCount() {
   if (!saveBtn) return;
 
   saveBtn.textContent = `Save All Readings (${getFilledReadingCount()})`;
+}
+
+function getBillingEditModalElements() {
+  return {
+    modal: document.getElementById('billingEditModal'),
+    form: document.getElementById('billingEditForm'),
+    subtitle: document.getElementById('billingEditSubtitle'),
+    previousInput: document.getElementById('billingEditPrevious'),
+    presentInput: document.getElementById('billingEditPresent'),
+    error: document.getElementById('billingEditError'),
+    consumption: document.getElementById('billingEditConsumption'),
+    amount: document.getElementById('billingEditAmount'),
+  };
+}
+
+function setBillingEditError(message = '') {
+  const { error } = getBillingEditModalElements();
+  if (error) error.textContent = message;
+}
+
+function toggleBillingEditModal(show) {
+  const { modal } = getBillingEditModalElements();
+  if (!modal) return;
+
+  modal.classList.toggle('show', show);
+  modal.setAttribute('aria-hidden', show ? 'false' : 'true');
+  document.body.style.overflow = show ? 'hidden' : '';
+}
+
+function updateBillingEditPreview() {
+  const { previousInput, presentInput, consumption, amount } = getBillingEditModalElements();
+  const rowData = filteredBilling.find((row) => row.rowKey === billingEditRowKey);
+  if (!rowData || !previousInput || !presentInput) return;
+
+  const previousValue = toNumber(String(previousInput.value || '').trim(), 0);
+  const presentValue = String(presentInput.value || '').trim();
+  const validation = validatePresentReading({ ...rowData, previous: previousValue }, presentValue);
+
+  if (validation.hasValue && validation.isValid) {
+    const calculatedConsumption = Math.max(0, validation.reading - previousValue);
+    const calculatedAmount = rowData.isMotherMeter ? 0 : getTariffAmount(rowData.categoryId, calculatedConsumption);
+
+    if (consumption) consumption.textContent = String(calculatedConsumption);
+    if (amount) amount.textContent = formatPeso(calculatedAmount);
+    setBillingEditError('');
+  } else {
+    if (consumption) consumption.textContent = '0';
+    if (amount) amount.textContent = formatPeso(0);
+    if (presentValue) {
+      setBillingEditError(validation.message);
+    } else {
+      setBillingEditError('');
+    }
+  }
+}
+
+function openBillingEditModal(rowKey) {
+  const rowData = filteredBilling.find((row) => row.rowKey === toNumber(rowKey, 0));
+  if (!rowData) return;
+
+  billingEditRowKey = rowData.rowKey;
+  const { subtitle, previousInput, presentInput, consumption, amount } = getBillingEditModalElements();
+
+  if (subtitle) {
+    subtitle.textContent = `${rowData.concessionerName || 'Unknown'} • Account #${rowData.accountNumber || rowData.concessionerId}`;
+  }
+
+  if (previousInput) previousInput.value = String(rowData.previous ?? '');
+  if (presentInput) presentInput.value = String(rowData.present > 0 ? rowData.present : rowData.draftPresent || '');
+  if (consumption) consumption.textContent = String(Math.max(0, toNumber(presentInput?.value || rowData.present, 0) - toNumber(previousInput?.value || rowData.previous, 0)));
+  if (amount) amount.textContent = formatPeso(rowData.isMotherMeter ? 0 : getTariffAmount(rowData.categoryId, Math.max(0, toNumber(presentInput?.value || rowData.present, 0) - toNumber(previousInput?.value || rowData.previous, 0))));
+
+  setBillingEditError('');
+  toggleBillingEditModal(true);
+  setTimeout(() => {
+    if (presentInput) {
+      presentInput.focus();
+      presentInput.select();
+    }
+  }, 0);
+}
+
+async function saveBillingEditModal() {
+  const rowData = filteredBilling.find((row) => row.rowKey === billingEditRowKey);
+  const { previousInput, presentInput } = getBillingEditModalElements();
+  if (!rowData || !previousInput || !presentInput) return;
+
+  const newPrevious = toNumber(String(previousInput.value || '').trim(), 0);
+  const presentRaw = String(presentInput.value || '').trim();
+
+  if (presentRaw === '') {
+    setBillingEditError('Present reading is required.');
+    return;
+  }
+
+  const validation = validatePresentReading({ ...rowData, previous: newPrevious }, presentRaw);
+  if (!validation.isValid) {
+    setBillingEditError(validation.message);
+    return;
+  }
+
+  rowData.previous = newPrevious;
+  rowData.draftPresent = String(validation.reading);
+
+  try {
+    await persistRowReading(rowData, validation.reading);
+    toggleBillingEditModal(false);
+    billingEditRowKey = null;
+    await loadBilling();
+    showNotification('Reading updated successfully.', 'success', 2200);
+  } catch (error) {
+    console.error(error);
+    setBillingEditError(error.message || 'Failed to update reading.');
+  }
 }
 
 async function persistRowReading(row, readingValue) {
@@ -799,22 +914,7 @@ function setupTableRowActions() {
     const editBtn = event.target.closest('[data-role="edit-reading"]');
     if (editBtn) {
       const rowKey = editBtn.getAttribute('data-row-key');
-      const rowData = filteredBilling.find((row) => row.rowKey === toNumber(rowKey, 0));
-      const input = content.querySelector(`.reading-input[data-row-key="${rowKey}"]`);
-      if (rowData && input) {
-        rowData.isEditing = true;
-        if (String(rowData.draftPresent ?? '').trim() === '') {
-          rowData.draftPresent = String(rowData.present > 0 ? rowData.present : '');
-        }
-        renderBillingRows(filteredBilling);
-        const reopenedInput = content.querySelector(`.reading-input[data-row-key="${rowKey}"]`);
-        if (reopenedInput) {
-          setRowEditingState(reopenedInput, true);
-          reopenedInput.focus();
-          reopenedInput.select();
-        }
-        showNotification('Editing enabled for this saved billing row.', 'info');
-      }
+      openBillingEditModal(rowKey);
       return;
     }
 
@@ -968,66 +1068,53 @@ function setupTableRowActions() {
     }
   });
 
+  const { modal, form, previousInput, presentInput } = getBillingEditModalElements();
+  if (modal) {
+    modal.addEventListener('click', (event) => {
+      if (event.target.closest('[data-role="billing-edit-close"]')) {
+        toggleBillingEditModal(false);
+        billingEditRowKey = null;
+        setBillingEditError('');
+      }
+    });
+  }
+
+  if (form) {
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      await saveBillingEditModal();
+    });
+  }
+
+  if (previousInput) {
+    previousInput.addEventListener('input', updateBillingEditPreview);
+  }
+
+  if (presentInput) {
+    presentInput.addEventListener('input', updateBillingEditPreview);
+    presentInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        saveBillingEditModal();
+      }
+    });
+  }
+
+  document.addEventListener('keydown', (event) => {
+    const { modal: editModal } = getBillingEditModalElements();
+    if (event.key === 'Escape' && editModal?.classList.contains('show')) {
+      toggleBillingEditModal(false);
+      billingEditRowKey = null;
+      setBillingEditError('');
+    }
+  });
+
   content.addEventListener('blur', async (event) => {
     const presentInput = event.target.closest('.reading-input[data-role="current-reading"]');
     if (presentInput) {
       await saveReadingFromInput(presentInput);
-      return;
-    }
-
-    const prevInput = event.target.closest('.previous-input[data-role="previous-reading"]');
-    if (prevInput) {
-      await savePreviousFromInput(prevInput);
     }
   }, true);
-
-  async function savePreviousFromInput(prevInput) {
-    if (!prevInput) return;
-
-    const rowKey = toNumber(prevInput.getAttribute('data-row-key'), 0);
-    if (rowKey <= 0 || savingRows.has(rowKey)) return;
-
-    const rowData = filteredBilling.find((row) => row.rowKey === rowKey);
-    if (!rowData) return;
-
-    const newPrevRaw = String(prevInput.value || '').trim();
-    const newPrev = newPrevRaw === '' ? 0 : toNumber(newPrevRaw, 0);
-    rowData.previous = newPrev;
-
-    const presentStr = String(rowData.draftPresent ?? (rowData.present > 0 ? rowData.present : '')).trim();
-
-    // If there's no present value and no existing billing, don't persist (nothing to save)
-    if (!presentStr && !rowData.hasExistingBilling) {
-      renderBillingRows(filteredBilling);
-      return;
-    }
-
-    // If there is a present value, validate it against the new previous
-    if (presentStr) {
-      const validation = validatePresentReading(rowData, presentStr);
-      const presentInputEl = prevInput.closest('tr')?.querySelector('.reading-input[data-role="current-reading"]');
-      if (presentInputEl) setReadingValidationState(presentInputEl, validation);
-      if (!validation.isValid) {
-        showNotification(validation.message, 'error');
-        return;
-      }
-    }
-
-    savingRows.add(rowKey);
-    prevInput.disabled = true;
-
-    try {
-      const currentReading = toNumber(presentStr || rowData.present, 0);
-      await persistRowReading(rowData, currentReading);
-      await loadBilling();
-      showNotification('Previous reading saved successfully.', 'success', 2200);
-    } catch (error) {
-      console.error(error);
-      showNotification(error.message || 'Failed to save previous reading.', 'error');
-    } finally {
-      savingRows.delete(rowKey);
-    }
-  }
 }
 
 function setupPaginationActions() {
@@ -1346,9 +1433,9 @@ function setupPrintButton() {
 
           .sheet-org-row {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            gap: 16px;
+            gap: 18px;
             width: 100%;
             margin-bottom: 0;
           }
@@ -1360,7 +1447,7 @@ function setupPrintButton() {
           }
 
           .sheet-title-wrap {
-            text-align: left;
+            text-align: center;
           }
 
           .sheet-org {
@@ -1456,7 +1543,7 @@ function setupPrintButton() {
               <div class="sheet-org">St. Joseph Stb. Multi-Purpose Cooperative</div>
               <div class="sheet-org-sub">Brgy. San Jose, Sto Tomas City, Batangas</div>
             </div>
-            <img src="/assets/images/SJ-STBMPC-logo.png" alt="SJ-STBMPC Logo" class="sheet-logo" />
+            <img src="assets/images/SJ-STBMPC-logo.png" alt="SJ-STBMPC Logo" class="sheet-logo" />
           </div>
 
           <div class="sheet-main-title">READING SHEET</div>
