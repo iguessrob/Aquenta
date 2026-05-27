@@ -70,6 +70,18 @@ function formatPeso(value) {
   })}`;
 }
 
+function formatPrintPlaceholder(value) {
+  const text = String(value ?? '').trim();
+  return `<<${text || ' '}>>`;
+}
+
+function formatPrintMoney(value) {
+  return `₱ ${formatPrintPlaceholder(toNumber(value).toLocaleString('en-PH', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }))}`;
+}
+
 function getInvoicePaginationMeta(rows) {
   const totalRecords = rows.length;
   const totalPages = Math.max(1, Math.ceil(totalRecords / INVOICE_PAGE_SIZE));
@@ -186,21 +198,24 @@ function openPrintWindow(title, bodyMarkup) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>${escapeHtml(title)}</title>
         <style>
+          @page {
+            size: 4.25in 5.5in;
+            margin: 0;
+          }
+
           * { box-sizing: border-box; }
           body {
             margin: 0;
-            padding: 8px;
             font-family: "Times New Roman", Georgia, serif;
             color: #111111;
             background: #fff;
           }
           .soa-sheet {
-            width: 100%;
-            max-width: 760px;
+            width: 4.25in;
+            min-height: 5.5in;
             margin: 0 auto;
             background: #fff;
-            border: 1px solid #111;
-            padding: 18px 24px 14px;
+            padding: 0.18in 0.22in 0.14in;
           }
           .sheet-break {
             page-break-after: always;
@@ -209,67 +224,88 @@ function openPrintWindow(title, bodyMarkup) {
           }
           .coop-name {
             text-align: center;
-            font-size: 17px;
-            margin: 2px 0 4px;
+            font-size: 12.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin: 0 0 2px;
+            line-height: 1.15;
           }
           .coop-address {
             text-align: center;
-            font-size: 13px;
-            margin: 0;
+            font-size: 10px;
+            margin: 0 0 4px;
+            line-height: 1.15;
+          }
+          .title-divider {
+            border-top: 2px solid #111;
+            width: 100%;
+            margin: 4px 0 3px;
           }
           .soa-main-title {
             text-align: center;
-            border-top: 4px solid #111;
-            margin: 12px auto 2px;
-            padding-top: 4px;
-            font-size: 44px;
+            margin: 0 0 2px;
+            font-size: 17px;
             font-weight: 700;
-            letter-spacing: 0.4px;
+            letter-spacing: 0.2px;
+            line-height: 1.08;
           }
           .soa-sub-title {
             text-align: center;
-            font-size: 21px;
+            font-size: 12.5px;
             font-weight: 700;
-            margin: 0 0 6px;
+            margin: 0 0 4px;
+            line-height: 1.08;
           }
           .soa-service-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 4px 24px;
-            font-size: 15px;
+            gap: 2px 18px;
+            font-size: 10px;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 2px;
+            line-height: 1.15;
+          }
+          .soa-service-row {
+            display: contents;
+          }
+          .soa-service-item {
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
           }
           .soa-line {
             border-top: 1px solid #111;
             margin: 10px 0;
           }
           .soa-line-text {
-            font-size: 12px;
+            font-size: 9px;
             font-weight: 700;
-            letter-spacing: 0.2px;
-            margin: 8px 0;
+            letter-spacing: 0.1px;
+            margin: 3px 0 4px;
             white-space: nowrap;
             overflow: hidden;
           }
           .soa-section-title {
             text-align: center;
-            font-size: 22px;
+            font-size: 13px;
             font-weight: 700;
-            margin: 4px 0 6px;
+            margin: 2px 0 4px;
+            line-height: 1.08;
           }
           .meter-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 0 0 10px;
+            margin: 0 0 4px;
+            table-layout: fixed;
           }
           .meter-table th,
           .meter-table td {
-            border: 2px solid #111;
-            padding: 4px 6px;
+            border: 1px solid #111;
+            padding: 3px 4px;
             text-align: center;
-            font-size: 16px;
-            height: 30px;
+            font-size: 9px;
+            height: 22px;
+            line-height: 1.05;
           }
           .meter-table th {
             font-weight: 400;
@@ -278,28 +314,31 @@ function openPrintWindow(title, bodyMarkup) {
             display: flex;
             justify-content: space-between;
             align-items: baseline;
-            gap: 20px;
-            font-size: 16px;
+            gap: 10px;
+            font-size: 10px;
             font-weight: 700;
-            margin: 3px 0;
+            margin: 1px 0;
+            line-height: 1.05;
           }
           .billing-row .label {
             flex: 1;
           }
           .billing-row .value {
-            min-width: 170px;
+            min-width: 72px;
             text-align: right;
+            white-space: nowrap;
           }
           .period-line {
-            font-size: 16px;
+            font-size: 10px;
             font-weight: 700;
-            margin-bottom: 6px;
+            margin-bottom: 2px;
+            line-height: 1.05;
           }
           .notes {
-            margin-top: 8px;
-            font-size: 11px;
+            margin-top: 5px;
+            font-size: 8px;
             font-weight: 700;
-            line-height: 1.45;
+            line-height: 1.35;
           }
           .notes .red {
             color: #d40000;
@@ -310,14 +349,12 @@ function openPrintWindow(title, bodyMarkup) {
           }
           @media print {
             body {
-              padding: 0;
               background: #fff;
             }
             .soa-sheet {
               border: none;
-              max-width: none;
-              width: 100%;
-              min-height: 0;
+              width: 4.25in;
+              min-height: 5.5in;
               page-break-inside: avoid;
               break-inside: avoid;
             }
@@ -373,21 +410,21 @@ function formatPesoCompact(value) {
 function buildStatementMarkup(row) {
   return `
     <section class="soa-sheet">
-      <p class="coop-name">St. Joseph-STB Multi-Purpose Cooperative</p>
-      <p class="coop-address">San Jose, City of Sto. Tomas, Batangas</p>
+      <p class="coop-name">ST. JOSEPH-STB MULTI-PURPOSE COOPERATIVE SJ-STB-MPC</p>
+      <p class="coop-address">San Jose, City of Sto. Tomas, Batangas LGA 0997</p>
+
+      <div class="title-divider"></div>
 
       <h1 class="soa-main-title">STATEMENT OF ACCOUNT</h1>
       <h2 class="soa-sub-title">SERVICE INFORMATION</h2>
 
       <div class="soa-service-grid">
-        <div>Account No: ${escapeHtml(row.accountNumber || '--')}</div>
-        <div>Rate Class: ${escapeHtml(row.rateClass || '--')}</div>
-        <div>Account Name: ${escapeHtml(row.name || '--')}</div>
+        <div class="soa-service-item">Account No: <span>${escapeHtml(formatPrintPlaceholder(row.accountNumber || ''))}</span></div>
+        <div class="soa-service-item">Rate Class: <span>${escapeHtml(formatPrintPlaceholder(row.rateClass || ''))}</span></div>
+        <div class="soa-service-item">Address: <span>${escapeHtml(formatPrintPlaceholder(row.address || ''))}</span></div>
         <div></div>
-        <div>Address: ${escapeHtml(row.address || '--')}</div>
-        <div></div>
-        <div>Contact No: ${escapeHtml(row.contactNo || '--')}</div>
-        <div></div>
+        <div class="soa-service-item">Account Name: <span>${escapeHtml(formatPrintPlaceholder(row.name || ''))}</span></div>
+        <div class="soa-service-item">Contact No: <span>${escapeHtml(formatPrintPlaceholder(row.contactNo || ''))}</span></div>
       </div>
 
       <div class="soa-line-text">===========================================================</div>
@@ -407,10 +444,10 @@ function buildStatementMarkup(row) {
         </thead>
         <tbody>
           <tr>
-            <td>${escapeHtml(row.meterNumber || '--')}</td>
-            <td>${row.previous === '' ? '--' : escapeHtml(row.previous)}</td>
-            <td>${row.present === '' ? '--' : escapeHtml(row.present)}</td>
-            <td>${row.consumed === '' ? '--' : escapeHtml(row.consumed)}</td>
+            <td>${escapeHtml(formatPrintPlaceholder(row.meterNumber || ''))}</td>
+            <td>${row.previous === '' ? '<< >>' : escapeHtml(formatPrintPlaceholder(row.previous))}</td>
+            <td>${row.present === '' ? '<< >>' : escapeHtml(formatPrintPlaceholder(row.present))}</td>
+            <td>${row.consumed === '' ? '<< >>' : escapeHtml(formatPrintPlaceholder(row.consumed))}</td>
           </tr>
         </tbody>
       </table>
@@ -418,16 +455,15 @@ function buildStatementMarkup(row) {
       <div class="soa-line-text">===========================================================</div>
       <h2 class="soa-section-title">BILLING INFORMATION</h2>
 
-      <p class="period-line">Period Covered: ${escapeHtml(row.periodCover || '--')}</p>
-      <div class="billing-row"><span class="label">Amount:</span><span class="value">${escapeHtml(formatPesoCompact(row.amount))}</span></div>
-      <div class="billing-row"><span class="label">Arrears:</span><span class="value">${escapeHtml(formatPesoCompact(row.arrears))}</span></div>
-      <div class="billing-row"><span class="label">LP/RF:</span><span class="value">${escapeHtml(formatPesoCompact(row.penalty))}</span></div>
-      <div class="billing-row"><span class="label">TOTAL AMOUNT DUE:</span><span class="value">${escapeHtml(formatPesoCompact(row.total))}</span></div>
+      <p class="period-line">Period Covered: ${escapeHtml(formatPrintPlaceholder(row.periodCover || ''))}</p>
+      <div class="billing-row"><span class="label">Amount:</span><span class="value">${escapeHtml(formatPrintMoney(row.amount))}</span></div>
+      <div class="billing-row"><span class="label">Arrears:</span><span class="value">${escapeHtml(formatPrintMoney(row.arrears))}</span></div>
+      <div class="billing-row"><span class="label">LP/RF:</span><span class="value">${escapeHtml(formatPrintMoney(row.penalty))}</span></div>
+      <div class="billing-row"><span class="label">TOTAL AMOUNT DUE:</span><span class="value">${escapeHtml(formatPrintMoney(row.total))}</span></div>
 
       <div class="notes">
-        <p><span class="red">DUE DATE:</span> Every 20<sup>th</sup> of the month.</p>
-        <p><span class="red">NOTE:</span> Payments delayed by 2 months or more will incur a 200 pesos penalty.</p>
-        <p>Please pay your monthly bill to avoid additional charges.</p>
+        <p><span class="red">DUE DATE:</span> EVERY 20<sup>th</sup> OF THE MONTH.</p>
+        <p><span class="red">NOTE:</span> PAYMENTS AFTER DUE DATE WILL INCUR A 200 PESOS PENALTY. PLEASE PAY YOUR MONTHLY CHARGES TO AVOID ADDITIONAL CHARGES AND DISCONNECTION.</p>
       </div>
     </section>
   `;
