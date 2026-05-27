@@ -214,6 +214,43 @@
     </div>
   </div>
 
+  <div id="billingEditModal" class="billing-edit-modal" aria-hidden="true">
+    <div class="billing-edit-backdrop" data-role="billing-edit-close"></div>
+    <div class="billing-edit-dialog" role="dialog" aria-modal="true" aria-labelledby="billingEditTitle">
+      <button type="button" class="billing-edit-close" data-role="billing-edit-close" aria-label="Close edit dialog">×</button>
+      <h3 id="billingEditTitle" class="billing-edit-title">Edit Billing Readings</h3>
+
+      <div class="billing-edit-summary">
+        <div class="billing-edit-summary-item">
+          <span class="billing-edit-summary-label">Account #</span>
+          <strong id="billingEditAccount" class="billing-edit-summary-value"></strong>
+        </div>
+        <div class="billing-edit-summary-item">
+          <span class="billing-edit-summary-label">Concessioner</span>
+          <strong id="billingEditName" class="billing-edit-summary-value"></strong>
+        </div>
+      </div>
+
+      <div class="billing-edit-grid">
+        <label class="billing-edit-field">
+          <span>Previous Reading</span>
+          <input type="number" id="billingEditPrevious" min="0" inputmode="numeric">
+        </label>
+        <label class="billing-edit-field">
+          <span>Present Reading</span>
+          <input type="number" id="billingEditPresent" min="0" inputmode="numeric">
+        </label>
+      </div>
+
+      <p id="billingEditMessage" class="billing-edit-message" aria-live="polite"></p>
+
+      <div class="billing-edit-actions">
+        <button type="button" class="btn btn-secondary billing-edit-cancel" data-role="billing-edit-close">Cancel</button>
+        <button type="button" class="btn btn-primary billing-edit-save" id="billingEditSaveBtn">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
   <!-- SECURITY GUARD: Validate session before rendering page content -->
   <script src="script/admin-security-guard.js"></script>
   <script src="script/api-client.js"></script>

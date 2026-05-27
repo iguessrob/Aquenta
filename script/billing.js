@@ -12,6 +12,7 @@ let districtCache = [];
 let filteredBilling = [];
 let currentBillingPage = 1;
 const savingRows = new Set();
+let billingEditRowKey = null;
 
 const BILLING_PAGE_SIZE = 25;
 
@@ -68,6 +69,57 @@ function validatePresentReading(rowData, rawValue) {
   };
 }
 
+function validateBillingReadingPair(previousValue, presentValue) {
+  const previousRaw = String(previousValue ?? '').trim();
+  const presentRaw = String(presentValue ?? '').trim();
+
+  if (!previousRaw || !presentRaw) {
+    return {
+      isValid: false,
+      previous: 0,
+      present: 0,
+      message: 'Previous and Present readings are required.',
+    };
+  }
+
+  const previous = Number(previousRaw);
+  const present = Number(presentRaw);
+
+  if (!Number.isFinite(previous) || previous < 0) {
+    return {
+      isValid: false,
+      previous: 0,
+      present: 0,
+      message: 'Previous reading must be a valid non-negative number.',
+    };
+  }
+
+  if (!Number.isFinite(present) || present < 0) {
+    return {
+      isValid: false,
+      previous,
+      present: 0,
+      message: 'Present reading must be a valid non-negative number.',
+    };
+  }
+
+  if (present < previous) {
+    return {
+      isValid: false,
+      previous,
+      present,
+      message: 'Present reading must be greater than or equal to Previous reading.',
+    };
+  }
+
+  return {
+    isValid: true,
+    previous,
+    present,
+    message: '',
+  };
+}
+
 function setReadingValidationState(input, validation) {
   if (!input) return;
 
@@ -86,6 +138,102 @@ function setRowEditingState(input, isEditing) {
 
   input.readOnly = !isEditing;
   input.classList.toggle('is-editing', isEditing);
+}
+
+function getBillingEditModalElements() {
+  return {
+    modal: document.getElementById('billingEditModal'),
+    title: document.getElementById('billingEditTitle'),
+    account: document.getElementById('billingEditAccount'),
+    name: document.getElementById('billingEditName'),
+    previous: document.getElementById('billingEditPrevious'),
+    present: document.getElementById('billingEditPresent'),
+    message: document.getElementById('billingEditMessage'),
+    saveBtn: document.getElementById('billingEditSaveBtn'),
+  };
+}
+
+function setBillingEditMessage(message, type = '') {
+  const { message: messageEl } = getBillingEditModalElements();
+  if (!messageEl) return;
+
+  messageEl.textContent = message || '';
+  messageEl.className = `billing-edit-message${type ? ` ${type}` : ''}`;
+}
+
+function toggleBillingEditModal(show) {
+  const { modal } = getBillingEditModalElements();
+  if (!modal) return;
+
+  modal.classList.toggle('show', show);
+  modal.setAttribute('aria-hidden', show ? 'false' : 'true');
+  document.body.style.overflow = show ? 'hidden' : '';
+}
+
+function openBillingEditModal(rowKey) {
+  const rowData = filteredBilling.find((row) => row.rowKey === toNumber(rowKey, 0));
+  if (!rowData) return;
+
+  billingEditRowKey = rowData.rowKey;
+  const { title, account, name, previous, present } = getBillingEditModalElements();
+
+  if (title) title.textContent = 'Edit Billing Readings';
+  if (account) account.textContent = rowData.accountNumber || `#${rowData.concessionerId}`;
+  if (name) name.textContent = rowData.concessionerName || 'Unknown';
+  if (previous) previous.value = String(rowData.previous ?? '');
+  if (present) present.value = String(rowData.present ?? '');
+
+  setBillingEditMessage('', '');
+  toggleBillingEditModal(true);
+
+  window.setTimeout(() => {
+    present?.focus();
+    present?.select();
+  }, 0);
+}
+
+async function saveBillingEditModal() {
+  if (!billingEditRowKey) return;
+
+  const rowData = filteredBilling.find((row) => row.rowKey === billingEditRowKey);
+  if (!rowData) {
+    setBillingEditMessage('The selected billing row could not be found.', 'error');
+    return;
+  }
+
+  const { previous, present, saveBtn } = getBillingEditModalElements();
+  const validation = validateBillingReadingPair(previous?.value, present?.value);
+
+  if (!validation.isValid) {
+    setBillingEditMessage(validation.message, 'error');
+    return;
+  }
+
+  const updatedPrevious = validation.previous;
+  const updatedPresent = validation.present;
+
+  rowData.previous = updatedPrevious;
+  rowData.present = updatedPresent;
+  rowData.draftPresent = String(updatedPresent);
+  rowData.consumption = Math.max(0, updatedPresent - updatedPrevious);
+  rowData.amount = rowData.isMotherMeter ? 0 : getTariffAmount(rowData.categoryId, rowData.consumption);
+
+  savingRows.add(rowData.rowKey);
+  if (saveBtn) saveBtn.disabled = true;
+
+  try {
+    await persistRowReading(rowData, updatedPresent);
+    toggleBillingEditModal(false);
+    billingEditRowKey = null;
+    await loadBilling();
+    notifyBilling('Billing readings updated successfully.', 'success', 2200);
+  } catch (error) {
+    console.error(error);
+    setBillingEditMessage(error.message || 'Failed to update billing readings.', 'error');
+  } finally {
+    savingRows.delete(rowData.rowKey);
+    if (saveBtn) saveBtn.disabled = false;
+  }
 }
 
 function getRowDisplayValue(row) {
@@ -799,22 +947,7 @@ function setupTableRowActions() {
     const editBtn = event.target.closest('[data-role="edit-reading"]');
     if (editBtn) {
       const rowKey = editBtn.getAttribute('data-row-key');
-      const rowData = filteredBilling.find((row) => row.rowKey === toNumber(rowKey, 0));
-      const input = content.querySelector(`.reading-input[data-row-key="${rowKey}"]`);
-      if (rowData && input) {
-        rowData.isEditing = true;
-        if (String(rowData.draftPresent ?? '').trim() === '') {
-          rowData.draftPresent = String(rowData.present > 0 ? rowData.present : '');
-        }
-        renderBillingRows(filteredBilling);
-        const reopenedInput = content.querySelector(`.reading-input[data-row-key="${rowKey}"]`);
-        if (reopenedInput) {
-          setRowEditingState(reopenedInput, true);
-          reopenedInput.focus();
-          reopenedInput.select();
-        }
-        notifyBilling('Editing enabled for this saved billing row.', 'info');
-      }
+      openBillingEditModal(rowKey);
       return;
     }
 
@@ -1149,6 +1282,44 @@ function setupBillingProgressModal() {
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && modal.classList.contains('show')) {
       toggleBillingProgressModal(false);
+    }
+  });
+}
+
+function setupBillingEditModal() {
+  const modal = document.getElementById('billingEditModal');
+  if (!modal) return;
+
+  modal.addEventListener('click', (event) => {
+    if (event.target.closest('[data-role="billing-edit-close"]')) {
+      toggleBillingEditModal(false);
+      billingEditRowKey = null;
+      setBillingEditMessage('', '');
+    }
+  });
+
+  const saveBtn = document.getElementById('billingEditSaveBtn');
+  if (saveBtn) {
+    saveBtn.addEventListener('click', async () => {
+      await saveBillingEditModal();
+    });
+  }
+
+  const previousInput = document.getElementById('billingEditPrevious');
+  const presentInput = document.getElementById('billingEditPresent');
+
+  [previousInput, presentInput].forEach((input) => {
+    if (!input) return;
+    input.addEventListener('input', () => {
+      setBillingEditMessage('', '');
+    });
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && modal.classList.contains('show')) {
+      toggleBillingEditModal(false);
+      billingEditRowKey = null;
+      setBillingEditMessage('', '');
     }
   });
 }
@@ -1636,6 +1807,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupTableRowActions();
   setupPaginationActions();
   setupBillingProgressModal();
+  setupBillingEditModal();
   setupActionButtons();
   setupPrintButton();
 
