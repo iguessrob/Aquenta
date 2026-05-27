@@ -747,6 +747,8 @@ function buildNormalizedRows() {
       concessionerName: getConcessionerDisplayName(concessioner, user),
       previous,
       present,
+      hasSavedPreviousReading: !!selectedBilling || !!previousBilling,
+      hasSavedPresentReading: !!selectedBilling,
       draftPresent: '',
       isEditing: false,
       consumption: hasReading ? Math.max(0, present - previous) : 0,
@@ -807,7 +809,8 @@ function renderBillingRows(rows) {
     const inputTitle = !initialValidation.isValid && initialValidation.hasValue
       ? 'Present reading must be greater than or equal to Previous reading.'
       : '';
-    const readOnlyAttribute = item.hasExistingBilling && !item.isEditing ? 'readonly' : '';
+    const presentReadOnlyAttribute = item.hasSavedPresentReading ? 'readonly' : '';
+    const previousReadOnlyAttribute = item.hasSavedPreviousReading ? 'readonly' : '';
     const savedRowClass = item.hasExistingBilling ? ' saved-row' : '';
     const actionsMarkup = item.hasExistingBilling
       ? `
@@ -843,7 +846,7 @@ function renderBillingRows(rows) {
             value="${presentValue}"
             min="0"
             inputmode="numeric"
-            ${readOnlyAttribute}
+            ${presentReadOnlyAttribute}
             title="${inputTitle}"
           />
         </td>
@@ -856,7 +859,7 @@ function renderBillingRows(rows) {
             data-initial-value="${item.previous || ''}"
             value="${item.previous || ''}"
             min="0"
-            ${item.hasExistingBilling && !item.isEditing && String(item.previous || '').trim() !== '' ? 'readonly' : ''}
+            ${previousReadOnlyAttribute}
             inputmode="numeric"
           />
         </td>
@@ -1451,7 +1454,7 @@ function setupPrintButton() {
     return rowHtml.join('');
   }
 
-  function buildReadingSheetPages() {
+  function buildReadingSheetPages(periodText) {
     const concessioners = getReadingSheetConcessioners();
     const rowsPerPage = 25;
     const pageCount = Math.max(1, Math.ceil(concessioners.length / rowsPerPage));
@@ -1701,58 +1704,70 @@ function setupPrintButton() {
       </head>
       <body>
         <div class="sheet">
-          ${buildReadingSheetPages()}
+          ${buildReadingSheetPages(periodText)}
         </div>
       </body>
       </html>
     `;
   }
 
-  const printBtn = document.querySelector('.print-btn');
-  if (printBtn) {
-    printBtn.addEventListener('click', () => {
-      const existingFrame = document.getElementById('readingSheetPrintFrame');
-      if (existingFrame) {
-        existingFrame.remove();
-      }
+  const handlePrintReadingSheet = () => {
+    const existingFrame = document.getElementById('readingSheetPrintFrame');
+    if (existingFrame) {
+      existingFrame.remove();
+    }
 
-      const frame = document.createElement('iframe');
-      frame.id = 'readingSheetPrintFrame';
-      frame.style.position = 'fixed';
-      frame.style.right = '0';
-      frame.style.bottom = '0';
-      frame.style.width = '0';
-      frame.style.height = '0';
-      frame.style.border = '0';
-      frame.style.visibility = 'hidden';
-      document.body.appendChild(frame);
+    const frame = document.createElement('iframe');
+    frame.id = 'readingSheetPrintFrame';
+    frame.style.position = 'fixed';
+    frame.style.right = '0';
+    frame.style.bottom = '0';
+    frame.style.width = '0';
+    frame.style.height = '0';
+    frame.style.border = '0';
+    frame.style.visibility = 'hidden';
+    document.body.appendChild(frame);
 
-      const frameWindow = frame.contentWindow;
-      const doc = frameWindow?.document;
-      if (!doc || !frameWindow) {
+    const frameWindow = frame.contentWindow;
+    const doc = frameWindow?.document;
+    if (!doc || !frameWindow) {
+      notifyBilling('Unable to open print preview.', 'error');
+      return;
+    }
+
+    let printTriggered = false;
+
+    const triggerPrint = () => {
+      if (printTriggered) return;
+      printTriggered = true;
+
+      try {
+        frameWindow.focus();
+        frameWindow.print();
+      } catch (error) {
+        console.error(error);
         notifyBilling('Unable to open print preview.', 'error');
-        return;
       }
+    };
 
-      const triggerPrint = () => {
-        try {
-          frameWindow.focus();
-          frameWindow.print();
-        } catch (error) {
-          console.error(error);
-          notifyBilling('Unable to open print preview.', 'error');
-        }
-      };
+    frame.addEventListener('load', () => {
+      window.setTimeout(triggerPrint, 50);
+    }, { once: true });
 
-      frame.addEventListener('load', () => {
-        window.setTimeout(triggerPrint, 50);
-      }, { once: true });
+    doc.open();
+    doc.write(buildReadingSheetHtml());
+    doc.close();
 
-      doc.open();
-      doc.write(buildReadingSheetHtml());
-      doc.close();
-    });
-  }
+    window.setTimeout(triggerPrint, 150);
+  };
+
+  document.addEventListener('click', (event) => {
+    const printButton = event.target.closest('.print-btn');
+    if (!printButton) return;
+
+    event.preventDefault();
+    handlePrintReadingSheet();
+  });
 }
 
 async function loadBilling(isInitial = false) {
