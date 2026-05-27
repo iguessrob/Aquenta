@@ -12,7 +12,6 @@ let districtCache = [];
 let filteredBilling = [];
 let currentBillingPage = 1;
 const savingRows = new Set();
-let billingEditRowKey = null;
 
 const BILLING_PAGE_SIZE = 25;
 
@@ -199,120 +198,6 @@ function updateSaveButtonCount() {
   if (!saveBtn) return;
 
   saveBtn.textContent = `Save All Readings (${getFilledReadingCount()})`;
-}
-
-function getBillingEditModalElements() {
-  return {
-    modal: document.getElementById('billingEditModal'),
-    form: document.getElementById('billingEditForm'),
-    subtitle: document.getElementById('billingEditSubtitle'),
-    previousInput: document.getElementById('billingEditPrevious'),
-    presentInput: document.getElementById('billingEditPresent'),
-    error: document.getElementById('billingEditError'),
-    consumption: document.getElementById('billingEditConsumption'),
-    amount: document.getElementById('billingEditAmount'),
-  };
-}
-
-function setBillingEditError(message = '') {
-  const { error } = getBillingEditModalElements();
-  if (error) error.textContent = message;
-}
-
-function toggleBillingEditModal(show) {
-  const { modal } = getBillingEditModalElements();
-  if (!modal) return;
-
-  modal.classList.toggle('show', show);
-  modal.setAttribute('aria-hidden', show ? 'false' : 'true');
-  document.body.style.overflow = show ? 'hidden' : '';
-}
-
-function updateBillingEditPreview() {
-  const { previousInput, presentInput, consumption, amount } = getBillingEditModalElements();
-  const rowData = filteredBilling.find((row) => row.rowKey === billingEditRowKey);
-  if (!rowData || !previousInput || !presentInput) return;
-
-  const previousValue = toNumber(String(previousInput.value || '').trim(), 0);
-  const presentValue = String(presentInput.value || '').trim();
-  const validation = validatePresentReading({ ...rowData, previous: previousValue }, presentValue);
-
-  if (validation.hasValue && validation.isValid) {
-    const calculatedConsumption = Math.max(0, validation.reading - previousValue);
-    const calculatedAmount = rowData.isMotherMeter ? 0 : getTariffAmount(rowData.categoryId, calculatedConsumption);
-
-    if (consumption) consumption.textContent = String(calculatedConsumption);
-    if (amount) amount.textContent = formatPeso(calculatedAmount);
-    setBillingEditError('');
-  } else {
-    if (consumption) consumption.textContent = '0';
-    if (amount) amount.textContent = formatPeso(0);
-    if (presentValue) {
-      setBillingEditError(validation.message);
-    } else {
-      setBillingEditError('');
-    }
-  }
-}
-
-function openBillingEditModal(rowKey) {
-  const rowData = filteredBilling.find((row) => row.rowKey === toNumber(rowKey, 0));
-  if (!rowData) return;
-
-  billingEditRowKey = rowData.rowKey;
-  const { subtitle, previousInput, presentInput, consumption, amount } = getBillingEditModalElements();
-
-  if (subtitle) {
-    subtitle.textContent = `${rowData.concessionerName || 'Unknown'} • Account #${rowData.accountNumber || rowData.concessionerId}`;
-  }
-
-  if (previousInput) previousInput.value = String(rowData.previous ?? '');
-  if (presentInput) presentInput.value = String(rowData.present > 0 ? rowData.present : rowData.draftPresent || '');
-  if (consumption) consumption.textContent = String(Math.max(0, toNumber(presentInput?.value || rowData.present, 0) - toNumber(previousInput?.value || rowData.previous, 0)));
-  if (amount) amount.textContent = formatPeso(rowData.isMotherMeter ? 0 : getTariffAmount(rowData.categoryId, Math.max(0, toNumber(presentInput?.value || rowData.present, 0) - toNumber(previousInput?.value || rowData.previous, 0))));
-
-  setBillingEditError('');
-  toggleBillingEditModal(true);
-  setTimeout(() => {
-    if (presentInput) {
-      presentInput.focus();
-      presentInput.select();
-    }
-  }, 0);
-}
-
-async function saveBillingEditModal() {
-  const rowData = filteredBilling.find((row) => row.rowKey === billingEditRowKey);
-  const { previousInput, presentInput } = getBillingEditModalElements();
-  if (!rowData || !previousInput || !presentInput) return;
-
-  const newPrevious = toNumber(String(previousInput.value || '').trim(), 0);
-  const presentRaw = String(presentInput.value || '').trim();
-
-  if (presentRaw === '') {
-    setBillingEditError('Present reading is required.');
-    return;
-  }
-
-  const validation = validatePresentReading({ ...rowData, previous: newPrevious }, presentRaw);
-  if (!validation.isValid) {
-    setBillingEditError(validation.message);
-    return;
-  }
-
-  rowData.previous = newPrevious;
-  rowData.draftPresent = String(validation.reading);
-
-  try {
-    await persistRowReading(rowData, validation.reading);
-    toggleBillingEditModal(false);
-    billingEditRowKey = null;
-    await loadBilling();
-    showNotification('Reading updated successfully.', 'success', 2200);
-  } catch (error) {
-    console.error(error);
-    setBillingEditError(error.message || 'Failed to update reading.');
-  }
 }
 
 async function persistRowReading(row, readingValue) {
@@ -796,17 +681,6 @@ function renderBillingRows(rows) {
         `
       : '<span class="table-actions-empty">--</span>';
 
-    // Add a print invoice button for every row
-    const printBtnMarkup = `
-      <button class="table-action-btn print-invoice-btn" data-role="print-invoice" data-row-key="${item.rowKey}" title="Print Invoice" aria-label="Print Invoice">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M19 21H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2z"></path>
-          <polyline points="17 17 12 12 7 17"></polyline>
-          <polyline points="7 7 12 12 17 7"></polyline>
-        </svg>
-      </button>
-    `;
-
     return `
       <tr class="${savedRowClass}" data-row-key="${item.rowKey}">
         <td>${account}</td>
@@ -843,7 +717,6 @@ function renderBillingRows(rows) {
         <td>
           <div class="table-actions">
             ${actionsMarkup}
-            ${printBtnMarkup}
           </div>
         </td>
       </tr>
@@ -926,14 +799,22 @@ function setupTableRowActions() {
     const editBtn = event.target.closest('[data-role="edit-reading"]');
     if (editBtn) {
       const rowKey = editBtn.getAttribute('data-row-key');
-      openBillingEditModal(rowKey);
-      return;
-    }
-
-    const printBtn = event.target.closest('[data-role="print-invoice"]');
-    if (printBtn) {
-      const rowKey = printBtn.getAttribute('data-row-key');
-      openInvoicePrintPreview(rowKey);
+      const rowData = filteredBilling.find((row) => row.rowKey === toNumber(rowKey, 0));
+      const input = content.querySelector(`.reading-input[data-row-key="${rowKey}"]`);
+      if (rowData && input) {
+        rowData.isEditing = true;
+        if (String(rowData.draftPresent ?? '').trim() === '') {
+          rowData.draftPresent = String(rowData.present > 0 ? rowData.present : '');
+        }
+        renderBillingRows(filteredBilling);
+        const reopenedInput = content.querySelector(`.reading-input[data-row-key="${rowKey}"]`);
+        if (reopenedInput) {
+          setRowEditingState(reopenedInput, true);
+          reopenedInput.focus();
+          reopenedInput.select();
+        }
+        showNotification('Editing enabled for this saved billing row.', 'info');
+      }
       return;
     }
 
@@ -1087,53 +968,66 @@ function setupTableRowActions() {
     }
   });
 
-  const { modal, form, previousInput, presentInput } = getBillingEditModalElements();
-  if (modal) {
-    modal.addEventListener('click', (event) => {
-      if (event.target.closest('[data-role="billing-edit-close"]')) {
-        toggleBillingEditModal(false);
-        billingEditRowKey = null;
-        setBillingEditError('');
-      }
-    });
-  }
-
-  if (form) {
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      await saveBillingEditModal();
-    });
-  }
-
-  if (previousInput) {
-    previousInput.addEventListener('input', updateBillingEditPreview);
-  }
-
-  if (presentInput) {
-    presentInput.addEventListener('input', updateBillingEditPreview);
-    presentInput.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        saveBillingEditModal();
-      }
-    });
-  }
-
-  document.addEventListener('keydown', (event) => {
-    const { modal: editModal } = getBillingEditModalElements();
-    if (event.key === 'Escape' && editModal?.classList.contains('show')) {
-      toggleBillingEditModal(false);
-      billingEditRowKey = null;
-      setBillingEditError('');
-    }
-  });
-
   content.addEventListener('blur', async (event) => {
     const presentInput = event.target.closest('.reading-input[data-role="current-reading"]');
     if (presentInput) {
       await saveReadingFromInput(presentInput);
+      return;
+    }
+
+    const prevInput = event.target.closest('.previous-input[data-role="previous-reading"]');
+    if (prevInput) {
+      await savePreviousFromInput(prevInput);
     }
   }, true);
+
+  async function savePreviousFromInput(prevInput) {
+    if (!prevInput) return;
+
+    const rowKey = toNumber(prevInput.getAttribute('data-row-key'), 0);
+    if (rowKey <= 0 || savingRows.has(rowKey)) return;
+
+    const rowData = filteredBilling.find((row) => row.rowKey === rowKey);
+    if (!rowData) return;
+
+    const newPrevRaw = String(prevInput.value || '').trim();
+    const newPrev = newPrevRaw === '' ? 0 : toNumber(newPrevRaw, 0);
+    rowData.previous = newPrev;
+
+    const presentStr = String(rowData.draftPresent ?? (rowData.present > 0 ? rowData.present : '')).trim();
+
+    // If there's no present value and no existing billing, don't persist (nothing to save)
+    if (!presentStr && !rowData.hasExistingBilling) {
+      renderBillingRows(filteredBilling);
+      return;
+    }
+
+    // If there is a present value, validate it against the new previous
+    if (presentStr) {
+      const validation = validatePresentReading(rowData, presentStr);
+      const presentInputEl = prevInput.closest('tr')?.querySelector('.reading-input[data-role="current-reading"]');
+      if (presentInputEl) setReadingValidationState(presentInputEl, validation);
+      if (!validation.isValid) {
+        showNotification(validation.message, 'error');
+        return;
+      }
+    }
+
+    savingRows.add(rowKey);
+    prevInput.disabled = true;
+
+    try {
+      const currentReading = toNumber(presentStr || rowData.present, 0);
+      await persistRowReading(rowData, currentReading);
+      await loadBilling();
+      showNotification('Previous reading saved successfully.', 'success', 2200);
+    } catch (error) {
+      console.error(error);
+      showNotification(error.message || 'Failed to save previous reading.', 'error');
+    } finally {
+      savingRows.delete(rowKey);
+    }
+  }
 }
 
 function setupPaginationActions() {
@@ -1595,185 +1489,6 @@ function setupPrintButton() {
       </body>
       </html>
     `;
-  }
-  /**
-   * Build a printable invoice HTML for a single billing row.
-   * Page size: 4.25in x 5.5in
-   */
-  function buildPrintableInvoiceHtml(row) {
-    const concessioner = concessionerCache.find((c) => toNumber(pick(c, ['concessionerId','ConcessionerId','concessionerID'],0),0) === toNumber(row.concessionerId,0)) || {};
-    const user = userCache.find((u) => toNumber(pick(u, ['userId','UserId'],0),0) === toNumber(row.userId,0)) || {};
-    const account = escapeHtml(row.accountNumber || `#${row.concessionerId}`);
-    const name = escapeHtml(row.concessionerName || getConcessionerDisplayName(concessioner, user));
-    const address = escapeHtml(pick(concessioner, ['address','Address','street','Street'], ''));
-    const contact = escapeHtml(pick(user, ['phone','Phone','contact','ContactNo','contactNo'], ''));
-    const rateClass = escapeHtml(String(pick(concessioner, ['rateClass','RateClass','categoryName','CategoryName'], '')));
-    const meter = escapeHtml(String(pick(concessioner, ['meterNumber','MeterNumber','meterNo'], '')) || '« »');
-    const prev = escapeHtml(String(row.previous ?? '« »'));
-    const present = escapeHtml(String(row.present ?? row.draftPresent ?? '« »'));
-    const consumption = escapeHtml(String(row.consumption ?? (toNumber(present,0) - toNumber(prev,0)) || '« »'));
-    const amountText = row.amount ? formatPeso(row.amount) : 'PHP 0.00';
-
-    return `
-      <!doctype html>
-      <html>
-      <head>
-        <meta charset="utf-8" />
-        <title>Invoice</title>
-        <style>
-          @page { size: 4.25in 5.5in; margin: 10mm; }
-          body { margin:0; font-family: 'Times New Roman', Times, serif; color: #000; }
-          .inv { width:100%; box-sizing:border-box; padding:4px; }
-          .inv-header { text-align:center; }
-          .org-name { font-weight:700; letter-spacing:1px; font-size:14px; text-transform:uppercase; }
-          .org-sub { font-size:10px; margin-top:2px; }
-          .title { text-align:center; font-size:18px; font-weight:700; margin-top:6px; }
-          .section { margin-top:8px; }
-          .two-col { display:flex; justify-content:space-between; gap:8px; }
-          .meta { font-weight:700; }
-          .divider { border-top:2px solid #000; margin:6px 0; }
-          table { width:100%; border-collapse:collapse; font-size:11px; }
-          table td, table th { padding:4px; border:1px solid #000; }
-          .meter-cell { font-weight:700; }
-          .amount-big { font-size:16px; font-weight:700; text-align:right; }
-          .note { font-size:9px; margin-top:6px; }
-          .due { color:#c00; font-weight:700; }
-          .center { text-align:center; }
-        </style>
-      </head>
-      <body>
-        <div class="inv">
-          <div class="inv-header">
-            <div class="org-name">ST. JOSEPH-STB MULTI-PURPOSE COOPERATIVE SJ-STB-MPC</div>
-            <div class="org-sub">San Jose, City of Sto. Tomas, Batangas LGA 0997</div>
-          </div>
-
-          <div class="title">STATEMENT OF ACCOUNT</div>
-
-          <div class="section two-col">
-            <div>
-              <div>Account No: « ${account} »</div>
-              <div>Address: « ${address || ' »'} »</div>
-              <div>Account Name: « ${name} »</div>
-            </div>
-            <div style="text-align:right;">
-              <div>Rate Class: « ${rateClass || ' »'} »</div>
-              <div>Contact No: « ${contact || ' »'} »</div>
-            </div>
-          </div>
-
-          <div class="divider"></div>
-
-          <div class="section">
-            <div style="font-weight:700; text-align:left; margin-bottom:6px;">METERING INFORMATION</div>
-            <table>
-              <thead>
-                <tr>
-                  <th>Meter no.</th>
-                  <th>Meter Reading</th>
-                  <th>Consumed</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td class="meter-cell">« ${meter} »</td>
-                  <td>
-                    <table style="width:100%; border-collapse:collapse;">
-                      <tr>
-                        <td class="center">Previous</td>
-                        <td class="center">Present</td>
-                      </tr>
-                      <tr>
-                        <td class="center">« ${prev} »</td>
-                        <td class="center">« ${present} »</td>
-                      </tr>
-                    </table>
-                  </td>
-                  <td class="center">« ${consumption} »</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="divider"></div>
-
-          <div class="section">
-            <div style="font-weight:700;">BILLING INFORMATION</div>
-            <table style="margin-top:6px;">
-              <tr>
-                <td style="width:60%;">Period Covered:</td>
-                <td style="text-align:right;">« »</td>
-              </tr>
-              <tr>
-                <td>Amount:</td>
-                <td style="text-align:right;">« ${amountText} »</td>
-              </tr>
-              <tr>
-                <td>Arrears:</td>
-                <td style="text-align:right;">« »</td>
-              </tr>
-              <tr>
-                <td>LP/RF:</td>
-                <td style="text-align:right;">« »</td>
-              </tr>
-              <tr>
-                <td style="font-weight:700;">TOTAL AMOUNT DUE:</td>
-                <td class="amount-big">« ${amountText} »</td>
-              </tr>
-            </table>
-
-            <div class="note">
-              <div class="due">DUE DATE: EVERY 20th OF THE MONTH.</div>
-              <div>NOTE: PAYMENTS AFTER DUE DATE WILL INCUR A 200 PESOS PENALTY. PLEASE PAY YOUR MONTHLY CHARGES TO AVOID ADDITIONAL CHARGES AND DISCONNECTION.</div>
-            </div>
-          </div>
-        </div>
-      </body>
-      </html>
-    `;
-  }
-
-  function openInvoicePrintPreview(rowKey) {
-    const key = toNumber(rowKey, 0);
-    const row = filteredBilling.find((r) => r.rowKey === key);
-    if (!row) {
-      showNotification('Invoice data not found for selected row.', 'error');
-      return;
-    }
-
-    const existing = document.getElementById('invoicePrintFrame');
-    if (existing) existing.remove();
-
-    const frame = document.createElement('iframe');
-    frame.id = 'invoicePrintFrame';
-    frame.style.position = 'fixed';
-    frame.style.right = '0';
-    frame.style.bottom = '0';
-    frame.style.width = '0';
-    frame.style.height = '0';
-    frame.style.border = '0';
-    frame.style.visibility = 'hidden';
-    document.body.appendChild(frame);
-
-    const doc = frame.contentWindow?.document;
-    if (!doc || !frame.contentWindow) {
-      showNotification('Unable to open invoice preview.', 'error');
-      return;
-    }
-
-    doc.open();
-    doc.write(buildPrintableInvoiceHtml(row));
-    doc.close();
-
-    frame.onload = () => {
-      try {
-        frame.contentWindow.focus();
-        frame.contentWindow.print();
-      } catch (e) {
-        console.error(e);
-        showNotification('Print failed.', 'error');
-      }
-    };
   }
 
   const printBtn = document.querySelector('.print-btn');
