@@ -25,6 +25,24 @@
     return url;
   }
 
+  function redirectToAuth() {
+    try {
+      localStorage.removeItem('aquentaUser');
+      localStorage.removeItem('aquentaLoggedIn');
+      localStorage.removeItem('aquentaLoginTime');
+      sessionStorage.clear();
+    } catch (error) {
+      // ignore storage cleanup failures
+    }
+
+    if (window.location.protocol === 'file:') {
+      window.location.replace('auth.html');
+      return;
+    }
+
+    window.location.replace('/auth');
+  }
+
   async function request(path, options) {
     const baseUrl = getApiBaseUrl();
     const normalizedPath = path.startsWith('/') ? path : `/${path}`;
@@ -85,6 +103,10 @@
         } else {
           friendlyMessage = `An unexpected error occurred (Status: ${response.status}).`;
         }
+      }
+
+      if ((response.status === 401 || response.status === 403) && !/\/User\/login$/i.test(normalizedPath)) {
+        redirectToAuth();
       }
 
       throw new Error(friendlyMessage);

@@ -21,8 +21,8 @@ const BILLING_PAGE_SIZE = 25;
  * @param {string} type - 'success', 'error', or 'info'
  * @param {number} duration - Duration in milliseconds (default: 4000)
  */
-function showNotification(message, type = 'info') {
-  if (window.showNotification) {
+function notifyBilling(message, type = 'info') {
+  if (typeof window.showNotification === 'function') {
     window.showNotification(message, type);
   } else {
     console.warn('showNotification not found on window, falling back to alert');
@@ -261,7 +261,7 @@ async function saveReadingFromInput(input) {
   }
 
   if (!validation.isValid) {
-    showNotification(validation.message, 'error');
+    notifyBilling(validation.message, 'error');
     return;
   }
 
@@ -283,10 +283,10 @@ async function saveReadingFromInput(input) {
   try {
     await persistRowReading(rowData, validation.reading);
     await loadBilling();
-    showNotification('Reading saved successfully.', 'success', 2200);
+    notifyBilling('Reading saved successfully.', 'success', 2200);
   } catch (error) {
     console.error(error);
-    showNotification(error.message || 'Failed to save billing reading.', 'error');
+    notifyBilling(error.message || 'Failed to save billing reading.', 'error');
   } finally {
     savingRows.delete(rowKey);
   }
@@ -813,7 +813,7 @@ function setupTableRowActions() {
           reopenedInput.focus();
           reopenedInput.select();
         }
-        showNotification('Editing enabled for this saved billing row.', 'info');
+        notifyBilling('Editing enabled for this saved billing row.', 'info');
       }
       return;
     }
@@ -931,7 +931,7 @@ function setupTableRowActions() {
           // clamp to present
           newPrev = presentVal;
           prevInput.value = String(presentVal);
-          showNotification('Previous reading cannot be greater than Present reading. Value adjusted.', 'info');
+          notifyBilling('Previous reading cannot be greater than Present reading. Value adjusted.', 'info');
         }
       }
 
@@ -1008,7 +1008,7 @@ function setupTableRowActions() {
       const presentInputEl = prevInput.closest('tr')?.querySelector('.reading-input[data-role="current-reading"]');
       if (presentInputEl) setReadingValidationState(presentInputEl, validation);
       if (!validation.isValid) {
-        showNotification(validation.message, 'error');
+        notifyBilling(validation.message, 'error');
         return;
       }
     }
@@ -1020,10 +1020,10 @@ function setupTableRowActions() {
       const currentReading = toNumber(presentStr || rowData.present, 0);
       await persistRowReading(rowData, currentReading);
       await loadBilling();
-      showNotification('Previous reading saved successfully.', 'success', 2200);
+      notifyBilling('Previous reading saved successfully.', 'success', 2200);
     } catch (error) {
       console.error(error);
-      showNotification(error.message || 'Failed to save previous reading.', 'error');
+      notifyBilling(error.message || 'Failed to save previous reading.', 'error');
     } finally {
       savingRows.delete(rowKey);
     }
@@ -1512,7 +1512,7 @@ function setupPrintButton() {
 
       const doc = frame.contentWindow?.document;
       if (!doc || !frame.contentWindow) {
-        showNotification('Unable to open print preview.', 'error');
+        notifyBilling('Unable to open print preview.', 'error');
         return;
       }
 
@@ -1548,7 +1548,7 @@ async function loadBilling(isInitial = false) {
       districts = await api.get('/District');
     } catch (error) {
       console.warn('Failed to load districts for billing filter:', error);
-      showNotification('District filter options could not be fully loaded.', 'info');
+      notifyBilling('District filter options could not be fully loaded.', 'info');
     }
 
     billingCache = Array.isArray(billing) ? billing : [];
@@ -1587,6 +1587,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadBilling(true);
   } catch (error) {
     console.error(error);
-    showNotification('Failed to load billing data from API.', 'error');
+    notifyBilling('Failed to load billing data from API.', 'error');
   }
 });
