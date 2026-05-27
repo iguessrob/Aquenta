@@ -796,6 +796,17 @@ function renderBillingRows(rows) {
         `
       : '<span class="table-actions-empty">--</span>';
 
+    // Add a print invoice button for every row
+    const printBtnMarkup = `
+      <button class="table-action-btn print-invoice-btn" data-role="print-invoice" data-row-key="${item.rowKey}" title="Print Invoice" aria-label="Print Invoice">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 21H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2z"></path>
+          <polyline points="17 17 12 12 7 17"></polyline>
+          <polyline points="7 7 12 12 17 7"></polyline>
+        </svg>
+      </button>
+    `;
+
     return `
       <tr class="${savedRowClass}" data-row-key="${item.rowKey}">
         <td>${account}</td>
@@ -832,6 +843,7 @@ function renderBillingRows(rows) {
         <td>
           <div class="table-actions">
             ${actionsMarkup}
+            ${printBtnMarkup}
           </div>
         </td>
       </tr>
@@ -915,6 +927,13 @@ function setupTableRowActions() {
     if (editBtn) {
       const rowKey = editBtn.getAttribute('data-row-key');
       openBillingEditModal(rowKey);
+      return;
+    }
+
+    const printBtn = event.target.closest('[data-role="print-invoice"]');
+    if (printBtn) {
+      const rowKey = printBtn.getAttribute('data-row-key');
+      openInvoicePrintPreview(rowKey);
       return;
     }
 
@@ -1576,6 +1595,185 @@ function setupPrintButton() {
       </body>
       </html>
     `;
+  }
+  /**
+   * Build a printable invoice HTML for a single billing row.
+   * Page size: 4.25in x 5.5in
+   */
+  function buildPrintableInvoiceHtml(row) {
+    const concessioner = concessionerCache.find((c) => toNumber(pick(c, ['concessionerId','ConcessionerId','concessionerID'],0),0) === toNumber(row.concessionerId,0)) || {};
+    const user = userCache.find((u) => toNumber(pick(u, ['userId','UserId'],0),0) === toNumber(row.userId,0)) || {};
+    const account = escapeHtml(row.accountNumber || `#${row.concessionerId}`);
+    const name = escapeHtml(row.concessionerName || getConcessionerDisplayName(concessioner, user));
+    const address = escapeHtml(pick(concessioner, ['address','Address','street','Street'], ''));
+    const contact = escapeHtml(pick(user, ['phone','Phone','contact','ContactNo','contactNo'], ''));
+    const rateClass = escapeHtml(String(pick(concessioner, ['rateClass','RateClass','categoryName','CategoryName'], '')));
+    const meter = escapeHtml(String(pick(concessioner, ['meterNumber','MeterNumber','meterNo'], '')) || '« »');
+    const prev = escapeHtml(String(row.previous ?? '« »'));
+    const present = escapeHtml(String(row.present ?? row.draftPresent ?? '« »'));
+    const consumption = escapeHtml(String(row.consumption ?? (toNumber(present,0) - toNumber(prev,0)) || '« »'));
+    const amountText = row.amount ? formatPeso(row.amount) : 'PHP 0.00';
+
+    return `
+      <!doctype html>
+      <html>
+      <head>
+        <meta charset="utf-8" />
+        <title>Invoice</title>
+        <style>
+          @page { size: 4.25in 5.5in; margin: 10mm; }
+          body { margin:0; font-family: 'Times New Roman', Times, serif; color: #000; }
+          .inv { width:100%; box-sizing:border-box; padding:4px; }
+          .inv-header { text-align:center; }
+          .org-name { font-weight:700; letter-spacing:1px; font-size:14px; text-transform:uppercase; }
+          .org-sub { font-size:10px; margin-top:2px; }
+          .title { text-align:center; font-size:18px; font-weight:700; margin-top:6px; }
+          .section { margin-top:8px; }
+          .two-col { display:flex; justify-content:space-between; gap:8px; }
+          .meta { font-weight:700; }
+          .divider { border-top:2px solid #000; margin:6px 0; }
+          table { width:100%; border-collapse:collapse; font-size:11px; }
+          table td, table th { padding:4px; border:1px solid #000; }
+          .meter-cell { font-weight:700; }
+          .amount-big { font-size:16px; font-weight:700; text-align:right; }
+          .note { font-size:9px; margin-top:6px; }
+          .due { color:#c00; font-weight:700; }
+          .center { text-align:center; }
+        </style>
+      </head>
+      <body>
+        <div class="inv">
+          <div class="inv-header">
+            <div class="org-name">ST. JOSEPH-STB MULTI-PURPOSE COOPERATIVE SJ-STB-MPC</div>
+            <div class="org-sub">San Jose, City of Sto. Tomas, Batangas LGA 0997</div>
+          </div>
+
+          <div class="title">STATEMENT OF ACCOUNT</div>
+
+          <div class="section two-col">
+            <div>
+              <div>Account No: « ${account} »</div>
+              <div>Address: « ${address || ' »'} »</div>
+              <div>Account Name: « ${name} »</div>
+            </div>
+            <div style="text-align:right;">
+              <div>Rate Class: « ${rateClass || ' »'} »</div>
+              <div>Contact No: « ${contact || ' »'} »</div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="section">
+            <div style="font-weight:700; text-align:left; margin-bottom:6px;">METERING INFORMATION</div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Meter no.</th>
+                  <th>Meter Reading</th>
+                  <th>Consumed</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="meter-cell">« ${meter} »</td>
+                  <td>
+                    <table style="width:100%; border-collapse:collapse;">
+                      <tr>
+                        <td class="center">Previous</td>
+                        <td class="center">Present</td>
+                      </tr>
+                      <tr>
+                        <td class="center">« ${prev} »</td>
+                        <td class="center">« ${present} »</td>
+                      </tr>
+                    </table>
+                  </td>
+                  <td class="center">« ${consumption} »</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="section">
+            <div style="font-weight:700;">BILLING INFORMATION</div>
+            <table style="margin-top:6px;">
+              <tr>
+                <td style="width:60%;">Period Covered:</td>
+                <td style="text-align:right;">« »</td>
+              </tr>
+              <tr>
+                <td>Amount:</td>
+                <td style="text-align:right;">« ${amountText} »</td>
+              </tr>
+              <tr>
+                <td>Arrears:</td>
+                <td style="text-align:right;">« »</td>
+              </tr>
+              <tr>
+                <td>LP/RF:</td>
+                <td style="text-align:right;">« »</td>
+              </tr>
+              <tr>
+                <td style="font-weight:700;">TOTAL AMOUNT DUE:</td>
+                <td class="amount-big">« ${amountText} »</td>
+              </tr>
+            </table>
+
+            <div class="note">
+              <div class="due">DUE DATE: EVERY 20th OF THE MONTH.</div>
+              <div>NOTE: PAYMENTS AFTER DUE DATE WILL INCUR A 200 PESOS PENALTY. PLEASE PAY YOUR MONTHLY CHARGES TO AVOID ADDITIONAL CHARGES AND DISCONNECTION.</div>
+            </div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  function openInvoicePrintPreview(rowKey) {
+    const key = toNumber(rowKey, 0);
+    const row = filteredBilling.find((r) => r.rowKey === key);
+    if (!row) {
+      showNotification('Invoice data not found for selected row.', 'error');
+      return;
+    }
+
+    const existing = document.getElementById('invoicePrintFrame');
+    if (existing) existing.remove();
+
+    const frame = document.createElement('iframe');
+    frame.id = 'invoicePrintFrame';
+    frame.style.position = 'fixed';
+    frame.style.right = '0';
+    frame.style.bottom = '0';
+    frame.style.width = '0';
+    frame.style.height = '0';
+    frame.style.border = '0';
+    frame.style.visibility = 'hidden';
+    document.body.appendChild(frame);
+
+    const doc = frame.contentWindow?.document;
+    if (!doc || !frame.contentWindow) {
+      showNotification('Unable to open invoice preview.', 'error');
+      return;
+    }
+
+    doc.open();
+    doc.write(buildPrintableInvoiceHtml(row));
+    doc.close();
+
+    frame.onload = () => {
+      try {
+        frame.contentWindow.focus();
+        frame.contentWindow.print();
+      } catch (e) {
+        console.error(e);
+        showNotification('Print failed.', 'error');
+      }
+    };
   }
 
   const printBtn = document.querySelector('.print-btn');
