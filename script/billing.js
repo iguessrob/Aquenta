@@ -1173,7 +1173,23 @@ function setupPrintButton() {
     return String(selectedOption?.textContent || '').trim();
   }
 
-  function buildBlankReadingRows(rowCount = 25) {
+  function getReadingSheetConcessioners() {
+    return [...concessionerCache].sort((a, b) => {
+      const districtA = toNumber(pick(a, ['districtId', 'DistrictId', 'districtID', 'DistrictID'], 0), 0);
+      const districtB = toNumber(pick(b, ['districtId', 'DistrictId', 'districtID', 'DistrictID'], 0), 0);
+      if (districtA !== districtB) return districtA - districtB;
+
+      const orderA = toNumber(pick(a, ['accountOrder', 'AccountOrder'], 0), 0);
+      const orderB = toNumber(pick(b, ['accountOrder', 'AccountOrder'], 0), 0);
+      if (orderA !== orderB) return orderA - orderB;
+
+      const accountA = String(pick(a, ['accountNumber', 'AccountNumber'], ''));
+      const accountB = String(pick(b, ['accountNumber', 'AccountNumber'], ''));
+      return accountA.localeCompare(accountB, undefined, { numeric: true, sensitivity: 'base' });
+    });
+  }
+
+  function buildBlankReadingRows(rows, startNumber = 1) {
     const selectedPeriodId = getSelectedPeriodId();
 
     const periodOrder = new Map();
@@ -1209,32 +1225,16 @@ function setupPrintButton() {
       ]),
     );
 
-    const activeConcessioners = concessionerCache
-      .filter((item) => {
-        const status = String(pick(item, ['status', 'Status'], '')).trim().toLowerCase();
-        return status === '' || status === 'active';
-      })
-      .sort((a, b) => {
-        const districtA = toNumber(pick(a, ['districtId', 'DistrictId', 'districtID', 'DistrictID'], 0), 0);
-        const districtB = toNumber(pick(b, ['districtId', 'DistrictId', 'districtID', 'DistrictID'], 0), 0);
-        if (districtA !== districtB) return districtA - districtB;
-
-        const orderA = toNumber(pick(a, ['accountOrder', 'AccountOrder'], 0), 0);
-        const orderB = toNumber(pick(b, ['accountOrder', 'AccountOrder'], 0), 0);
-        if (orderA !== orderB) return orderA - orderB;
-
-        const accountA = String(pick(a, ['accountNumber', 'AccountNumber'], ''));
-        const accountB = String(pick(b, ['accountNumber', 'AccountNumber'], ''));
-        return accountA.localeCompare(accountB, undefined, { numeric: true, sensitivity: 'base' });
-      });
-
-    const rows = [];
-    for (let index = 1; index <= rowCount; index += 1) {
-      const concessioner = activeConcessioners[index - 1];
+    const rowHtml = [];
+    for (let offset = 0; offset < 25; offset += 1) {
+      const rowNumber = startNumber + offset;
+      const concessioner = rows[offset] || null;
       const userId = toNumber(pick(concessioner, ['userId', 'UserId', 'userID', 'UserID'], 0), 0);
       const user = userMap.get(userId) || null;
       const name = concessioner ? getConcessionerDisplayName(concessioner, user) : '';
       const meterNumber = concessioner ? pick(concessioner, ['meterNumber', 'MeterNumber'], '') : '';
+      const status = String(pick(concessioner, ['status', 'Status'], '')).trim().toLowerCase();
+      const isActive = !concessioner || status === '' || status === 'active';
 
       const concessionerId = toNumber(pick(concessioner, ['concessionerId', 'ConcessionerId', 'concessionerID', 'ConcessionerID'], 0), 0);
       const billings = billingByConcessioner.get(concessionerId) || [];
@@ -1263,9 +1263,9 @@ function setupPrintButton() {
       const previousText = String(previousReading) === '' ? '&nbsp;' : escapeHtml(String(previousReading));
       const meterText = meterNumber ? escapeHtml(String(meterNumber)) : '&nbsp;';
 
-      rows.push(`
-        <tr>
-          <td class="center">${index}</td>
+      rowHtml.push(`
+        <tr class="${isActive ? 'active-row' : 'inactive-row'}">
+          <td class="center">${rowNumber}</td>
           <td>${name ? escapeHtml(name) : '&nbsp;'}</td>
           <td class="center meter-cell">${meterText}</td>
           <td>&nbsp;</td>
@@ -1277,7 +1277,61 @@ function setupPrintButton() {
       `);
     }
 
-    return rows.join('');
+    return rowHtml.join('');
+  }
+
+  function buildReadingSheetPages() {
+    const concessioners = getReadingSheetConcessioners();
+    const rowsPerPage = 25;
+    const pageCount = Math.max(1, Math.ceil(concessioners.length / rowsPerPage));
+    const pageMarkup = [];
+
+    for (let pageIndex = 0; pageIndex < pageCount; pageIndex += 1) {
+      const start = pageIndex * rowsPerPage;
+      const pageRows = concessioners.slice(start, start + rowsPerPage);
+      const startNumber = start + 1;
+
+      pageMarkup.push(`
+        <section class="sheet-page ${pageIndex > 0 ? 'sheet-page-break' : ''}">
+          <div class="sheet-header">
+            <img src="assets/images/SJ-STBMPC-logo.png" alt="SJ-STBMPC Logo" class="sheet-logo" />
+            <div class="sheet-title-wrap">
+              <div class="sheet-org">St. Joseph Stb. Multi-Purpose Cooperative</div>
+              <div class="sheet-org-sub">Brgy. San Jose, Sto Tomas City, Batangas</div>
+              <div class="sheet-main-title">READING SHEET</div>
+            </div>
+            <div class="sheet-header-spacer" aria-hidden="true"></div>
+          </div>
+
+          <div class="sheet-meta">
+            <div class="sheet-period">${periodText}</div>
+          </div>
+
+          <table class="sheet-table">
+            <thead>
+              <tr>
+                <th rowspan="2" class="center w-no">No</th>
+                <th rowspan="2" class="center w-name">Concessioner</th>
+                <th rowspan="2" class="center w-meter">Meter<br>Number</th>
+                <th colspan="2" class="center">Reading</th>
+                <th rowspan="2" class="center w-consumption">Total Consumption</th>
+                <th rowspan="2" class="center w-amount">Amount</th>
+                <th rowspan="2" class="center w-remark">Remark</th>
+              </tr>
+              <tr>
+                <th class="center w-reading">Present</th>
+                <th class="center w-reading">Previous</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${buildBlankReadingRows(pageRows, startNumber)}
+            </tbody>
+          </table>
+        </section>
+      `);
+    }
+
+    return pageMarkup.join('');
   }
 
   function buildReadingSheetHtml() {
@@ -1344,11 +1398,20 @@ function setupPrintButton() {
             margin: 0 auto;
           }
 
-          .sheet-org-row {
-            display: flex;
-            justify-content: center;
+          .sheet-page {
+            width: 100%;
+          }
+
+          .sheet-page-break {
+            break-before: page;
+            page-break-before: always;
+          }
+
+          .sheet-header {
+            display: grid;
+            grid-template-columns: 54px 1fr 54px;
             align-items: center;
-            gap: 18px;
+            gap: 10px;
             width: 100%;
             margin-bottom: 0;
           }
@@ -1357,6 +1420,12 @@ function setupPrintButton() {
             width: 54px;
             height: 54px;
             object-fit: contain;
+            justify-self: start;
+          }
+
+          .sheet-header-spacer {
+            width: 54px;
+            height: 54px;
           }
 
           .sheet-title-wrap {
@@ -1421,6 +1490,11 @@ function setupPrintButton() {
             text-transform: uppercase;
           }
 
+          .sheet-table tr.inactive-row td {
+            background: #ededed;
+            color: #7b7b7b;
+          }
+
           .sheet-table .center {
             text-align: center;
           }
@@ -1446,45 +1520,17 @@ function setupPrintButton() {
             .sheet {
               break-inside: avoid;
             }
+
+            .sheet-table tr.inactive-row td {
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
           }
         </style>
       </head>
       <body>
         <div class="sheet">
-          <div class="sheet-org-row">
-            <div class="sheet-title-wrap">
-              <div class="sheet-org">St. Joseph Stb. Multi-Purpose Cooperative</div>
-              <div class="sheet-org-sub">Brgy. San Jose, Sto Tomas City, Batangas</div>
-            </div>
-            <img src="assets/images/SJ-STBMPC-logo.png" alt="SJ-STBMPC Logo" class="sheet-logo" />
-          </div>
-
-          <div class="sheet-main-title">READING SHEET</div>
-
-          <div class="sheet-meta">
-            <div class="sheet-period">${periodText}</div>
-          </div>
-
-          <table class="sheet-table">
-            <thead>
-              <tr>
-                <th rowspan="2" class="center w-no">No</th>
-                <th rowspan="2" class="center w-name">Concessioner</th>
-                <th rowspan="2" class="center w-meter">Meter<br>Number</th>
-                <th colspan="2" class="center">Reading</th>
-                <th rowspan="2" class="center w-consumption">Total Consumption</th>
-                <th rowspan="2" class="center w-amount">Amount</th>
-                <th rowspan="2" class="center w-remark">Remark</th>
-              </tr>
-              <tr>
-                <th class="center w-reading">Present</th>
-                <th class="center w-reading">Previous</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${buildBlankReadingRows(25)}
-            </tbody>
-          </table>
+          ${buildReadingSheetPages()}
         </div>
       </body>
       </html>
