@@ -5,7 +5,6 @@
   const closeSidebarBtn = document.getElementById('closeSidebar');
   
   const disconnectionTableBody = document.getElementById('disconnectionTableBody');
-  const disconnectionCountElem = document.getElementById('disconnectionCount');
   const recordCountText = document.querySelector('.table-footer p');
   const disconnectionMonthFilter = document.getElementById('disconnectionMonthFilter');
 
@@ -85,9 +84,6 @@
     const end = Math.min(start + PAGE_SIZE, totalRecords);
     const visibleRows = rows.slice(start, end);
 
-    if (disconnectionCountElem) {
-      disconnectionCountElem.textContent = `Concessioners to be Disconnected: ${totalRecords}`;
-    }
 
     if (recordCountText) {
       recordCountText.textContent = totalRecords
@@ -102,18 +98,19 @@
     disconnectionTableBody.innerHTML = '';
 
     if (visibleRows.length === 0) {
-      disconnectionTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No accounts subject to disconnection.</td></tr>';
+      disconnectionTableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No accounts subject to disconnection.</td></tr>';
       return;
     }
-
-    visibleRows.forEach((c) => {
+    visibleRows.forEach((c, idx) => {
       const row = document.createElement('tr');
+      const rowNo = start + idx + 1;
       row.innerHTML = `
-        <td>${escapeHtml(getValue(c, ['accountNumber', 'AccountNumber'], ''))}</td>
+        <td style="text-align:center;">${escapeHtml(String(rowNo))}</td>
         <td>${escapeHtml(getValue(c, ['fullName', 'FullName'], ''))}</td>
-        <td>${escapeHtml(getValue(c, ['lastReading', 'LastReading'], '0'))}</td>
-        <td>${escapeHtml(formatMonthLabel(getMonthCount(c)))}</td>
-        <td>${escapeHtml(formatCurrency(getValue(c, ['totalDebt', 'TotalDebt'])))}</td>
+        <td style="text-align:center;">${escapeHtml(getValue(c, ['lastReading', 'LastReading'], '0'))}</td>
+        <td style="text-align:center;">${escapeHtml(formatMonthLabel(getMonthCount(c)))}</td>
+        <td style="text-align:right;">${escapeHtml(formatCurrency(getValue(c, ['totalDebt', 'TotalDebt'])))}</td>
+        <td>${escapeHtml(getValue(c, ['remarks', 'Remarks'], ''))}</td>
       `;
       disconnectionTableBody.appendChild(row);
     });
@@ -211,6 +208,22 @@
     setupPaginationGuards();
     if (disconnectionMonthFilter) {
       disconnectionMonthFilter.addEventListener('change', applyFilters);
+    }
+    // set disconnection title to previous month and year
+    try {
+      const titleEl = document.querySelector('.disconnection-title');
+      if (titleEl) {
+        const now = new Date();
+        const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const months = [
+          'January','February','March','April','May','June','July','August','September','October','November','December'
+        ];
+        const monthName = months[prev.getMonth()].toUpperCase();
+        const year = prev.getFullYear();
+        titleEl.textContent = `DISCONNECTION LIST ${monthName} ${year}`;
+      }
+    } catch (e) {
+      // ignore title set errors
     }
     await loadDisconnectionList();
   }

@@ -330,6 +330,16 @@
 }
 
 @media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm 8mm;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+  }
+
   .sidebar,
   .topbar,
   .print-btn,
@@ -338,17 +348,137 @@
     display: none !important;
   }
 
+  .app-container,
+  .main-container,
+  .content,
+  .disconnection-panel,
+  .disconnection-header,
+  .disconnection-stat-wrap,
+  .disconnection-header-left {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    border: 0 !important;
+  }
+
   .main-container {
     margin-left: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
   }
 
   .content {
     padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  .disconnection-header {
+    margin-bottom: 8mm !important;
+    text-align: center !important;
+  }
+
+  .disconnection-header-left {
+    align-items: center !important;
+  }
+
+  .disconnection-title {
+    width: 100% !important;
+    text-align: center !important;
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.4px !important;
+    color: #111 !important;
+    margin: 0 !important;
+    text-transform: uppercase;
+  }
+
+  .disconnection-stat-wrap {
+    display: none !important;
   }
 
   .disconnection-panel {
     border: 0;
     box-shadow: none;
     padding: 0;
+  }
+
+  .table-wrapper {
+    overflow: visible !important;
+  }
+
+  .disconnection-table {
+    min-width: 0 !important;
+    width: 100% !important;
+    border-collapse: collapse !important;
+    table-layout: fixed !important;
+  }
+
+  .disconnection-table thead th,
+  .disconnection-table tbody td {
+    border: 1px solid #222 !important;
+    color: #111 !important;
+    padding: 4px 6px !important;
+    font-size: 9.5px !important;
+    line-height: 1.08 !important;
+    vertical-align: middle !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .disconnection-table thead th {
+    background: #f2f2f2 !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    text-align: center !important;
+  }
+
+  .disconnection-table tbody td {
+    background: #fff !important;
+  }
+
+  .disconnection-table tbody tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .disconnection-table th:nth-child(1),
+  .disconnection-table td:nth-child(1) {
+    width: 6% !important;
+    text-align: center !important;
+  }
+
+  .disconnection-table th:nth-child(2),
+  .disconnection-table td:nth-child(2) {
+    width: 34% !important;
+  }
+
+  .disconnection-table th:nth-child(3),
+  .disconnection-table td:nth-child(3) {
+    width: 16% !important;
+    text-align: center !important;
+  }
+
+  .disconnection-table th:nth-child(4),
+  .disconnection-table td:nth-child(4) {
+    width: 12% !important;
+    text-align: center !important;
+  }
+
+  .disconnection-table th:nth-child(5),
+  .disconnection-table td:nth-child(5) {
+    width: 20% !important;
+    text-align: right !important;
+  }
+
+  .disconnection-table th:nth-child(6),
+  .disconnection-table td:nth-child(6) {
+    width: 12% !important;
+    text-align: left !important;
+  }
+
+  .disconnection-table tbody tr td:last-child {
+    padding-right: 8px !important;
   }
 }
