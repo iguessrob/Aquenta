@@ -1346,9 +1346,10 @@ function setupPrintButton() {
 
           .sheet-org-row {
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            gap: 8px;
+            gap: 16px;
+            width: 100%;
             margin-bottom: 0;
           }
 
@@ -1359,7 +1360,7 @@ function setupPrintButton() {
           }
 
           .sheet-title-wrap {
-            text-align: center;
+            text-align: left;
           }
 
           .sheet-org {
@@ -1451,11 +1452,11 @@ function setupPrintButton() {
       <body>
         <div class="sheet">
           <div class="sheet-org-row">
-            <img src="/assets/images/Aquenta_logo.png" alt="Aquenta Logo" class="sheet-logo" />
             <div class="sheet-title-wrap">
               <div class="sheet-org">St. Joseph Stb. Multi-Purpose Cooperative</div>
               <div class="sheet-org-sub">Brgy. San Jose, Sto Tomas City, Batangas</div>
             </div>
+            <img src="/assets/images/SJ-STBMPC-logo.png" alt="SJ-STBMPC Logo" class="sheet-logo" />
           </div>
 
           <div class="sheet-main-title">READING SHEET</div>
