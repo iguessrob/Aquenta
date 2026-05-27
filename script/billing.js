@@ -1556,20 +1556,30 @@ function setupPrintButton() {
       frame.style.visibility = 'hidden';
       document.body.appendChild(frame);
 
-      const doc = frame.contentWindow?.document;
-      if (!doc || !frame.contentWindow) {
+      const frameWindow = frame.contentWindow;
+      const doc = frameWindow?.document;
+      if (!doc || !frameWindow) {
         notifyBilling('Unable to open print preview.', 'error');
         return;
       }
 
+      const triggerPrint = () => {
+        try {
+          frameWindow.focus();
+          frameWindow.print();
+        } catch (error) {
+          console.error(error);
+          notifyBilling('Unable to open print preview.', 'error');
+        }
+      };
+
+      frame.addEventListener('load', () => {
+        window.setTimeout(triggerPrint, 50);
+      }, { once: true });
+
       doc.open();
       doc.write(buildReadingSheetHtml());
       doc.close();
-
-      frame.onload = () => {
-        frame.contentWindow.focus();
-        frame.contentWindow.print();
-      };
     });
   }
 }
