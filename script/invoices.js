@@ -72,7 +72,7 @@ function formatPeso(value) {
 
 function formatPrintPlaceholder(value) {
   const text = String(value ?? '').trim();
-  return `<<${text || ' '}>>`;
+  return text || '';
 }
 
 function formatPrintMoney(value) {
@@ -445,9 +445,9 @@ function buildStatementMarkup(row) {
         <tbody>
           <tr>
             <td>${escapeHtml(formatPrintPlaceholder(row.meterNumber || ''))}</td>
-            <td>${row.previous === '' ? '<< >>' : escapeHtml(formatPrintPlaceholder(row.previous))}</td>
-            <td>${row.present === '' ? '<< >>' : escapeHtml(formatPrintPlaceholder(row.present))}</td>
-            <td>${row.consumed === '' ? '<< >>' : escapeHtml(formatPrintPlaceholder(row.consumed))}</td>
+            <td>${row.previous === '' ? '' : escapeHtml(formatPrintPlaceholder(row.previous))}</td>
+            <td>${row.present === '' ? '' : escapeHtml(formatPrintPlaceholder(row.present))}</td>
+            <td>${row.consumed === '' ? '' : escapeHtml(formatPrintPlaceholder(row.consumed))}</td>
           </tr>
         </tbody>
       </table>
