@@ -1006,16 +1006,22 @@ function setupTableRowActions() {
         if (prevInputEl) {
           if (validation.hasValue) {
             prevInputEl.setAttribute('max', String(present));
-            // Clamp previous if it exceeds present
             const prevVal = prevInputEl.value ? toNumber(prevInputEl.value, 0) : 0;
             if (prevVal > present) {
-              prevInputEl.value = String(present);
-              rowData.previous = present;
-              if (consumptionCell) consumptionCell.textContent = '0';
-              if (amountCell) amountCell.textContent = formatPeso(getTariffAmount(rowData.categoryId, 0));
+              // Do NOT overwrite the user's previous input while they edit Present.
+              // Mark the previous input visually invalid and provide a tooltip instead.
+              prevInputEl.classList.add('is-invalid');
+              prevInputEl.setAttribute('title', 'Previous reading cannot be greater than Present reading.');
+              if (consumptionCell) consumptionCell.textContent = '--';
+              if (amountCell) amountCell.textContent = '--';
+            } else {
+              prevInputEl.classList.remove('is-invalid');
+              prevInputEl.removeAttribute('title');
             }
           } else {
             prevInputEl.removeAttribute('max');
+            prevInputEl.classList.remove('is-invalid');
+            prevInputEl.removeAttribute('title');
           }
         }
       } catch (e) {
@@ -1299,6 +1305,19 @@ function setupBillingEditModal() {
       billingEditRowKey = null;
       setBillingEditMessage('', '');
     }
+  });
+
+  // Explicitly attach close handlers to Cancel/backdrop/close controls
+  const closeEls = modal.querySelectorAll('[data-role="billing-edit-close"]');
+  closeEls.forEach((el) => {
+    el.addEventListener('click', () => {
+      toggleBillingEditModal(false);
+      billingEditRowKey = null;
+      setBillingEditMessage('', '');
+      const { previous, present } = getBillingEditModalElements();
+      if (previous) previous.value = '';
+      if (present) present.value = '';
+    });
   });
 
   const saveBtn = document.getElementById('billingEditSaveBtn');
