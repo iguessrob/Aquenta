@@ -478,7 +478,7 @@
         }
 
         setTimeout(() => {
-          window.location.href = 'customer-record.html';
+          window.location.href = '../customer-record.html';
         }, 1500);
       } catch (error) {
         console.error('Delete concessioner failed:', error);
