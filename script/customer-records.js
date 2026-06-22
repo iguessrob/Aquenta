@@ -525,7 +525,7 @@
 
       try {
         const created = await createCustomer(data);
-        window.location.href = `view-customer.html?id=${encodeURIComponent(created.concessionerId)}`;
+        window.location.href = `/customer/view-customer.html?id=${encodeURIComponent(created.concessionerId)}`;
       } catch (error) {
         console.error(error);
         window.showNotification(error.message || 'Failed to add concessioner.', 'error');
@@ -629,7 +629,7 @@
 
       try {
         const updated = await updateCustomer(concessionerId, updates);
-        window.location.href = `view-customer.html?id=${encodeURIComponent(updated.concessionerId)}`;
+        window.location.href = `/customer/view-customer.html?id=${encodeURIComponent(updated.concessionerId)}`;
       } catch (error) {
         console.error(error);
         window.showNotification(error.message || 'Failed to save changes.', 'error');

@@ -478,7 +478,8 @@
         }
 
         setTimeout(() => {
-          window.location.href = '../customer-record.html';
+          // Use absolute path to ensure correct redirection regardless of trailing slashes or base path
+          window.location.href = '/customer-record.html';
         }, 1500);
       } catch (error) {
         console.error('Delete concessioner failed:', error);
