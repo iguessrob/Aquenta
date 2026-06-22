@@ -18,7 +18,7 @@ namespace AquentaLibrary.Repositories
 
         public bool DeleteConcessioner(int id)
         {
-            return Delete(id);
+            return DeleteConcessionerSP(id) == 1;
         }
 
         /// <summary>
