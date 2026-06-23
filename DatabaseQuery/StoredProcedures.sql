@@ -993,7 +993,9 @@ BEGIN
 		p.PeriodStart,
 		p.PeriodEnd
 	FROM tbl_Billing b
+	INNER JOIN tbl_Concessioner c ON b.ConcessionerID = c.ConcessionerID
 	LEFT JOIN tbl_Period p ON b.PeriodID = p.PeriodID
+	WHERE c.IsDeleted = 0
 	ORDER BY b.BillingID DESC;
 END
 GO

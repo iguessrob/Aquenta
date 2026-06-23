@@ -186,13 +186,10 @@ function computeLatestConcessionerCardMetrics(billingList, paymentList, periodLi
     };
   }
 
-  // Build set of deleted concessioner IDs
-  const deletedConcessionerIds = new Set(
+  // The /Concessioner API (SP_GetAllConcessioner) already filters IsDeleted=0,
+  // so we build a whitelist of active concessioner IDs and only process those billings.
+  const activeConcessionerIds = new Set(
     (concessionerList || [])
-      .filter((c) => {
-        const isDeleted = c.isDeleted ?? c.IsDeleted ?? false;
-        return isDeleted === true || isDeleted === 1;
-      })
       .map((c) => toNumber(c.concessionerId ?? c.ConcessionerID ?? c.ConcessionerId))
       .filter((id) => id > 0)
   );
@@ -207,9 +204,9 @@ function computeLatestConcessionerCardMetrics(billingList, paymentList, periodLi
   const allLatestBills = (billingList || []).filter((bill) => {
     const periodId = toNumber(bill.periodId ?? bill.PeriodID ?? bill.PeriodId);
     if (periodId !== latestPeriodId) return false;
-    // Exclude billing records for deleted concessioners
+    // Only include billing records for active (non-deleted) concessioners
     const cid = toNumber(bill.concessionerId ?? bill.ConcessionerID ?? bill.ConcessionerId);
-    return !deletedConcessionerIds.has(cid);
+    return activeConcessionerIds.size === 0 || activeConcessionerIds.has(cid);
   });
 
   const latestBillIdSet = new Set(
@@ -275,22 +272,21 @@ function buildFallbackDashboardMetrics(billings, payments, periods, selectedYear
     periodList.map((period) => [toNumber(period.periodId ?? period.PeriodID ?? period.PeriodId), period])
   );
 
-  // Build set of deleted concessioner IDs to exclude their billing records
-  const deletedConcessionerIds = new Set(
+  // The /Concessioner API already filters IsDeleted=0, so the returned list
+  // is a whitelist of active concessioner IDs. Only process billing records in this whitelist.
+  const activeConcessionerIds = new Set(
     (Array.isArray(concessionerList) ? concessionerList : [])
-      .filter((c) => {
-        const isDeleted = c.isDeleted ?? c.IsDeleted ?? false;
-        return isDeleted === true || isDeleted === 1;
-      })
       .map((c) => toNumber(c.concessionerId ?? c.ConcessionerID ?? c.ConcessionerId))
       .filter((id) => id > 0)
   );
 
-  // Filter out billing records belonging to deleted concessioners
-  const activeBillingList = billingList.filter((bill) => {
-    const cid = toNumber(bill.concessionerId ?? bill.ConcessionerID ?? bill.ConcessionerId);
-    return !deletedConcessionerIds.has(cid);
-  });
+  // Filter out billing records not belonging to any active concessioner
+  const activeBillingList = activeConcessionerIds.size > 0
+    ? billingList.filter((bill) => {
+        const cid = toNumber(bill.concessionerId ?? bill.ConcessionerID ?? bill.ConcessionerId);
+        return activeConcessionerIds.has(cid);
+      })
+    : billingList;
 
   const monthlyDataForSelectedYear = MONTH_NAMES.map((monthName) => ({
     month: monthName,
