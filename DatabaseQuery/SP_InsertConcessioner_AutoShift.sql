@@ -28,7 +28,8 @@ BEGIN
         UPDATE tbl_Concessioner
         SET AccountOrder = AccountOrder + 1
         WHERE DistrictID = @DistrictID
-          AND AccountOrder >= @AccountOrder;
+                    AND AccountOrder >= @AccountOrder
+                    AND IsDeleted = 0;
 
         INSERT INTO tbl_Concessioner (
             UserID,

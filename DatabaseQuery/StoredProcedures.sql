@@ -821,7 +821,8 @@ BEGIN
 		UPDATE tbl_Concessioner
 		SET AccountOrder = AccountOrder + 1
 		WHERE DistrictID = @DistrictID
-		  AND AccountOrder >= @AccountOrder;
+		  AND AccountOrder >= @AccountOrder
+		  AND IsDeleted = 0;
 
 		INSERT INTO tbl_Concessioner (UserID, CategoryID, MembershipID, DistrictID, AccountNumber, AccountOrder, MeterNumber, Address, ContactNumber, EmailAddress, Status)
 		VALUES (@UserID, @CategoryID, @MembershipID, @DistrictID, @AccountNumber, @AccountOrder, @MeterNumber, @Address, @ContactNumber, @EmailAddress, @Status);
@@ -855,21 +856,111 @@ CREATE OR ALTER PROCEDURE SP_UpdateConcessioner
 	@Status NVARCHAR(20)
 AS
 BEGIN
-	UPDATE tbl_Concessioner
-	SET UserID = @UserID,
-		CategoryID = @CategoryID,
-		MembershipID = @MembershipID,
-		DistrictID = @DistrictID,
-		AccountNumber = @AccountNumber,
-		AccountOrder = @AccountOrder,
-		MeterNumber = @MeterNumber,
-		Address = @Address,
-		ContactNumber = @ContactNumber,
-		EmailAddress = @EmailAddress,
-		Status = @Status
-	WHERE ConcessionerID = @ConcessionerID;
-	
-	SELECT @@ROWCOUNT AS RowsAffected;
+	SET NOCOUNT ON;
+
+	IF @AccountOrder IS NULL OR @AccountOrder < 1
+	BEGIN
+		RAISERROR('AccountOrder must be a positive whole number.', 16, 1);
+		RETURN;
+	END
+
+	BEGIN TRANSACTION;
+	BEGIN TRY
+		DECLARE @CurrentDistrictID INT;
+		DECLARE @CurrentAccountOrder INT;
+
+		SELECT
+			@CurrentDistrictID = DistrictID,
+			@CurrentAccountOrder = AccountOrder
+		FROM tbl_Concessioner
+		WHERE ConcessionerID = @ConcessionerID
+		  AND IsDeleted = 0;
+
+		IF @CurrentDistrictID IS NULL
+		BEGIN
+			ROLLBACK TRANSACTION;
+			RAISERROR('Concessioner not found.', 16, 1);
+			RETURN;
+		END
+
+		IF @CurrentDistrictID = @DistrictID AND @CurrentAccountOrder = @AccountOrder
+		BEGIN
+			UPDATE tbl_Concessioner
+			SET UserID = @UserID,
+				CategoryID = @CategoryID,
+				MembershipID = @MembershipID,
+				DistrictID = @DistrictID,
+				AccountNumber = @AccountNumber,
+				AccountOrder = @AccountOrder,
+				MeterNumber = @MeterNumber,
+				Address = @Address,
+				ContactNumber = @ContactNumber,
+				EmailAddress = @EmailAddress,
+				Status = @Status
+			WHERE ConcessionerID = @ConcessionerID;
+		END
+		ELSE
+		BEGIN
+			IF @CurrentDistrictID = @DistrictID
+			BEGIN
+				IF @AccountOrder > @CurrentAccountOrder
+				BEGIN
+					UPDATE tbl_Concessioner
+					SET AccountOrder = AccountOrder - 1
+					WHERE DistrictID = @DistrictID
+					  AND IsDeleted = 0
+					  AND AccountOrder > @CurrentAccountOrder
+					  AND AccountOrder <= @AccountOrder;
+				END
+				ELSE
+				BEGIN
+					UPDATE tbl_Concessioner
+					SET AccountOrder = AccountOrder + 1
+					WHERE DistrictID = @DistrictID
+					  AND IsDeleted = 0
+					  AND AccountOrder >= @AccountOrder
+					  AND AccountOrder < @CurrentAccountOrder;
+				END
+			END
+			ELSE
+			BEGIN
+				UPDATE tbl_Concessioner
+				SET AccountOrder = AccountOrder - 1
+				WHERE DistrictID = @CurrentDistrictID
+				  AND IsDeleted = 0
+				  AND AccountOrder > @CurrentAccountOrder;
+
+				UPDATE tbl_Concessioner
+				SET AccountOrder = AccountOrder + 1
+				WHERE DistrictID = @DistrictID
+				  AND IsDeleted = 0
+				  AND AccountOrder >= @AccountOrder;
+			END
+
+			UPDATE tbl_Concessioner
+			SET UserID = @UserID,
+				CategoryID = @CategoryID,
+				MembershipID = @MembershipID,
+				DistrictID = @DistrictID,
+				AccountNumber = @AccountNumber,
+				AccountOrder = @AccountOrder,
+				MeterNumber = @MeterNumber,
+				Address = @Address,
+				ContactNumber = @ContactNumber,
+				EmailAddress = @EmailAddress,
+				Status = @Status
+			WHERE ConcessionerID = @ConcessionerID;
+		END
+
+		SELECT @@ROWCOUNT AS RowsAffected;
+		COMMIT TRANSACTION;
+	END TRY
+	BEGIN CATCH
+		IF @@TRANCOUNT > 0
+			ROLLBACK TRANSACTION;
+
+		THROW;
+	END CATCH
 END
 GO
 
@@ -878,11 +969,46 @@ CREATE OR ALTER PROCEDURE SP_DeleteConcessioner
 	@ConcessionerID INT
 AS
 BEGIN
-	UPDATE tbl_Concessioner
-	SET IsDeleted = 1
-	WHERE ConcessionerID = @ConcessionerID;
-	
-	SELECT @@ROWCOUNT AS RowsAffected;
+	SET NOCOUNT ON;
+
+	BEGIN TRANSACTION;
+	BEGIN TRY
+		DECLARE @DistrictID INT;
+		DECLARE @AccountOrder INT;
+
+		SELECT
+			@DistrictID = DistrictID,
+			@AccountOrder = AccountOrder
+		FROM tbl_Concessioner
+		WHERE ConcessionerID = @ConcessionerID
+		  AND IsDeleted = 0;
+
+		IF @DistrictID IS NULL
+		BEGIN
+			ROLLBACK TRANSACTION;
+			SELECT 0 AS RowsAffected;
+			RETURN;
+		END
+
+		UPDATE tbl_Concessioner
+		SET IsDeleted = 1
+		WHERE ConcessionerID = @ConcessionerID;
+
+		UPDATE tbl_Concessioner
+		SET AccountOrder = AccountOrder - 1
+		WHERE DistrictID = @DistrictID
+		  AND IsDeleted = 0
+		  AND AccountOrder > @AccountOrder;
+
+		SELECT @@ROWCOUNT AS RowsAffected;
+		COMMIT TRANSACTION;
+	END TRY
+	BEGIN CATCH
+		IF @@TRANCOUNT > 0
+			ROLLBACK TRANSACTION;
+
+		THROW;
+	END CATCH
 END
 GO
 

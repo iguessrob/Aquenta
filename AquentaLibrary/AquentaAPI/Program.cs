@@ -176,12 +176,12 @@ void SeedMissingMonthlyPeriods()
         }
 
         var today = DateTime.Today;
-        var currentMonthStart = new DateTime(today.Year, today.Month, 1);
+        var previousMonthStart = new DateTime(today.AddMonths(-1).Year, today.AddMonths(-1).Month, 1);
 
         DateTime nextMonthToCreate;
         if (periods.Count == 0)
         {
-            nextMonthToCreate = currentMonthStart;
+            nextMonthToCreate = previousMonthStart;
         }
         else
         {
@@ -192,7 +192,12 @@ void SeedMissingMonthlyPeriods()
             nextMonthToCreate = latestStart.AddMonths(1);
         }
 
-        for (var month = nextMonthToCreate; month <= currentMonthStart; month = month.AddMonths(1))
+        if (nextMonthToCreate > previousMonthStart)
+        {
+            return;
+        }
+
+        for (var month = nextMonthToCreate; month <= previousMonthStart; month = month.AddMonths(1))
         {
             var monthKey = month.ToString("yyyy-MM");
             if (existingMonths.Contains(monthKey))

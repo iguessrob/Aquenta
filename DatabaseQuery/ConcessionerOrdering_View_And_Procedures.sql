@@ -35,6 +35,7 @@ SELECT
     c.ContactNumber,
     c.EmailAddress,
     c.Status,
+    c.IsDeleted,
     d.DistrictName,
     CASE
         WHEN UPPER(LTRIM(RTRIM(d.DistrictName))) LIKE 'PUROK %'
@@ -67,6 +68,7 @@ BEGIN
         EmailAddress,
         Status
     FROM dbo.vw_ConcessionerOrdered
+    WHERE IsDeleted = 0
     ORDER BY SortDistrictOrder, AccountOrder, ConcessionerID;
 END
 GO
@@ -90,6 +92,7 @@ BEGIN
         Status
     FROM dbo.vw_ConcessionerOrdered
     WHERE Status = 'Active'
+            AND IsDeleted = 0
     ORDER BY SortDistrictOrder, AccountOrder, ConcessionerID;
 END
 GO
@@ -114,6 +117,7 @@ BEGIN
         Status
     FROM dbo.vw_ConcessionerOrdered
     WHERE Status = @Status
+            AND IsDeleted = 0
     ORDER BY SortDistrictOrder, AccountOrder, ConcessionerID;
 END
 GO
@@ -138,6 +142,7 @@ BEGIN
         Status
     FROM dbo.vw_ConcessionerOrdered
     WHERE DistrictID = @DistrictID
+            AND IsDeleted = 0
     ORDER BY AccountOrder, ConcessionerID;
 END
 GO
@@ -162,6 +167,7 @@ BEGIN
         Status
     FROM dbo.vw_ConcessionerOrdered
     WHERE UserID = @UserID
+            AND IsDeleted = 0
     ORDER BY SortDistrictOrder, AccountOrder, ConcessionerID;
 END
 GO
