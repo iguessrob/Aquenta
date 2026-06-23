@@ -27,7 +27,14 @@ namespace AquentaAPI.Controllers
             if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)) return Unauthorized("Administrative privileges required.");
 
             NormalizeOptionalFields(concessioner);
-            return Ok(concessionerServices.Add(concessioner));
+            try
+            {
+                return Ok(concessionerServices.Add(concessioner));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPut]

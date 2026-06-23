@@ -485,8 +485,9 @@
     const form = document.getElementById('concessionerForm');
     if (!form) return;
 
+    let lookups;
     try {
-      await hydrateConcessionerLookupSelects(false);
+      lookups = await hydrateConcessionerLookupSelects(false);
     } catch (error) {
       console.error('Failed to load rate class/membership options from API.', error);
     }
@@ -520,6 +521,17 @@
 
       if (!/^\d+$/.test(data.districtSequence) || Number(data.districtSequence) <= 0) {
         window.showNotification('Account Order is required and must be a positive whole number.', 'warning');
+        return;
+      }
+
+      const normalizedAccount = data.accountNumber.trim().toUpperCase();
+      const duplicate = (lookups?.concessioners || []).some((c) => {
+        const account = String(pickValue(c, ['accountNumber', 'AccountNumber'], '')).trim().toUpperCase();
+        const isDeleted = !!pickValue(c, ['isDeleted', 'IsDeleted'], false);
+        return account && account === normalizedAccount && !isDeleted;
+      });
+      if (duplicate) {
+        window.showNotification('Account number already exists. Please choose a different account number.', 'warning');
         return;
       }
 

@@ -816,6 +816,17 @@ BEGIN
 		RETURN;
 	END
 
+	IF EXISTS (
+		SELECT 1
+		FROM tbl_Concessioner
+		WHERE UPPER(LTRIM(RTRIM(AccountNumber))) = UPPER(LTRIM(RTRIM(@AccountNumber)))
+		  AND IsDeleted = 0
+	)
+	BEGIN
+		RAISERROR('Account number already exists.', 16, 1);
+		RETURN;
+	END
+
 	BEGIN TRANSACTION;
 	BEGIN TRY
 		UPDATE tbl_Concessioner
