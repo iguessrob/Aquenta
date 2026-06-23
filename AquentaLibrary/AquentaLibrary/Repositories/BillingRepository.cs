@@ -163,9 +163,13 @@ namespace AquentaLibrary.Repositories
                     SELECT TOP 1 b2.PeriodID
                     FROM tbl_Billing b2
                     INNER JOIN tbl_Period p ON b2.PeriodID = p.PeriodID
+                    INNER JOIN tbl_Concessioner c2 ON b2.ConcessionerID = c2.ConcessionerID
+                    WHERE c2.IsDeleted = 0
                     ORDER BY p.PeriodEnd DESC, b2.CreatedAt DESC
                 )
-                AND UPPER(LTRIM(RTRIM(ISNULL(u.FirstName, '')))) <> 'MOTHER METER';");
+                AND UPPER(LTRIM(RTRIM(ISNULL(u.FirstName, '')))) <> 'MOTHER METER'
+                AND c.IsDeleted = 0
+                AND u.IsDeleted = 0;");
 
             if (latestPeriodConsumption.HasValue)
             {
