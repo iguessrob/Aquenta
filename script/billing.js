@@ -810,7 +810,7 @@ function renderBillingRows(rows) {
       ? 'Present reading must be greater than or equal to Previous reading.'
       : '';
     const presentReadOnlyAttribute = item.hasSavedPresentReading ? 'readonly' : '';
-    const previousReadOnlyAttribute = item.hasSavedPreviousReading ? 'readonly' : '';
+    const previousReadOnlyAttribute = '';
     const savedRowClass = item.hasExistingBilling ? ' saved-row' : '';
     const actionsMarkup = item.hasExistingBilling
       ? `
