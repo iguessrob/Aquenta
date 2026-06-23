@@ -1262,7 +1262,7 @@ AS
 BEGIN
 	SELECT COUNT(ConcessionerID) AS TotalActiveConcessioners
 	FROM tbl_Concessioner 
-	WHERE Status = @Status AND AccountNumber NOT LIKE '%MOTHER%';
+	WHERE Status = @Status AND IsDeleted = 0 AND AccountNumber NOT LIKE '%MOTHER%';
 END
 GO
 
@@ -1301,7 +1301,8 @@ CREATE OR ALTER PROCEDURE SP_GetTotalConcessioners
 AS
 BEGIN
 	SELECT COUNT(ConcessionerID) AS TotalConcessioners
-	FROM tbl_Concessioner;
+	FROM tbl_Concessioner
+	WHERE IsDeleted = 0;
 END
 GO
 
@@ -1375,7 +1376,7 @@ BEGIN
 	FROM tbl_Billing b
 	INNER JOIN tbl_Concessioner c ON b.ConcessionerID = c.ConcessionerID
 	INNER JOIN tbl_District d ON c.DistrictID = d.DistrictID
-	WHERE b.CreatedAt >= (
+	WHERE c.IsDeleted = 0 AND b.CreatedAt >= (
 		SELECT DATEADD(MONTH, DATEDIFF(MONTH, 0, MAX(b2.CreatedAt)), 0)
 		FROM tbl_Billing b2
 	)
@@ -1437,7 +1438,7 @@ BEGIN
 	INNER JOIN tbl_District d ON c.DistrictID = d.DistrictID
 	INNER JOIN tbl_Membership m ON c.MembershipID = m.MembershipID
 	LEFT JOIN tbl_Billing b ON c.ConcessionerID = b.ConcessionerID
-	WHERE c.Status = 'Active'
+	WHERE c.Status = 'Active' AND c.IsDeleted = 0
 	GROUP BY u.FirstName, u.LastName, c.AccountNumber, d.DistrictName, m.MembershipName, c.ConcessionerID
 	ORDER BY TotalWaterUsed DESC;
 END
@@ -1478,7 +1479,7 @@ BEGIN
 		INNER JOIN tbl_District d ON c.DistrictID = d.DistrictID
 		INNER JOIN tbl_Period p ON b.PeriodID = p.PeriodID
 		LEFT JOIN PaymentTotals pt ON pt.BillingID = b.BillingID
-		WHERE b.BillStatus IN ('Unpaid', 'Overdue')
+		WHERE c.IsDeleted = 0 AND b.BillStatus IN ('Unpaid', 'Overdue')
 	)
 	SELECT
 		ConcessionerID,
@@ -1521,7 +1522,7 @@ BEGIN
 	INNER JOIN tbl_User u ON c.UserID = u.UserID
 	INNER JOIN tbl_District d ON c.DistrictID = d.DistrictID
 	INNER JOIN tbl_Billing b ON c.ConcessionerID = b.ConcessionerID
-	WHERE c.Status = 'Delinquent' AND b.BillStatus IN ('Unpaid', 'Overdue')
+	WHERE c.Status = 'Delinquent' AND c.IsDeleted = 0 AND b.BillStatus IN ('Unpaid', 'Overdue')
 	GROUP BY u.FirstName, u.LastName, c.AccountNumber, c.Address, c.ContactNumber, c.Status, d.DistrictName
 	ORDER BY TotalDebt DESC;
 END
