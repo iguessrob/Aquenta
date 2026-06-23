@@ -351,9 +351,10 @@ function updateSaveButtonCount() {
 async function persistRowReading(row, readingValue) {
   const api = getApi();
   const currentReading = toNumber(readingValue, 0);
+  const prevForCalc = row.previous === '' ? 0 : row.previous;
   const billAmount = row.isMotherMeter
     ? 0
-    : getTariffAmount(row.categoryId, Math.max(0, currentReading - row.previous));
+    : getTariffAmount(row.categoryId, Math.max(0, currentReading - prevForCalc));
   const penalty = row.isMotherMeter ? 0 : row.penalty;
 
   const payload = {
@@ -361,7 +362,7 @@ async function persistRowReading(row, readingValue) {
     concessionerID: row.concessionerId,
     userId: row.userId,
     periodId: row.periodId,
-    prevReading: row.previous,
+    prevReading: row.previous === '' ? null : row.previous,
     currentReading,
     billAmount,
     penalty,
@@ -716,23 +717,31 @@ function buildNormalizedRows() {
         return (periodOrder.get(pb) || 0) - (periodOrder.get(pa) || 0);
       })[0] || null;
 
-    const previous = selectedBilling
-      ? toNumber(pick(selectedBilling, ['prevReading', 'PrevReading'], 0), 0)
-      : previousBilling
-        ? toNumber(pick(previousBilling, ['currentReading', 'CurrentReading'], 0), 0)
-        : 0;
+    // Previous reading: prefer explicit saved prevReading on selected billing.
+    // If none, prefer the latest previous billing's currentReading when present.
+    // If there is no actual previous value, leave as empty string so the UI shows blank.
+    let previous = '';
+    if (selectedBilling) {
+      const prevVal = pick(selectedBilling, ['prevReading', 'PrevReading'], null);
+      previous = prevVal === null || prevVal === undefined ? '' : toNumber(prevVal, 0);
+    } else if (previousBilling) {
+      const prevCurr = pick(previousBilling, ['currentReading', 'CurrentReading'], null);
+      previous = prevCurr === null || prevCurr === undefined ? '' : toNumber(prevCurr, 0);
+    }
 
     const present = selectedBilling
       ? toNumber(pick(selectedBilling, ['currentReading', 'CurrentReading'], 0), 0)
       : 0;
 
     const hasReading = present > 0;
+    // Use numeric zero for calculations when previous is blank (display-only blank).
+    const previousForCalc = previous === '' ? 0 : previous;
     const catId = toNumber(pick(concessioner, ['categoryId', 'CategoryId'], 0), 0);
     const amount = isMotherMeter
       ? 0
       : ((selectedBilling && selectedBilling.billStatus === 'Paid')
         ? toNumber(pick(selectedBilling, ['billAmount', 'BillAmount'], 0), 0)
-        : (hasReading ? getTariffAmount(catId, Math.max(0, present - previous)) : 0));
+        : (hasReading ? getTariffAmount(catId, Math.max(0, present - previousForCalc)) : 0));
 
     return {
       rowKey: concessionerId,
@@ -751,7 +760,7 @@ function buildNormalizedRows() {
       hasSavedPresentReading: !!selectedBilling,
       draftPresent: '',
       isEditing: false,
-      consumption: hasReading ? Math.max(0, present - previous) : 0,
+      consumption: hasReading ? Math.max(0, present - previousForCalc) : 0,
       amount,
       isMotherMeter,
       hasExistingBilling: !!selectedBilling,
@@ -793,7 +802,8 @@ function renderBillingRows(rows) {
     const displayValue = getRowDisplayValue(item);
     const initialValidation = validatePresentReading(item, displayValue);
     const hasReading = initialValidation.hasValue && initialValidation.isValid;
-    const previewConsumption = hasReading ? Math.max(0, toNumber(displayValue, 0) - item.previous) : 0;
+    const prevForPreview = item.previous === '' ? 0 : item.previous;
+    const previewConsumption = hasReading ? Math.max(0, toNumber(displayValue, 0) - prevForPreview) : 0;
     const previewAmount = item.isMotherMeter
       ? 0
       : ((item.hasExistingBilling && !item.isEditing && item.billStatus === 'Paid')
@@ -856,8 +866,8 @@ function renderBillingRows(rows) {
             class="reading-input previous-input${item.isEditing ? ' is-editing' : ''}"
             data-role="previous-reading"
             data-row-key="${item.rowKey}"
-            data-initial-value="${item.previous || ''}"
-            value="${item.previous || ''}"
+            data-initial-value="${item.previous === '' ? '' : item.previous}"
+            value="${item.previous === '' ? '' : item.previous}"
             min="0"
             ${previousReadOnlyAttribute}
             inputmode="numeric"
@@ -982,7 +992,8 @@ function setupTableRowActions() {
 
       const present = validation.reading;
       const canCompute = validation.hasValue && validation.isValid;
-      const consumption = canCompute ? Math.max(0, present - rowData.previous) : 0;
+      const prevForCalc = rowData.previous === '' ? 0 : rowData.previous;
+      const consumption = canCompute ? Math.max(0, present - prevForCalc) : 0;
       const computedAmount = rowData.isMotherMeter ? 0 : (canCompute ? getTariffAmount(rowData.categoryId, consumption) : 0);
 
       const row = presentInput.closest('tr');
@@ -1063,13 +1074,14 @@ function setupTableRowActions() {
 
       // Update previous in memory
       const newPrevRaw = String(prevInput.value || '').trim();
-      let newPrev = newPrevRaw === '' ? 0 : toNumber(newPrevRaw, 0);
+      // preserve blank as '' to indicate no previous reading
+      let newPrev = newPrevRaw === '' ? '' : toNumber(newPrevRaw, 0);
 
       // Enforce previous <= present (if present exists)
       const presentInputEl = prevInput.closest('tr')?.querySelector('.reading-input[data-role="current-reading"]');
       const presentVal = presentInputEl ? toNumber(String(presentInputEl.value || '').trim(), 0) : 0;
       if (presentInputEl && String(presentInputEl.value || '').trim() !== '') {
-        if (newPrev > presentVal) {
+        if (newPrev !== '' && newPrev > presentVal) {
           // clamp to present
           newPrev = presentVal;
           prevInput.value = String(presentVal);
@@ -1085,7 +1097,8 @@ function setupTableRowActions() {
       if (presentInputEl) setReadingValidationState(presentInputEl, validation);
 
       const canCompute = validation.hasValue && validation.isValid;
-      const consumption = canCompute ? Math.max(0, validation.reading - rowData.previous) : 0;
+      const prevForCalc2 = rowData.previous === '' ? 0 : rowData.previous;
+      const consumption = canCompute ? Math.max(0, validation.reading - prevForCalc2) : 0;
       const computedAmount = rowData.isMotherMeter ? 0 : (canCompute ? getTariffAmount(rowData.categoryId, consumption) : 0);
 
       const row = prevInput.closest('tr');
@@ -1133,7 +1146,8 @@ function setupTableRowActions() {
     if (!rowData) return;
 
     const newPrevRaw = String(prevInput.value || '').trim();
-    const newPrev = newPrevRaw === '' ? 0 : toNumber(newPrevRaw, 0);
+    // preserve blank as '' to represent no previous reading
+    const newPrev = newPrevRaw === '' ? '' : toNumber(newPrevRaw, 0);
     rowData.previous = newPrev;
 
     const presentStr = String(rowData.draftPresent ?? (rowData.present > 0 ? rowData.present : '')).trim();
