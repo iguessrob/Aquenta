@@ -26,7 +26,9 @@ BEGIN
         ORDER BY pe.PeriodEnd DESC
     )
     AND UPPER(LTRIM(RTRIM(ISNULL(u.FirstName, '')))) NOT LIKE '%MOTHER METER%'
-    AND UPPER(LTRIM(RTRIM(ISNULL(c.AccountNumber, '')))) NOT LIKE 'ACC-MOTHER%';
+    AND UPPER(LTRIM(RTRIM(ISNULL(c.AccountNumber, '')))) NOT LIKE 'ACC-MOTHER%'
+    AND c.IsDeleted = 0
+    AND u.IsDeleted = 0;
 END
 GO
 
@@ -41,12 +43,14 @@ BEGIN
     SELECT
         ISNULL(SUM(b.BillAmount + ISNULL(b.Penalty, 0)), 0) AS TotalMonthlyAccountReceivable
     FROM tbl_Billing b
+    INNER JOIN tbl_Concessioner c ON b.ConcessionerID = c.ConcessionerID
     WHERE b.PeriodID = (
         SELECT TOP 1 b2.PeriodID
         FROM tbl_Billing b2
         INNER JOIN tbl_Period p2 ON b2.PeriodID = p2.PeriodID
         ORDER BY p2.PeriodEnd DESC
-    );
+    )
+    AND c.IsDeleted = 0;
 END
 GO
 
@@ -62,12 +66,14 @@ BEGIN
         ISNULL(SUM(p.AmountPaid), 0) AS TotalMonthlyCollection
     FROM tbl_Payment p
     INNER JOIN tbl_Billing b ON p.BillingID = b.BillingID
+    INNER JOIN tbl_Concessioner c ON b.ConcessionerID = c.ConcessionerID
     WHERE b.PeriodID = (
         SELECT TOP 1 b2.PeriodID
         FROM tbl_Billing b2
         INNER JOIN tbl_Period p2 ON b2.PeriodID = p2.PeriodID
         ORDER BY p2.PeriodEnd DESC
-    );
+    )
+    AND c.IsDeleted = 0;
 END
 GO
 
@@ -83,11 +89,13 @@ BEGIN
         ISNULL(SUM(b.BillAmount + ISNULL(b.Penalty, 0)), 0) AS TotalAnnualAccountReceivable
     FROM tbl_Billing b
     INNER JOIN tbl_Period p ON b.PeriodID = p.PeriodID
+    INNER JOIN tbl_Concessioner c ON b.ConcessionerID = c.ConcessionerID
     WHERE YEAR(p.PeriodEnd) = (
         SELECT TOP 1 YEAR(p2.PeriodEnd)
         FROM tbl_Billing b2
         INNER JOIN tbl_Period p2 ON b2.PeriodID = p2.PeriodID
         ORDER BY p2.PeriodEnd DESC
-    );
+    )
+    AND c.IsDeleted = 0;
 END
 GO

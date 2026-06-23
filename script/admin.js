@@ -186,6 +186,17 @@ function computeLatestConcessionerCardMetrics(billingList, paymentList, periodLi
     };
   }
 
+  // Build set of deleted concessioner IDs
+  const deletedConcessionerIds = new Set(
+    (concessionerList || [])
+      .filter((c) => {
+        const isDeleted = c.isDeleted ?? c.IsDeleted ?? false;
+        return isDeleted === true || isDeleted === 1;
+      })
+      .map((c) => toNumber(c.concessionerId ?? c.ConcessionerID ?? c.ConcessionerId))
+      .filter((id) => id > 0)
+  );
+
   const motherConcessionerIds = new Set(
     (concessionerList || [])
       .filter((c) => isMotherMeterConcessioner(c))
@@ -195,7 +206,10 @@ function computeLatestConcessionerCardMetrics(billingList, paymentList, periodLi
 
   const allLatestBills = (billingList || []).filter((bill) => {
     const periodId = toNumber(bill.periodId ?? bill.PeriodID ?? bill.PeriodId);
-    return periodId === latestPeriodId;
+    if (periodId !== latestPeriodId) return false;
+    // Exclude billing records for deleted concessioners
+    const cid = toNumber(bill.concessionerId ?? bill.ConcessionerID ?? bill.ConcessionerId);
+    return !deletedConcessionerIds.has(cid);
   });
 
   const latestBillIdSet = new Set(
@@ -253,13 +267,30 @@ function computeLatestConcessionerCardMetrics(billingList, paymentList, periodLi
   };
 }
 
-function buildFallbackDashboardMetrics(billings, payments, periods, selectedYear) {
+function buildFallbackDashboardMetrics(billings, payments, periods, selectedYear, concessionerList) {
   const billingList = Array.isArray(billings) ? billings : [];
   const paymentList = Array.isArray(payments) ? payments : [];
   const periodList = Array.isArray(periods) ? periods : [];
   const periodById = new Map(
     periodList.map((period) => [toNumber(period.periodId ?? period.PeriodID ?? period.PeriodId), period])
   );
+
+  // Build set of deleted concessioner IDs to exclude their billing records
+  const deletedConcessionerIds = new Set(
+    (Array.isArray(concessionerList) ? concessionerList : [])
+      .filter((c) => {
+        const isDeleted = c.isDeleted ?? c.IsDeleted ?? false;
+        return isDeleted === true || isDeleted === 1;
+      })
+      .map((c) => toNumber(c.concessionerId ?? c.ConcessionerID ?? c.ConcessionerId))
+      .filter((id) => id > 0)
+  );
+
+  // Filter out billing records belonging to deleted concessioners
+  const activeBillingList = billingList.filter((bill) => {
+    const cid = toNumber(bill.concessionerId ?? bill.ConcessionerID ?? bill.ConcessionerId);
+    return !deletedConcessionerIds.has(cid);
+  });
 
   const monthlyDataForSelectedYear = MONTH_NAMES.map((monthName) => ({
     month: monthName,
@@ -271,7 +302,7 @@ function buildFallbackDashboardMetrics(billings, payments, periods, selectedYear
   const billingIdToBucket = new Map();
   const bucketByYearMonth = new Map();
 
-  if (billingList.length === 0) {
+  if (activeBillingList.length === 0) {
     return {
       latestMonthIndex: new Date().getMonth(),
       totalMonthlyAccountReceivable: 0,
@@ -284,7 +315,7 @@ function buildFallbackDashboardMetrics(billings, payments, periods, selectedYear
   }
 
   let latestDate = null;
-  billingList.forEach((item) => {
+  activeBillingList.forEach((item) => {
     const parsedDate = resolveBillingDate(item, periodById);
     if (!parsedDate) return;
     if (!latestDate || parsedDate > latestDate) {
@@ -296,7 +327,7 @@ function buildFallbackDashboardMetrics(billings, payments, periods, selectedYear
     latestDate = new Date();
   }
 
-  billingList.forEach((item) => {
+  activeBillingList.forEach((item) => {
     const billDate = resolveBillingDate(item, periodById);
     if (!billDate) return;
 
@@ -454,7 +485,7 @@ async function loadDashboardData() {
     }
   }
 
-  const fallbackMetrics = buildFallbackDashboardMetrics(billings, payments, periods, currentYear);
+  const fallbackMetrics = buildFallbackDashboardMetrics(billings, payments, periods, currentYear, concessioners);
   const cardMetrics = computeLatestConcessionerCardMetrics(
     billingList,
     Array.isArray(payments) ? payments : [],

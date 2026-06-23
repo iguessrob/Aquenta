@@ -1277,7 +1277,9 @@ BEGIN
 	INNER JOIN tbl_Concessioner c ON c.ConcessionerID = b.ConcessionerID
 	INNER JOIN tbl_User u ON u.UserID = c.UserID
 	WHERE b.CreatedAt >= @StartDate AND b.CreatedAt < @EndDate
-	  AND UPPER(LTRIM(RTRIM(ISNULL(u.FirstName, '')))) <> 'MOTHER METER';
+	  AND UPPER(LTRIM(RTRIM(ISNULL(u.FirstName, '')))) <> 'MOTHER METER'
+	  AND c.IsDeleted = 0
+	  AND u.IsDeleted = 0;
 END
 GO
 
@@ -1292,7 +1294,9 @@ BEGIN
 	INNER JOIN tbl_Concessioner c ON c.ConcessionerID = b.ConcessionerID
 	INNER JOIN tbl_User u ON u.UserID = c.UserID
 	WHERE b.BillStatus <> 'Paid'
-	  AND UPPER(LTRIM(RTRIM(ISNULL(u.FirstName, '')))) <> 'MOTHER METER';
+	  AND UPPER(LTRIM(RTRIM(ISNULL(u.FirstName, '')))) <> 'MOTHER METER'
+	  AND c.IsDeleted = 0
+	  AND u.IsDeleted = 0;
 END
 GO
 
@@ -1339,10 +1343,11 @@ CREATE OR ALTER PROCEDURE SP_GetUnpaidBillsSummary
 AS
 BEGIN
 	SELECT 
-		COUNT(BillingID) AS UnpaidBillsCount,
-		SUM(BillAmount + Penalty) AS TotalUnpaidAmount
-	FROM tbl_Billing
-	WHERE BillStatus IN ('Unpaid', 'Overdue');
+		COUNT(b.BillingID) AS UnpaidBillsCount,
+		SUM(b.BillAmount + b.Penalty) AS TotalUnpaidAmount
+	FROM tbl_Billing b
+	INNER JOIN tbl_Concessioner c ON b.ConcessionerID = c.ConcessionerID
+	WHERE b.BillStatus IN ('Unpaid', 'Overdue') AND c.IsDeleted = 0;
 END
 GO
 
@@ -1351,10 +1356,11 @@ CREATE OR ALTER PROCEDURE SP_GetOverdueBillsSummary
 AS
 BEGIN
 	SELECT 
-		COUNT(BillingID) AS OverdueBillsCount,
-		SUM(BillAmount + Penalty) AS TotalOverdueAmount
-	FROM tbl_Billing
-	WHERE BillStatus = 'Overdue';
+		COUNT(b.BillingID) AS OverdueBillsCount,
+		SUM(b.BillAmount + b.Penalty) AS TotalOverdueAmount
+	FROM tbl_Billing b
+	INNER JOIN tbl_Concessioner c ON b.ConcessionerID = c.ConcessionerID
+	WHERE b.BillStatus = 'Overdue' AND c.IsDeleted = 0;
 END
 GO
 

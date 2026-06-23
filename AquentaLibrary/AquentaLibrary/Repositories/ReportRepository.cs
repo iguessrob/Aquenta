@@ -206,7 +206,7 @@ namespace AquentaLibrary.Repositories
                     SUM(CASE WHEN b.BillingID IS NOT NULL AND b.CurrentReading > 0 THEN 1 ELSE 0 END) AS CompletedReadings
                 FROM tbl_District d
                 LEFT JOIN tbl_Concessioner c
-                    ON c.DistrictID = d.DistrictID AND c.Status = 'Active'
+                    ON c.DistrictID = d.DistrictID AND c.Status = 'Active' AND c.IsDeleted = 0
                 LEFT JOIN tbl_Billing b
                     ON b.ConcessionerID = c.ConcessionerID
                     AND b.PeriodID = @PeriodID
@@ -440,6 +440,8 @@ namespace AquentaLibrary.Repositories
                     MONTH(COALESCE(p.PeriodEnd, p.PeriodStart)) AS LatestMonthIndex
                 FROM tbl_Billing b
                 INNER JOIN tbl_Period p ON b.PeriodID = p.PeriodID
+                INNER JOIN tbl_Concessioner c ON b.ConcessionerID = c.ConcessionerID
+                WHERE c.IsDeleted = 0
                 ORDER BY COALESCE(p.PeriodEnd, p.PeriodStart) DESC, b.CreatedAt DESC;");
         }
 
@@ -479,12 +481,16 @@ namespace AquentaLibrary.Repositories
                 var latestPeriodConsumption = dbConnection.QuerySingleOrDefault<int?>(@"
                     SELECT ISNULL(SUM(CAST((b.CurrentReading - b.PrevReading) AS INT)), 0)
                     FROM tbl_Billing b
+                    INNER JOIN tbl_Concessioner c ON b.ConcessionerID = c.ConcessionerID
                     WHERE b.PeriodID = (
                         SELECT TOP 1 b2.PeriodID
                         FROM tbl_Billing b2
                         INNER JOIN tbl_Period p ON b2.PeriodID = p.PeriodID
+                        INNER JOIN tbl_Concessioner c2 ON b2.ConcessionerID = c2.ConcessionerID
+                        WHERE c2.IsDeleted = 0
                         ORDER BY p.PeriodEnd DESC, b2.CreatedAt DESC
-                    );");
+                    )
+                    AND c.IsDeleted = 0;");
 
                 int waterConsumed;
                 if (latestPeriodConsumption.HasValue)

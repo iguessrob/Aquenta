@@ -29,6 +29,8 @@ INNER JOIN tbl_User u ON c.UserID = u.UserID
 LEFT JOIN tbl_Payment p ON b.BillingID = p.BillingID
 WHERE c.AccountNumber NOT LIKE '%MOTHER%'
   AND u.FirstName NOT LIKE '%MOTHER%'
+  AND c.IsDeleted = 0
+  AND u.IsDeleted = 0
 GROUP BY YEAR(b.CreatedAt), MONTH(b.CreatedAt)
 GO
 
@@ -46,6 +48,8 @@ LEFT JOIN tbl_Billing b ON c.ConcessionerID = b.ConcessionerID
 LEFT JOIN tbl_Payment p ON b.BillingID = p.BillingID
 WHERE c.AccountNumber NOT LIKE '%MOTHER%'
   AND u.FirstName NOT LIKE '%MOTHER%'
+  AND c.IsDeleted = 0
+  AND u.IsDeleted = 0
 GROUP BY c.ConcessionerID, c.AccountNumber, u.FirstName, u.LastName
 GO
 
@@ -54,11 +58,11 @@ CREATE OR ALTER VIEW dbo.vw_DistrictProgress AS
 SELECT 
     d.DistrictID,
     d.DistrictName,
-    COUNT(DISTINCT CASE WHEN c.Status = 'Active' THEN c.ConcessionerID END) AS ActiveCount,
+    COUNT(DISTINCT CASE WHEN c.Status = 'Active' AND c.IsDeleted = 0 THEN c.ConcessionerID END) AS ActiveCount,
     COUNT(DISTINCT b.BillingID) AS ReadingsCompleted
 FROM tbl_District d
-LEFT JOIN tbl_Concessioner c ON d.DistrictID = c.DistrictID
-LEFT JOIN tbl_User u ON c.UserID = u.UserID
+LEFT JOIN tbl_Concessioner c ON d.DistrictID = c.DistrictID AND c.IsDeleted = 0
+LEFT JOIN tbl_User u ON c.UserID = u.UserID AND u.IsDeleted = 0
 LEFT JOIN tbl_Billing b ON c.ConcessionerID = b.ConcessionerID
 WHERE (c.AccountNumber IS NULL OR (c.AccountNumber NOT LIKE '%MOTHER%' AND u.FirstName NOT LIKE '%MOTHER%'))
 GROUP BY d.DistrictID, d.DistrictName
@@ -67,12 +71,12 @@ GO
 -- VIEW 4: vw_DashboardStats
 CREATE OR ALTER VIEW dbo.vw_DashboardStats AS
 SELECT 
-    (SELECT COUNT(*) FROM tbl_Concessioner c INNER JOIN tbl_User u ON c.UserID = u.UserID WHERE c.Status = 'Active' AND c.AccountNumber NOT LIKE '%MOTHER%' AND u.FirstName NOT LIKE '%MOTHER%') AS TotalActiveMembers,
-    (SELECT SUM(b.BillAmount) FROM tbl_Billing b INNER JOIN tbl_Concessioner c ON b.ConcessionerID = c.ConcessionerID INNER JOIN tbl_User u ON c.UserID = u.UserID WHERE b.BillStatus <> 'Paid' AND c.AccountNumber NOT LIKE '%MOTHER%' AND u.FirstName NOT LIKE '%MOTHER%') AS TotalPendingCollections,
-    (SELECT SUM(b.CurrentReading - b.PrevReading) FROM tbl_Billing b INNER JOIN tbl_Concessioner c ON b.ConcessionerID = c.ConcessionerID INNER JOIN tbl_User u ON c.UserID = u.UserID WHERE MONTH(b.CreatedAt) = MONTH(GETDATE()) AND YEAR(b.CreatedAt) = YEAR(GETDATE()) AND c.AccountNumber NOT LIKE '%MOTHER%' AND u.FirstName NOT LIKE '%MOTHER%') AS CurrentMonthConsumption,
-    (SELECT COUNT(*) FROM tbl_Concessioner c INNER JOIN tbl_User u ON c.UserID = u.UserID WHERE c.AccountNumber NOT LIKE '%MOTHER%' AND u.FirstName NOT LIKE '%MOTHER%') AS TotalRegistered,
-    (SELECT ISNULL(SUM(b.BillAmount + ISNULL(b.Penalty, 0)), 0) FROM tbl_Billing b INNER JOIN tbl_Concessioner c ON b.ConcessionerID = c.ConcessionerID INNER JOIN tbl_User u ON c.UserID = u.UserID WHERE b.BillStatus = 'Overdue' AND c.AccountNumber NOT LIKE '%MOTHER%' AND u.FirstName NOT LIKE '%MOTHER%') AS TotalOverdueAmount,
-    (SELECT COUNT(DISTINCT b.ConcessionerID) FROM tbl_Billing b INNER JOIN tbl_Concessioner c ON b.ConcessionerID = c.ConcessionerID INNER JOIN tbl_User u ON c.UserID = u.UserID WHERE b.BillStatus = 'Overdue' AND c.AccountNumber NOT LIKE '%MOTHER%' AND u.FirstName NOT LIKE '%MOTHER%') AS OverdueConcessionerCount
+    (SELECT COUNT(*) FROM tbl_Concessioner c INNER JOIN tbl_User u ON c.UserID = u.UserID WHERE c.Status = 'Active' AND c.AccountNumber NOT LIKE '%MOTHER%' AND u.FirstName NOT LIKE '%MOTHER%' AND c.IsDeleted = 0 AND u.IsDeleted = 0) AS TotalActiveMembers,
+    (SELECT SUM(b.BillAmount) FROM tbl_Billing b INNER JOIN tbl_Concessioner c ON b.ConcessionerID = c.ConcessionerID INNER JOIN tbl_User u ON c.UserID = u.UserID WHERE b.BillStatus <> 'Paid' AND c.AccountNumber NOT LIKE '%MOTHER%' AND u.FirstName NOT LIKE '%MOTHER%' AND c.IsDeleted = 0 AND u.IsDeleted = 0) AS TotalPendingCollections,
+    (SELECT SUM(b.CurrentReading - b.PrevReading) FROM tbl_Billing b INNER JOIN tbl_Concessioner c ON b.ConcessionerID = c.ConcessionerID INNER JOIN tbl_User u ON c.UserID = u.UserID WHERE MONTH(b.CreatedAt) = MONTH(GETDATE()) AND YEAR(b.CreatedAt) = YEAR(GETDATE()) AND c.AccountNumber NOT LIKE '%MOTHER%' AND u.FirstName NOT LIKE '%MOTHER%' AND c.IsDeleted = 0 AND u.IsDeleted = 0) AS CurrentMonthConsumption,
+    (SELECT COUNT(*) FROM tbl_Concessioner c INNER JOIN tbl_User u ON c.UserID = u.UserID WHERE c.AccountNumber NOT LIKE '%MOTHER%' AND u.FirstName NOT LIKE '%MOTHER%' AND c.IsDeleted = 0 AND u.IsDeleted = 0) AS TotalRegistered,
+    (SELECT ISNULL(SUM(b.BillAmount + ISNULL(b.Penalty, 0)), 0) FROM tbl_Billing b INNER JOIN tbl_Concessioner c ON b.ConcessionerID = c.ConcessionerID INNER JOIN tbl_User u ON c.UserID = u.UserID WHERE b.BillStatus = 'Overdue' AND c.AccountNumber NOT LIKE '%MOTHER%' AND u.FirstName NOT LIKE '%MOTHER%' AND c.IsDeleted = 0 AND u.IsDeleted = 0) AS TotalOverdueAmount,
+    (SELECT COUNT(DISTINCT b.ConcessionerID) FROM tbl_Billing b INNER JOIN tbl_Concessioner c ON b.ConcessionerID = c.ConcessionerID INNER JOIN tbl_User u ON c.UserID = u.UserID WHERE b.BillStatus = 'Overdue' AND c.AccountNumber NOT LIKE '%MOTHER%' AND u.FirstName NOT LIKE '%MOTHER%' AND c.IsDeleted = 0 AND u.IsDeleted = 0) AS OverdueConcessionerCount
 FROM (SELECT 1 AS Dummy) AS d
 GO
 
@@ -94,6 +98,8 @@ LEFT JOIN tbl_District d ON c.DistrictID = d.DistrictID
 WHERE b.BillStatus IN ('Unpaid', 'Overdue', 'Partial')
   AND c.AccountNumber NOT LIKE '%MOTHER%'
   AND u.FirstName NOT LIKE '%MOTHER%'
+  AND c.IsDeleted = 0
+  AND u.IsDeleted = 0
 GROUP BY c.ConcessionerID, c.AccountNumber, u.FirstName, u.LastName, d.DistrictName
 GO
 
@@ -103,8 +109,8 @@ SELECT
     m.MembershipName,
     COUNT(c.ConcessionerID) AS TotalCustomers
 FROM tbl_Membership m
-LEFT JOIN tbl_Concessioner c ON m.MembershipID = c.MembershipID
-LEFT JOIN tbl_User u ON c.UserID = u.UserID
+LEFT JOIN tbl_Concessioner c ON m.MembershipID = c.MembershipID AND c.IsDeleted = 0
+LEFT JOIN tbl_User u ON c.UserID = u.UserID AND u.IsDeleted = 0
 WHERE (c.AccountNumber IS NULL OR (c.AccountNumber NOT LIKE '%MOTHER%' AND u.FirstName NOT LIKE '%MOTHER%'))
 GROUP BY m.MembershipName
 GO
@@ -135,6 +141,8 @@ LEFT JOIN tbl_Membership m ON c.MembershipID = m.MembershipID
 WHERE b.BillStatus IN ('Unpaid', 'Overdue', 'Partial')
   AND c.AccountNumber NOT LIKE '%MOTHER%'
   AND u.FirstName NOT LIKE '%MOTHER%'
+  AND c.IsDeleted = 0
+  AND u.IsDeleted = 0
 GROUP BY c.ConcessionerID, c.AccountNumber, u.FirstName, u.LastName, d.DistrictName, m.MembershipName
 GO
 
@@ -152,6 +160,8 @@ INNER JOIN tbl_Billing b ON c.ConcessionerID = b.ConcessionerID
 WHERE b.BillStatus IN ('Unpaid', 'Overdue', 'Partial')
   AND c.AccountNumber NOT LIKE '%MOTHER%'
   AND u.FirstName NOT LIKE '%MOTHER%'
+  AND c.IsDeleted = 0
+  AND u.IsDeleted = 0
 GROUP BY c.ConcessionerID, c.AccountNumber, u.FirstName, u.LastName
 HAVING COUNT(b.BillingID) >= 3
 GO
