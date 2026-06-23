@@ -158,7 +158,8 @@ namespace AquentaLibrary.Repositories
             var parameters = new DynamicParameters();
             parameters.Add("@ConcessionerID", id, DbType.Int32);
 
-            return dbConnection.Execute(
+            // SP_DeleteConcessioner returns a single integer column 'RowsAffected'
+            return dbConnection.QuerySingle<int>(
                 "SP_DeleteConcessioner",
                 parameters,
                 commandType: CommandType.StoredProcedure);

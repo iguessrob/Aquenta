@@ -994,13 +994,19 @@ BEGIN
 		SET IsDeleted = 1
 		WHERE ConcessionerID = @ConcessionerID;
 
+		-- Soft-delete the target row and capture whether a row was deleted
+		DECLARE @DeletedRows INT;
+		SET @DeletedRows = @@ROWCOUNT;
+
+		-- Shift down account orders for later active concessioners in the same district
 		UPDATE tbl_Concessioner
 		SET AccountOrder = AccountOrder - 1
 		WHERE DistrictID = @DistrictID
 		  AND IsDeleted = 0
 		  AND AccountOrder > @AccountOrder;
 
-		SELECT @@ROWCOUNT AS RowsAffected;
+		-- Return number of rows actually soft-deleted (should be 1 on success, 0 if not found)
+		SELECT @DeletedRows AS RowsAffected;
 		COMMIT TRANSACTION;
 	END TRY
 	BEGIN CATCH
