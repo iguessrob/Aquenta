@@ -971,16 +971,8 @@ function setupTableRowActions() {
       const rowData = filteredBilling.find((row) => row.rowKey === toNumber(rowKey, 0));
       if (rowData) {
         if (rowData.hasExistingBilling && rowData.billingId > 0) {
-          if (!confirm('Are you sure you want to delete this billing record? This will permanently remove it from the database.')) return;
-          try {
-            const api = getApi();
-            await api.delete(`/Billing?id=${rowData.billingId}`);
-            notifyBilling('Billing record deleted successfully.', 'success', 2200);
-            await loadBilling();
-          } catch (error) {
-            console.error(error);
-            notifyBilling(error.message || 'Failed to delete billing record.', 'error');
-          }
+          billingDeleteRowKey = rowData.rowKey;
+          toggleBillingDeleteModal(true);
           return;
         }
 
@@ -1321,6 +1313,60 @@ function setupBillingProgressModal() {
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && modal.classList.contains('show')) {
       toggleBillingProgressModal(false);
+    }
+  });
+}
+
+let billingDeleteRowKey = null;
+
+function toggleBillingDeleteModal(show) {
+  const modal = document.getElementById('billingDeleteModal');
+  if (!modal) return;
+  modal.classList.toggle('show', show);
+  modal.setAttribute('aria-hidden', show ? 'false' : 'true');
+  document.body.style.overflow = show ? 'hidden' : '';
+}
+
+function setupBillingDeleteModal() {
+  const modal = document.getElementById('billingDeleteModal');
+  if (!modal) return;
+
+  const closeEls = modal.querySelectorAll('[data-role="billing-delete-close"]');
+  closeEls.forEach((el) => {
+    el.addEventListener('click', () => {
+      toggleBillingDeleteModal(false);
+      billingDeleteRowKey = null;
+    });
+  });
+
+  const confirmBtn = document.getElementById('billingDeleteConfirmBtn');
+  if (confirmBtn) {
+    confirmBtn.addEventListener('click', async () => {
+      if (!billingDeleteRowKey) return;
+      const rowData = filteredBilling.find((row) => row.rowKey === billingDeleteRowKey);
+      if (!rowData) return;
+
+      confirmBtn.disabled = true;
+      try {
+        const api = getApi();
+        await api.delete(`/Billing?id=${rowData.billingId}`);
+        toggleBillingDeleteModal(false);
+        billingDeleteRowKey = null;
+        notifyBilling('Billing record deleted successfully.', 'success', 2200);
+        await loadBilling();
+      } catch (error) {
+        console.error(error);
+        notifyBilling(error.message || 'Failed to delete billing record.', 'error');
+      } finally {
+        confirmBtn.disabled = false;
+      }
+    });
+  }
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && modal.classList.contains('show')) {
+      toggleBillingDeleteModal(false);
+      billingDeleteRowKey = null;
     }
   });
 }
@@ -1872,6 +1918,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupPaginationActions();
   setupBillingProgressModal();
   setupBillingEditModal();
+  setupBillingDeleteModal();
   setupActionButtons();
   setupPrintButton();
 
