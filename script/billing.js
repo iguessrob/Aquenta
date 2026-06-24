@@ -956,7 +956,7 @@ function setupTableRowActions() {
   const content = document.querySelector('.billing-content');
   if (!content) return;
 
-  content.addEventListener('click', (event) => {
+  content.addEventListener('click', async (event) => {
     const editBtn = event.target.closest('[data-role="edit-reading"]');
     if (editBtn) {
       const rowKey = editBtn.getAttribute('data-row-key');
@@ -969,10 +969,26 @@ function setupTableRowActions() {
       const rowKey = clearBtn.getAttribute('data-row-key');
       const input = content.querySelector(`.reading-input[data-row-key="${rowKey}"]`);
       const rowData = filteredBilling.find((row) => row.rowKey === toNumber(rowKey, 0));
-      if (rowData && input) {
-        rowData.draftPresent = '';
-        input.value = '';
-        input.dispatchEvent(new Event('input', { bubbles: true }));
+      if (rowData) {
+        if (rowData.hasExistingBilling && rowData.billingId > 0) {
+          if (!confirm('Are you sure you want to delete this billing record? This will permanently remove it from the database.')) return;
+          try {
+            const api = getApi();
+            await api.delete(`/Billing?id=${rowData.billingId}`);
+            notifyBilling('Billing record deleted successfully.', 'success', 2200);
+            await loadBilling();
+          } catch (error) {
+            console.error(error);
+            notifyBilling(error.message || 'Failed to delete billing record.', 'error');
+          }
+          return;
+        }
+
+        if (input) {
+          rowData.draftPresent = '';
+          input.value = '';
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+        }
       }
     }
   });
