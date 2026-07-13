@@ -706,6 +706,8 @@
     if (districtValueEl) districtValueEl.textContent = customer.district || '';
     if (phoneEl) phoneEl.textContent = customer.contactNumber || '';
     if (emailEl) emailEl.textContent = customer.email || '';
+    const membershipValueEl = document.getElementById('customerMembershipValue');
+    if (membershipValueEl) membershipValueEl.textContent = customer.membership || '';
     if (editLink) editLink.href = `edit-concessioner.html?id=${encodeURIComponent(customer.concessionerId)}`;
 
     // Add Reset Password button logic

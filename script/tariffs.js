@@ -426,6 +426,12 @@ function setupAddRateModal() {
     btn.addEventListener('click', () => {
       const section = btn.closest('.tariff-section');
       currentTariffType = section?.querySelector('.section-title')?.textContent || '';
+      
+      const cubicInput = document.getElementById('cubicMeterInput');
+      const amountInput = document.getElementById('amountInput');
+      if (cubicInput) cubicInput.value = '0';
+      if (amountInput) amountInput.value = '0';
+
       openModal('addRateModal');
     });
   });

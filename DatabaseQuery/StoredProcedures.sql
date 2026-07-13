@@ -1565,6 +1565,7 @@ BEGIN
 	INNER JOIN tbl_Concessioner c ON b.ConcessionerID = c.ConcessionerID
 	INNER JOIN tbl_Category cat ON c.CategoryID = cat.CategoryID
 	INNER JOIN tbl_User u ON c.UserID = u.UserID
+	WHERE c.IsDeleted = 0 AND u.IsDeleted = 0
 	ORDER BY b.BillingID DESC;
 END
 GO
@@ -1814,6 +1815,8 @@ BEGIN
 		INNER JOIN tbl_User u ON u.UserID = c.UserID
 		INNER JOIN tbl_Period p ON p.PeriodID = b.PeriodID
 		WHERE YEAR(COALESCE(p.PeriodEnd, p.PeriodStart)) = @Year
+		  AND c.IsDeleted = 0
+		  AND u.IsDeleted = 0
 		GROUP BY MONTH(COALESCE(p.PeriodEnd, p.PeriodStart))
 	)
 	SELECT
