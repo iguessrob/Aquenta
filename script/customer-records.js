@@ -116,6 +116,25 @@
     populateSelectOptions(districtSelect, districtValues);
     populateSelectOptions(rateSelect, rateValues);
     populateSelectOptions(membershipSelect, membershipValues);
+    return lookups;
+  }
+
+  function parseNumericAccountNumber(accountNumber) {
+    if (!accountNumber) return NaN;
+    const numeric = String(accountNumber).replace(/\D+/g, '');
+    return numeric ? Number(numeric) : NaN;
+  }
+
+  async function getNextAccountNumberForDistrict(district) {
+    if (!district) return '';
+    const customers = await getCustomers();
+    const target = String(district).trim().toLowerCase();
+    const highest = customers
+      .filter((customer) => String(customer.district || '').trim().toLowerCase() === target)
+      .map((customer) => parseNumericAccountNumber(String(customer.accountNumber || '')))
+      .filter((num) => Number.isInteger(num) && num > 0)
+      .reduce((max, num) => Math.max(max, num), 0);
+    return String(highest + 1);
   }
 
   async function fetchLookups() {
@@ -492,6 +511,30 @@
       console.error('Failed to load rate class/membership options from API.', error);
     }
 
+    const districtSelect = document.getElementById('district');
+    const accountNumberInput = document.getElementById('accountNumber');
+    let lastSuggestedAccountNumber = '';
+
+    if (districtSelect) {
+      districtSelect.addEventListener('change', async () => {
+        const districtValue = String(districtSelect.value || '').trim();
+        if (!districtValue) {
+          return;
+        }
+
+        const nextNumber = await getNextAccountNumberForDistrict(districtValue);
+        const currentValue = String(accountNumberInput?.value || '').trim();
+        if (!accountNumberInput || !nextNumber) {
+          return;
+        }
+
+        if (!currentValue || currentValue === lastSuggestedAccountNumber) {
+          accountNumberInput.value = nextNumber;
+          lastSuggestedAccountNumber = nextNumber;
+        }
+      });
+    }
+
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
 
@@ -606,6 +649,29 @@
     setValue('editRateClassification', customer.rateClassification);
     setValue('editConnectionStatus', customer.connectionStatus);
     setValue('editMembership', customer.membership);
+
+    const editDistrictSelect = document.getElementById('editDistrict');
+    const editAccountNumberInput = document.getElementById('editAccountNumber');
+    const originalDistrict = String(customer.district || '').trim();
+    const originalAccountNumber = String(customer.accountNumber || '').trim();
+    let lastEditSuggestedAccountNumber = '';
+
+    if (editDistrictSelect) {
+      editDistrictSelect.addEventListener('change', async () => {
+        const districtValue = String(editDistrictSelect.value || '').trim();
+        if (!districtValue) {
+          return;
+        }
+
+        const nextNumber = await getNextAccountNumberForDistrict(districtValue);
+        const currentValue = String(editAccountNumberInput?.value || '').trim();
+        const shouldAutoFill = !currentValue || currentValue === originalAccountNumber || currentValue === lastEditSuggestedAccountNumber;
+        if (editAccountNumberInput && nextNumber && shouldAutoFill) {
+          editAccountNumberInput.value = nextNumber;
+          lastEditSuggestedAccountNumber = nextNumber;
+        }
+      });
+    }
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
