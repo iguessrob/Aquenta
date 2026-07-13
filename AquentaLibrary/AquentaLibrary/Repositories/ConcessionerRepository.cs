@@ -151,6 +151,14 @@ namespace AquentaLibrary.Repositories
         }
 
         /// <summary>
+        /// Update concessioner using SP_UpdateConcessioner
+        /// </summary>
+        public bool UpdateConcessioner(ConcessionerModel concessioner)
+        {
+            return UpdateConcessionerSP(concessioner) == 1;
+        }
+
+        /// <summary>
         /// Delete concessioner using SP_DeleteConcessioner
         /// </summary>
         public int DeleteConcessionerSP(int id)
