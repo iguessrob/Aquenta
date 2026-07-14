@@ -705,21 +705,17 @@ function buildNormalizedRows() {
       return periodId === selectedPeriodId;
     }) || null;
 
-    const previousBilling = billings
-      .filter((billing) => {
-        const periodId = toNumber(pick(billing, ['periodId', 'PeriodId', 'periodID', 'PeriodID'], 0), 0);
-        const order = periodOrder.get(periodId) || 0;
-        return order > 0 && order < selectedOrder;
-      })
-      .sort((a, b) => {
-        const pa = toNumber(pick(a, ['periodId', 'PeriodId', 'periodID', 'PeriodID'], 0), 0);
-        const pb = toNumber(pick(b, ['periodId', 'PeriodId', 'periodID', 'PeriodID'], 0), 0);
-        return (periodOrder.get(pb) || 0) - (periodOrder.get(pa) || 0);
-      })[0] || null;
+    const previousPeriodId = selectedOrder > 1
+      ? [...periodOrder.entries()].find(([, order]) => order === selectedOrder - 1)?.[0] || 0
+      : 0;
+
+    const previousBilling = previousPeriodId > 0
+      ? billings.find((billing) => toNumber(pick(billing, ['periodId', 'PeriodId', 'periodID', 'PeriodID'], 0), 0) === previousPeriodId)
+      : null;
 
     // Previous reading: prefer explicit saved prevReading on selected billing.
-    // If none, prefer the latest previous billing's currentReading when present.
-    // If there is no actual previous value, leave as empty string so the UI shows blank.
+    // If none, prefer the direct prior period's currentReading when present.
+    // If there is no actual previous value for the direct prior period, leave as empty string so the UI shows blank.
     let previous = '';
     if (selectedBilling) {
       const prevVal = pick(selectedBilling, ['prevReading', 'PrevReading'], null);
