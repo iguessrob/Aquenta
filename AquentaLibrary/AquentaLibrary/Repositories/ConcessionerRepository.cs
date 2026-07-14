@@ -228,10 +228,5 @@ namespace AquentaLibrary.Repositories
                 parameters,
                 commandType: CommandType.StoredProcedure);
         }
-
-        public bool UpdateConcessioner(ConcessionerModel concessioner)
-        {
-            return Update(concessioner);
-        }
     }
 }
