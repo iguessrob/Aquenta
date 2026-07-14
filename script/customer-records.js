@@ -749,6 +749,7 @@
     const rateClassPill = document.getElementById('customerRateClassPill');
     const statusValueEl = document.getElementById('customerStatusValue');
     const districtValueEl = document.getElementById('customerDistrictValue');
+    const meterNumberEl = document.getElementById('customerMeterNumber');
     const phoneEl = document.getElementById('customerPhone');
     const emailEl = document.getElementById('customerEmail');
     const editLink = document.getElementById('editCustomerLink');
@@ -795,6 +796,7 @@
     // Display the rate classification in the small labeled field (was previously labeled "Status")
     if (statusValueEl) statusValueEl.textContent = customer.rateClassification || '';
     if (districtValueEl) districtValueEl.textContent = customer.district || '';
+    if (meterNumberEl) meterNumberEl.textContent = customer.meterNumber || '';
     if (phoneEl) phoneEl.textContent = customer.contactNumber || '';
     if (emailEl) emailEl.textContent = customer.email || '';
     const membershipValueEl = document.getElementById('customerMembershipValue');
