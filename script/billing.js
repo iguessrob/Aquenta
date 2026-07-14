@@ -174,6 +174,9 @@ function openBillingEditModal(rowKey) {
   const rowData = filteredBilling.find((row) => row.rowKey === toNumber(rowKey, 0));
   if (!rowData) return;
 
+  rowData.isEditing = true;
+  renderBillingRows(filteredBilling);
+
   billingEditRowKey = rowData.rowKey;
   const { title, account, name, previous, present } = getBillingEditModalElements();
 
@@ -223,6 +226,7 @@ async function saveBillingEditModal() {
 
   try {
     await persistRowReading(rowData, updatedPresent);
+    rowData.isEditing = false;
     toggleBillingEditModal(false);
     billingEditRowKey = null;
     await loadBilling();
@@ -240,11 +244,24 @@ function getRowDisplayValue(row) {
   const draftValue = String(row?.draftPresent ?? '').trim();
   if (draftValue !== '') return draftValue;
 
-  if (toNumber(row?.present, 0) > 0) {
-    return String(row.present);
+  const presentValue = row?.present;
+  if (presentValue !== undefined && presentValue !== null && String(presentValue).trim() !== '') {
+    return String(presentValue);
   }
 
   return '';
+}
+
+function clearBillingRowEditState() {
+  if (!billingEditRowKey) return;
+
+  const rowData = filteredBilling.find((row) => row.rowKey === billingEditRowKey);
+  if (rowData) {
+    rowData.isEditing = false;
+    renderBillingRows(filteredBilling);
+  }
+
+  billingEditRowKey = null;
 }
 
 function normalizeReadingValue(value) {
@@ -1374,7 +1391,7 @@ function setupBillingEditModal() {
   modal.addEventListener('click', (event) => {
     if (event.target.closest('[data-role="billing-edit-close"]')) {
       toggleBillingEditModal(false);
-      billingEditRowKey = null;
+      clearBillingRowEditState();
       setBillingEditMessage('', '');
     }
   });
@@ -1384,7 +1401,7 @@ function setupBillingEditModal() {
   closeEls.forEach((el) => {
     el.addEventListener('click', () => {
       toggleBillingEditModal(false);
-      billingEditRowKey = null;
+      clearBillingRowEditState();
       setBillingEditMessage('', '');
       const { previous, present } = getBillingEditModalElements();
       if (previous) previous.value = '';
@@ -1412,7 +1429,7 @@ function setupBillingEditModal() {
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && modal.classList.contains('show')) {
       toggleBillingEditModal(false);
-      billingEditRowKey = null;
+      clearBillingRowEditState();
       setBillingEditMessage('', '');
     }
   });

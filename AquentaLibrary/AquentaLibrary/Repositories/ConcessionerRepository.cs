@@ -144,7 +144,7 @@ namespace AquentaLibrary.Repositories
             parameters.Add("@EmailAddress", concessioner.EmailAddress, DbType.String);
             parameters.Add("@Status", concessioner.Status, DbType.String);
 
-            return dbConnection.Execute(
+            return dbConnection.QuerySingle<int>(
                 "SP_UpdateConcessioner",
                 parameters,
                 commandType: CommandType.StoredProcedure);

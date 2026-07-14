@@ -783,6 +783,11 @@
       return;
     }
 
+    const renderValueOrDash = (value) => {
+      const trimmed = String(value || '').trim();
+      return trimmed || '-';
+    };
+
     nameEl.textContent = customer.fullName || `${customer.firstName || ''} ${customer.lastName || ''}`.trim();
     if (accountEl) accountEl.textContent = customer.accountNumber || '';
     if (addressEl) addressEl.textContent = customer.address || '';
@@ -796,8 +801,8 @@
     // Display the rate classification in the small labeled field (was previously labeled "Status")
     if (statusValueEl) statusValueEl.textContent = customer.rateClassification || '';
     if (districtValueEl) districtValueEl.textContent = customer.district || '';
-    if (meterNumberEl) meterNumberEl.textContent = customer.meterNumber || '';
-    if (phoneEl) phoneEl.textContent = customer.contactNumber || '';
+    if (meterNumberEl) meterNumberEl.textContent = renderValueOrDash(customer.meterNumber);
+    if (phoneEl) phoneEl.textContent = renderValueOrDash(customer.contactNumber);
     if (emailEl) emailEl.textContent = customer.email || '';
     const membershipValueEl = document.getElementById('customerMembershipValue');
     if (membershipValueEl) membershipValueEl.textContent = customer.membership || '';

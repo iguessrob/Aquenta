@@ -879,6 +879,7 @@ BEGIN
 	BEGIN TRY
 		DECLARE @CurrentDistrictID INT;
 		DECLARE @CurrentAccountOrder INT;
+		DECLARE @RowsAffected INT = 0;
 
 		SELECT
 			@CurrentDistrictID = DistrictID,
@@ -909,6 +910,8 @@ BEGIN
 				EmailAddress = @EmailAddress,
 				Status = @Status
 			WHERE ConcessionerID = @ConcessionerID;
+
+			SET @RowsAffected = @@ROWCOUNT;
 		END
 		ELSE
 		BEGIN
@@ -961,9 +964,38 @@ BEGIN
 				EmailAddress = @EmailAddress,
 				Status = @Status
 			WHERE ConcessionerID = @ConcessionerID;
+
+			SET @RowsAffected = @@ROWCOUNT;
 		END
 
-		SELECT @@ROWCOUNT AS RowsAffected;
+		;WITH OrderedOldDistrict AS (
+			SELECT ConcessionerID,
+				ROW_NUMBER() OVER (ORDER BY AccountOrder, ConcessionerID) AS NewAccountOrder
+			FROM tbl_Concessioner
+			WHERE DistrictID = @CurrentDistrictID
+			  AND IsDeleted = 0
+		)
+		UPDATE c
+		SET AccountOrder = o.NewAccountOrder
+		FROM tbl_Concessioner c
+		JOIN OrderedOldDistrict o ON c.ConcessionerID = o.ConcessionerID;
+
+		IF @CurrentDistrictID <> @DistrictID
+		BEGIN
+			;WITH OrderedNewDistrict AS (
+				SELECT ConcessionerID,
+					ROW_NUMBER() OVER (ORDER BY AccountOrder, ConcessionerID) AS NewAccountOrder
+				FROM tbl_Concessioner
+				WHERE DistrictID = @DistrictID
+				  AND IsDeleted = 0
+			)
+			UPDATE c
+			SET AccountOrder = o.NewAccountOrder
+			FROM tbl_Concessioner c
+			JOIN OrderedNewDistrict o ON c.ConcessionerID = o.ConcessionerID;
+		END
+
+		SELECT @RowsAffected AS RowsAffected;
 		COMMIT TRANSACTION;
 	END TRY
 	BEGIN CATCH
