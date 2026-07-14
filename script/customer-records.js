@@ -127,14 +127,35 @@
 
   async function getNextAccountNumberForDistrict(district) {
     if (!district) return '';
+    // Determine district id (purok) when possible, falling back to 0
+    let purokId = 0;
+    try {
+      const lookups = await fetchLookups();
+      const foundId = findLookupIdByName(lookups.districts || [], ['districtId', 'DistrictId', 'districtID', 'DistrictID'], ['districtName', 'DistrictName'], district);
+      purokId = Number(foundId) || 0;
+    } catch (err) {
+      // ignore and use 0
+      purokId = 0;
+    }
+
     const customers = await getCustomers();
     const target = String(district).trim().toLowerCase();
+
+    // Prefer explicit district sequence (accountOrder) when available; otherwise fall back to numeric parse of accountNumber
     const highest = customers
       .filter((customer) => String(customer.district || '').trim().toLowerCase() === target)
-      .map((customer) => parseNumericAccountNumber(String(customer.accountNumber || '')))
-      .filter((num) => Number.isInteger(num) && num > 0)
+      .map((customer) => {
+        const seq = Number(String(pickValue(customer, ['districtSequence', 'districtSequence', 'districtSequence'], '') || '').trim());
+        if (Number.isInteger(seq) && seq > 0) return seq;
+        const parsed = parseNumericAccountNumber(String(customer.accountNumber || ''));
+        return Number.isInteger(parsed) && parsed > 0 ? parsed : 0;
+      })
       .reduce((max, num) => Math.max(max, num), 0);
-    return String(highest + 1);
+
+    const nextOrder = Number(highest) + 1;
+    const purokTwo = String(purokId).padStart(2, '0');
+    const orderFour = String(nextOrder).padStart(4, '0');
+    return `${purokTwo}-${orderFour}`;
   }
 
   async function fetchLookups() {
@@ -568,10 +589,14 @@
       }
 
       const normalizedAccount = data.accountNumber.trim().toUpperCase();
+      const numericNormalizedAccount = normalizedAccount.replace(/\D+/g, '');
       const duplicate = (lookups?.concessioners || []).some((c) => {
-        const account = String(pickValue(c, ['accountNumber', 'AccountNumber'], '')).trim().toUpperCase();
+        const accountRaw = String(pickValue(c, ['accountNumber', 'AccountNumber'], '')).trim();
+        const account = accountRaw.toUpperCase();
+        const numericExisting = account.replace(/\D+/g, '');
         const isDeleted = !!pickValue(c, ['isDeleted', 'IsDeleted'], false);
-        return account && account === normalizedAccount && !isDeleted;
+        if (!account || isDeleted) return false;
+        return account === normalizedAccount || (numericExisting && numericNormalizedAccount && numericExisting === numericNormalizedAccount);
       });
       if (duplicate) {
         window.showNotification('Account number already exists. Please choose a different account number.', 'warning');
