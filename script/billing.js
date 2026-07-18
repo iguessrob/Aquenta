@@ -939,9 +939,11 @@ function renderBillingRows(rows) {
 function applyBillingFilters(resetPage = true) {
   const searchInput = document.querySelector('.search-input');
   const districtSelect = document.querySelector('.filter-select');
+  const statusSelect = document.getElementById('billingStatusFilter');
 
   const search = String(searchInput?.value || '').trim().toLowerCase();
   const district = String(districtSelect?.value || 'all').trim().toLowerCase();
+  const statusFilter = String(statusSelect?.value || 'all').trim().toLowerCase();
 
   const districtNameById = new Map(
     districtCache.map((item) => [
@@ -957,11 +959,13 @@ function applyBillingFilters(resetPage = true) {
     const concessioner = String(item.concessionerName || '').toLowerCase();
     const itemDistrictId = toNumber(item.districtId, 0);
     const itemDistrictName = String(districtNameById.get(itemDistrictId) || '').trim().toLowerCase();
+    const itemStatus = String(item.billStatus || 'unpaid').trim().toLowerCase();
 
     const matchesSearch = !search || account.includes(search) || concessioner.includes(search);
     const matchesDistrict = district === 'all' || district === itemDistrictName;
+    const matchesStatus = statusFilter === 'all' || itemStatus === statusFilter;
 
-    return matchesSearch && matchesDistrict;
+    return matchesSearch && matchesDistrict && matchesStatus;
   });
 
   if (resetPage) {
@@ -974,10 +978,12 @@ function applyBillingFilters(resetPage = true) {
 function setupFilterListeners() {
   const searchInput = document.querySelector('.search-input');
   const districtSelect = document.querySelector('.filter-select');
+  const statusSelect = document.getElementById('billingStatusFilter');
   const periodSelect = document.querySelector('.date-input');
 
   if (searchInput) searchInput.addEventListener('input', applyBillingFilters);
   if (districtSelect) districtSelect.addEventListener('change', applyBillingFilters);
+  if (statusSelect) statusSelect.addEventListener('change', applyBillingFilters);
   if (periodSelect) periodSelect.addEventListener('change', applyBillingFilters);
 }
 
