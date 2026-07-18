@@ -515,6 +515,21 @@ function formatPeso(value) {
   return `PHP ${toNumber(value).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
+function normalizeConnectionStatus(value, fallback = 'active') {
+  const status = String(value ?? '').trim().toLowerCase();
+  if (!status) return fallback;
+
+  if (status === 'active' || status === 'inactive' || status === 'disconnected' || status === 'delinquent' || status === 'pending') {
+    return status;
+  }
+
+  if (status === 'enabled' || status === 'current') return 'active';
+  if (status === 'disabled' || status === 'closed') return 'inactive';
+  if (status === 'cancelled' || status === 'canceled') return 'disconnected';
+
+  return status;
+}
+
 function getTariffAmount(categoryId, consumption) {
   const safeConsumption = toNumber(consumption, 0);
   const category = toNumber(categoryId, 0);
@@ -654,7 +669,7 @@ function populatePeriodFilter() {
 }
 
 function populateDistrictFilter() {
-  const select = document.querySelector('.filter-select');
+  const select = document.getElementById('billingDistrictFilter');
   if (!select) return;
 
   const previous = select.value;
@@ -728,9 +743,11 @@ function buildNormalizedRows() {
       return periodId === selectedPeriodId;
     }) || null;
 
-    const status = String(pick(concessioner, ['status', 'Status'], '')).trim().toLowerCase();
-    const isActive = !concessioner || status === '' || status === 'active';
-    const connectionStatus = status || (isActive ? 'active' : 'inactive');
+    const connectionStatus = normalizeConnectionStatus(
+      pick(concessioner, ['status', 'Status', 'connectionStatus', 'ConnectionStatus'], ''),
+      'active',
+    );
+    const isActive = !concessioner || connectionStatus === 'active';
 
     const previousPeriodId = selectedOrder > 1
       ? [...periodOrder.entries()].find(([, order]) => order === selectedOrder - 1)?.[0] || 0
@@ -961,7 +978,10 @@ function applyBillingFilters(resetPage = true) {
     const concessioner = String(item.concessionerName || '').toLowerCase();
     const itemDistrictId = toNumber(item.districtId, 0);
     const itemDistrictName = String(districtNameById.get(itemDistrictId) || '').trim().toLowerCase();
-    const itemStatus = String(item.connectionStatus || (item.isActive ? 'active' : 'inactive')).trim().toLowerCase();
+    const itemStatus = normalizeConnectionStatus(
+      item.connectionStatus || item.status || item.billStatus || (item.isActive ? 'active' : 'inactive'),
+      item.isActive ? 'active' : 'inactive',
+    );
 
     const matchesSearch = !search || account.includes(search) || concessioner.includes(search);
     const matchesDistrict = district === 'all' || district === itemDistrictName;
