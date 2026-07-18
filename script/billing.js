@@ -758,12 +758,16 @@ function buildNormalizedRows() {
     const hasReading = selectedBilling !== null || present !== '';
     // Use numeric zero for calculations when previous is blank (display-only blank).
     const previousForCalc = previous === '' ? 0 : previous;
+    const storedConsumption = selectedBilling
+      ? toNumber(pick(selectedBilling, ['consumption', 'Consumption'], Math.max(0, present - previousForCalc)), 0)
+      : Math.max(0, present - previousForCalc);
     const catId = toNumber(pick(concessioner, ['categoryId', 'CategoryId'], 0), 0);
+    const storedAmount = selectedBilling ? toNumber(pick(selectedBilling, ['billAmount', 'BillAmount'], 0), 0) : 0;
     const amount = isMotherMeter
       ? 0
-      : ((selectedBilling && selectedBilling.billStatus === 'Paid')
-        ? toNumber(pick(selectedBilling, ['billAmount', 'BillAmount'], 0), 0)
-        : getBillingAmountForRow(isActive, catId, Math.max(0, present - previousForCalc), hasReading));
+      : (selectedBilling
+        ? storedAmount
+        : getBillingAmountForRow(isActive, catId, storedConsumption, hasReading));
 
     return {
       rowKey: concessionerId,
@@ -782,7 +786,7 @@ function buildNormalizedRows() {
       hasSavedPresentReading: !!selectedBilling,
       draftPresent: '',
       isEditing: false,
-      consumption: hasReading ? Math.max(0, present - previousForCalc) : 0,
+      consumption: selectedBilling ? storedConsumption : (hasReading ? storedConsumption : 0),
       amount,
       isMotherMeter,
       isActive,
@@ -829,15 +833,17 @@ function renderBillingRows(rows) {
     const previewConsumption = hasReading ? Math.max(0, toNumber(displayValue, 0) - prevForPreview) : 0;
     const previewAmount = item.isMotherMeter
       ? 0
-      : ((item.hasExistingBilling && !item.isEditing && item.billStatus === 'Paid')
+      : ((item.hasExistingBilling && !item.isEditing)
         ? item.amount
         : (hasReading ? getBillingAmountForRow(item.isActive, item.categoryId, previewConsumption, true) : 0));
     const account = escapeHtml(item.accountNumber || `#${item.concessionerId}`);
     const name = escapeHtml(item.concessionerName || 'Unknown');
     const presentValue = displayValue;
     const initialValue = normalizeReadingValue(presentValue);
-    const consumptionText = hasReading ? String(previewConsumption) : '--';
-    const amountText = hasReading ? formatPeso(previewAmount) : '--';
+    const savedConsumptionText = item.hasExistingBilling && !item.isEditing ? String(item.consumption ?? 0) : String(previewConsumption);
+    const savedAmountText = item.hasExistingBilling && !item.isEditing ? formatPeso(item.amount) : formatPeso(previewAmount);
+    const consumptionText = hasReading ? savedConsumptionText : '--';
+    const amountText = hasReading ? savedAmountText : '--';
     const inputClassName = `reading-input${!initialValidation.isValid && initialValidation.hasValue ? ' is-invalid' : ''}`;
     const inputTitle = !initialValidation.isValid && initialValidation.hasValue
       ? 'Present reading must be greater than or equal to Previous reading.'
@@ -1035,11 +1041,11 @@ function setupTableRowActions() {
       const actionsWrap = row.querySelector('.table-actions');
 
       if (consumptionCell) {
-        consumptionCell.textContent = canCompute ? String(consumption) : '--';
+        consumptionCell.textContent = canCompute ? String(consumption) : (rowData.hasExistingBilling ? String(rowData.consumption ?? 0) : '--');
       }
 
       if (amountCell) {
-        amountCell.textContent = canCompute ? formatPeso(computedAmount) : '--';
+        amountCell.textContent = canCompute ? formatPeso(computedAmount) : (rowData.hasExistingBilling ? formatPeso(rowData.amount ?? 0) : '--');
       }
 
       // Ensure previous input has a max equal to present (if present exists)
@@ -1136,8 +1142,8 @@ function setupTableRowActions() {
       if (!row) return;
       const consumptionCell = row.querySelector('[data-role="consumption"]');
       const amountCell = row.querySelector('[data-role="amount"]');
-      if (consumptionCell) consumptionCell.textContent = canCompute ? String(consumption) : '--';
-      if (amountCell) amountCell.textContent = canCompute ? formatPeso(computedAmount) : '--';
+      if (consumptionCell) consumptionCell.textContent = canCompute ? String(consumption) : (rowData.hasExistingBilling ? String(rowData.consumption ?? 0) : '--');
+      if (amountCell) amountCell.textContent = canCompute ? formatPeso(computedAmount) : (rowData.hasExistingBilling ? formatPeso(rowData.amount ?? 0) : '--');
 
       updateSaveButtonCount();
     }

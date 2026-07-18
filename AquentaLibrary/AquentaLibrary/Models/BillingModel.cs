@@ -29,6 +29,9 @@ namespace AquentaLibrary.Models
         [Column("CurrentReading")]
         public int CurrentReading { get; set; }
 
+        [Column("Consumption")]
+        public int Consumption { get; set; }
+
         [Column("BillAmount")]
         public decimal BillAmount { get; set; }
 
