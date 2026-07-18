@@ -1894,14 +1894,21 @@ async function loadBilling(isInitial = false) {
 
   const api = getApi();
   try {
-    const [billing, concessioners, users, periods, tariffs, activeVersionResult] = await Promise.all([
+    const [billing, users, periods, tariffs, activeVersionResult] = await Promise.all([
       api.get('/Billing'),
-      api.get('/Concessioner/active'),
       api.get('/User'),
       api.get('/Period'),
       api.get('/Tariffs/active'),
       api.get('/TariffVersion/active'),
     ]);
+
+    let concessioners = [];
+    try {
+      concessioners = await api.get('/Concessioner');
+    } catch (error) {
+      console.warn('Failed to load all concessioners for billing page, falling back to active list:', error);
+      concessioners = await api.get('/Concessioner/active');
+    }
 
     let districts = [];
     try {
