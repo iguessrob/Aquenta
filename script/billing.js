@@ -730,6 +730,7 @@ function buildNormalizedRows() {
 
     const status = String(pick(concessioner, ['status', 'Status'], '')).trim().toLowerCase();
     const isActive = !concessioner || status === '' || status === 'active';
+    const connectionStatus = status || (isActive ? 'active' : 'inactive');
 
     const previousPeriodId = selectedOrder > 1
       ? [...periodOrder.entries()].find(([, order]) => order === selectedOrder - 1)?.[0] || 0
@@ -790,6 +791,7 @@ function buildNormalizedRows() {
       amount,
       isMotherMeter,
       isActive,
+      connectionStatus,
       hasExistingBilling: !!selectedBilling,
       billStatus: selectedBilling ? String(pick(selectedBilling, ['billStatus', 'BillStatus'], 'Unpaid')) : 'Unpaid',
       penalty: isMotherMeter ? 0 : (selectedBilling ? toNumber(pick(selectedBilling, ['penalty', 'Penalty'], 0), 0) : 0),
@@ -938,7 +940,7 @@ function renderBillingRows(rows) {
 
 function applyBillingFilters(resetPage = true) {
   const searchInput = document.querySelector('.search-input');
-  const districtSelect = document.querySelector('.filter-select');
+  const districtSelect = document.getElementById('billingDistrictFilter');
   const statusSelect = document.getElementById('billingStatusFilter');
 
   const search = String(searchInput?.value || '').trim().toLowerCase();
@@ -959,7 +961,7 @@ function applyBillingFilters(resetPage = true) {
     const concessioner = String(item.concessionerName || '').toLowerCase();
     const itemDistrictId = toNumber(item.districtId, 0);
     const itemDistrictName = String(districtNameById.get(itemDistrictId) || '').trim().toLowerCase();
-    const itemStatus = String(item.billStatus || 'unpaid').trim().toLowerCase();
+    const itemStatus = String(item.connectionStatus || (item.isActive ? 'active' : 'inactive')).trim().toLowerCase();
 
     const matchesSearch = !search || account.includes(search) || concessioner.includes(search);
     const matchesDistrict = district === 'all' || district === itemDistrictName;
@@ -977,7 +979,7 @@ function applyBillingFilters(resetPage = true) {
 
 function setupFilterListeners() {
   const searchInput = document.querySelector('.search-input');
-  const districtSelect = document.querySelector('.filter-select');
+  const districtSelect = document.getElementById('billingDistrictFilter');
   const statusSelect = document.getElementById('billingStatusFilter');
   const periodSelect = document.querySelector('.date-input');
 
