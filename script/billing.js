@@ -1940,8 +1940,8 @@ async function loadBilling(isInitial = false) {
     try {
       concessioners = await api.get('/Concessioner');
     } catch (error) {
-      console.warn('Failed to load all concessioners for billing page, falling back to active list:', error);
-      concessioners = await api.get('/Concessioner/active');
+      console.error('Failed to load concessioners for billing page:', error);
+      throw error;
     }
 
     let districts = [];
