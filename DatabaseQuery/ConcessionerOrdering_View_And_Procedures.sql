@@ -55,21 +55,29 @@ CREATE OR ALTER PROCEDURE SP_GetAllConcessioner
 AS
 BEGIN
     SELECT
-        ConcessionerID,
-        UserID,
-        CategoryID,
-        MembershipID,
-        DistrictID,
-        AccountNumber,
-        AccountOrder,
-        MeterNumber,
-        Address,
-        ContactNumber,
-        EmailAddress,
-        Status
-    FROM dbo.vw_ConcessionerOrdered
-    WHERE IsDeleted = 0
-    ORDER BY SortDistrictOrder, AccountOrder, ConcessionerID;
+        c.ConcessionerID,
+        c.UserID,
+        c.CategoryID,
+        c.MembershipID,
+        c.DistrictID,
+        c.AccountNumber,
+        c.AccountOrder,
+        c.MeterNumber,
+        c.Address,
+        c.ContactNumber,
+        c.EmailAddress,
+        c.Status
+    FROM tbl_Concessioner c
+    LEFT JOIN tbl_District d ON c.DistrictID = d.DistrictID
+    WHERE c.IsDeleted = 0
+    ORDER BY
+        CASE
+            WHEN UPPER(LTRIM(RTRIM(d.DistrictName))) LIKE 'PUROK %'
+            THEN TRY_CAST(REPLACE(UPPER(LTRIM(RTRIM(d.DistrictName))), 'PUROK ', '') AS INT)
+            ELSE 9999
+        END,
+        c.AccountOrder,
+        c.ConcessionerID;
 END
 GO
 

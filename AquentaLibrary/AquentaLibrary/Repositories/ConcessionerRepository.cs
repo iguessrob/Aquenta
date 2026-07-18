@@ -26,11 +26,34 @@ namespace AquentaLibrary.Repositories
         /// </summary>
         public IEnumerable<ConcessionerModel> GetAllConcessioner()
         {
-            var parameters = new DynamicParameters();
-            return dbConnection.Query<ConcessionerModel>(
-                "SP_GetAllConcessioner",
-                parameters,
-                commandType: CommandType.StoredProcedure);
+            const string query = @"
+                SELECT
+                    c.ConcessionerID,
+                    c.UserID,
+                    c.CategoryID,
+                    c.MembershipID,
+                    c.DistrictID,
+                    c.AccountNumber,
+                    c.AccountOrder,
+                    c.MeterNumber,
+                    c.Address,
+                    c.ContactNumber,
+                    c.EmailAddress,
+                    c.Status,
+                    c.IsDeleted
+                FROM tbl_Concessioner c
+                LEFT JOIN tbl_District d ON c.DistrictID = d.DistrictID
+                WHERE c.IsDeleted = 0
+                ORDER BY
+                    CASE
+                        WHEN UPPER(LTRIM(RTRIM(d.DistrictName))) LIKE 'PUROK %'
+                        THEN TRY_CAST(REPLACE(UPPER(LTRIM(RTRIM(d.DistrictName))), 'PUROK ', '') AS INT)
+                        ELSE 9999
+                    END,
+                    c.AccountOrder,
+                    c.ConcessionerID;";
+
+            return dbConnection.Query<ConcessionerModel>(query);
         }
 
         /// <summary>
