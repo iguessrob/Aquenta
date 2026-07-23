@@ -1559,8 +1559,10 @@ function setupPrintButton() {
       const user = userMap.get(userId) || null;
       const name = concessioner ? getConcessionerDisplayName(concessioner, user) : '';
       const meterNumber = concessioner ? pick(concessioner, ['meterNumber', 'MeterNumber'], '') : '';
-      const status = String(pick(concessioner, ['status', 'Status'], '')).trim().toLowerCase();
+      const rawStatus = String(pick(concessioner, ['status', 'Status'], '')).trim();
+      const status = rawStatus.toLowerCase();
       const isActive = !concessioner || status === '' || status === 'active';
+      const remarksText = isActive ? '&nbsp;' : escapeHtml(rawStatus || 'Inactive');
 
       const concessionerId = toNumber(pick(concessioner, ['concessionerId', 'ConcessionerId', 'concessionerID', 'ConcessionerID'], 0), 0);
       const billings = billingByConcessioner.get(concessionerId) || [];
@@ -1598,7 +1600,7 @@ function setupPrintButton() {
           <td class="center">${previousText}</td>
           <td>&nbsp;</td>
           <td>&nbsp;</td>
-          <td>&nbsp;</td>
+          <td>${remarksText}</td>
         </tr>
       `);
     }
