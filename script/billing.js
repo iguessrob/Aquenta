@@ -52,15 +52,6 @@ function validatePresentReading(rowData, rawValue) {
     };
   }
 
-  if (reading < toNumber(rowData?.previous, 0)) {
-    return {
-      isValid: false,
-      reading,
-      hasValue: true,
-      message: 'Present reading must be greater than or equal to Previous reading.',
-    };
-  }
-
   return {
     isValid: true,
     reading,
@@ -73,49 +64,46 @@ function validateBillingReadingPair(previousValue, presentValue) {
   const previousRaw = String(previousValue ?? '').trim();
   const presentRaw = String(presentValue ?? '').trim();
 
-  if (!previousRaw || !presentRaw) {
-    return {
-      isValid: false,
-      previous: 0,
-      present: 0,
-      message: 'Previous and Present readings are required.',
-    };
+  const hasPrevious = previousRaw !== '';
+  const hasPresent = presentRaw !== '';
+
+  if (hasPrevious) {
+    const previous = Number(previousRaw);
+    if (!Number.isFinite(previous) || previous < 0) {
+      return {
+        isValid: false,
+        previous: 0,
+        present: 0,
+        message: 'Previous reading must be a valid non-negative number.',
+      };
+    }
   }
 
-  const previous = Number(previousRaw);
-  const present = Number(presentRaw);
-
-  if (!Number.isFinite(previous) || previous < 0) {
-    return {
-      isValid: false,
-      previous: 0,
-      present: 0,
-      message: 'Previous reading must be a valid non-negative number.',
-    };
+  if (hasPresent) {
+    const present = Number(presentRaw);
+    if (!Number.isFinite(present) || present < 0) {
+      return {
+        isValid: false,
+        previous: hasPrevious ? Number(previousRaw) : '',
+        present: 0,
+        message: 'Present reading must be a valid non-negative number.',
+      };
+    }
   }
 
-  if (!Number.isFinite(present) || present < 0) {
+  if (hasPrevious && hasPresent && Number(presentRaw) < Number(previousRaw)) {
     return {
       isValid: false,
-      previous,
-      present: 0,
-      message: 'Present reading must be a valid non-negative number.',
-    };
-  }
-
-  if (present < previous) {
-    return {
-      isValid: false,
-      previous,
-      present,
+      previous: Number(previousRaw),
+      present: Number(presentRaw),
       message: 'Present reading must be greater than or equal to Previous reading.',
     };
   }
 
   return {
     isValid: true,
-    previous,
-    present,
+    previous: hasPrevious ? Number(previousRaw) : '',
+    present: hasPresent ? Number(presentRaw) : '',
     message: '',
   };
 }
@@ -212,13 +200,13 @@ async function saveBillingEditModal() {
     return;
   }
 
-  const updatedPrevious = validation.previous;
-  const updatedPresent = validation.present;
+  const updatedPrevious = validation.previous === '' ? '' : validation.previous;
+  const updatedPresent = validation.present === '' ? rowData.present : validation.present;
 
   rowData.previous = updatedPrevious;
   rowData.present = updatedPresent;
   rowData.draftPresent = String(updatedPresent);
-  rowData.consumption = Math.max(0, updatedPresent - updatedPrevious);
+  rowData.consumption = Math.max(0, updatedPresent - (updatedPrevious === '' ? 0 : updatedPrevious));
   rowData.amount = rowData.isMotherMeter ? 0 : getBillingAmountForRow(rowData.isActive, rowData.categoryId, rowData.consumption, true);
 
   savingRows.add(rowData.rowKey);
@@ -1147,10 +1135,8 @@ function setupTableRowActions() {
       const presentVal = presentInputEl ? toNumber(String(presentInputEl.value || '').trim(), 0) : 0;
       if (presentInputEl && String(presentInputEl.value || '').trim() !== '') {
         if (newPrev !== '' && newPrev > presentVal) {
-          // clamp to present
-          newPrev = presentVal;
-          prevInput.value = String(presentVal);
-          notifyBilling('Previous reading cannot be greater than Present reading. Value adjusted.', 'info');
+          newPrev = '';
+          prevInput.value = '';
         }
       }
 
