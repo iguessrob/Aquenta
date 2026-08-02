@@ -43,10 +43,16 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!user) return;
 
     // A. Populate Top-bar User Information
-    const firstName = user.firstName || user.FirstName || '';
-    const lastName = user.lastName || user.LastName || '';
-    const fullName = (firstName + ' ' + lastName).trim() || 'User';
-    const initials = ((firstName[0] || '') + (lastName[0] || '')).toUpperCase() || 'U';
+    const firstName = conGuardNormalizeNamePart(user.firstName || user.FirstName || '');
+    const lastName = conGuardNormalizeNamePart(user.lastName || user.LastName || '');
+    const fullName = conGuardBuildDisplayName(firstName, lastName);
+    const initialsSource = firstName || lastName || 'User';
+    const initials = String(initialsSource)
+        .split(/\s+/)
+        .map(function (part) { return part[0] || ''; })
+        .join('')
+        .slice(0, 2)
+        .toUpperCase() || 'U';
 
     const topbarUserName = document.getElementById('topbarUserName');
     if (topbarUserName) topbarUserName.textContent = fullName;
@@ -55,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (topbarAvatar) topbarAvatar.textContent = initials;
 
     const welcomeTitle = document.getElementById('welcomeTitle');
-    if (welcomeTitle) welcomeTitle.textContent = 'Welcome back, ' + (firstName || 'User') + '!';
+    if (welcomeTitle) welcomeTitle.textContent = 'Welcome back, ' + (firstName || lastName || 'User') + '!';
 
     // B. Sidebar Toggle Logic
     const sidebar = document.getElementById('sidebar');
@@ -104,6 +110,28 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Shared Helpers
+function conGuardNormalizeNamePart(value) {
+    const text = String(value || '').trim();
+    if (!text) return '';
+
+    const upper = text.toUpperCase();
+    if (upper === 'N/A' || upper === 'NA' || upper === 'N A' || upper === 'NONE' || upper === 'NULL' || upper === '-') {
+        return '';
+    }
+
+    return text;
+}
+
+function conGuardBuildDisplayName(firstName, lastName) {
+    const parts = [
+        conGuardNormalizeNamePart(firstName),
+        conGuardNormalizeNamePart(lastName),
+    ].filter(Boolean);
+
+    if (!parts.length) return 'User';
+    return parts.join(' ');
+}
+
 async function conGuardResolveConcessioner() {
     const user = conGuardGetUser();
     if (!user) return null;
